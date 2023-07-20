@@ -15,14 +15,19 @@
 
 .nav {
   width: 100%;
-  position: relative;
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1%;
-  border-bottom: 2px solid rgba(34,36,38,.15);
-  width: 1127px;
-  margin-left: auto!important;
-  margin-right: auto!important;
+  /* border-bottom: 2px solid rgba(34,36,38,.15); */
+  /* margin-left: auto!important;
+  margin-right: auto!important; */
+
+  padding: 20px 171px;
+  /* gap: 10px; */
+  /* position: absolute; */
+  border-bottom: 2px solid rgba(34, 36, 38, 0.15);
+  background: #DDD0C8;
+  display: flex;
+  /* justify-content: center; */
+  align-items: center;
+  gap: 50px;
 }
 
 .nav > .nav-header {
@@ -35,15 +40,17 @@
   display: inline-block;
   font-size: 22px;
   color: #fff;
-  margin: 0 0 -2px;
-  padding: 0.85714286em 1.14285714em;
 }
 
 .nav > .nav-links {
   display: inline;
   /* float: right; */
-  font-size: 1.07142857rem;  
-  padding-right:200px ;
+  font-size: 1.07142857rem;
+  display: flex;
+  height: 17px;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
 }
 
 .nav > .nav-links > a {
@@ -72,6 +79,7 @@
     <nav class="nav-links">
         <a href="{base}/">About</a>
         <a href="{base}/project">Projects</a>
+        <a href="{base}/team">Team</a>
         <a href="{base}/faq">FAQ</a>
     </nav>
   </div>

@@ -1,87 +1,46 @@
 <script>
   // Import the components from the components folder
-  import Card from '$lib/components/card.svelte';
+  // import Card from '$lib/components/card.svelte';
   import Navbar from '$lib/components/navbar.svelte';
-  // import Hero from '$lib/assets/landing-hero.png';
+  import Hero from '$lib/components/hero.svelte';
+  import ProjCard from '$lib/components/project_card.svelte';
+  // import Footnote from '$lib/components/footnote.svelte'
+
 
   // Define some data for the cards
-  const team = [
+  const current_project = [
       {
-        name: 'Ed Happ',
-        link: 'https://www.linkedin.com/in/edward-g-happ/',
-        role: 'Executive Fellow',
-        bio: 'Edward G. Happ is an Executive Fellow at the University of Michigan School of Information, where he is teaching and conducting research. His 40 years of professional experience include all facets of managing information services and high technology businesses, including general management with P&L responsibility, operations, product management, sales, marketing, customer service, human resources management, technical consulting, manufacturing, and both software and hardware development.'
+        name: 'Chetah',
+        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
+        logo: './src/lib/assets/Updated_LOGO.png'
       },
       {
-        name: 'Sidra Effendi',
-        link: 'https://www.linkedin.com/in/sidraeffendi/',
-        role: 'Consultant and Data Scientist',
-        bio: "Sidra is a Master's student at the University of Michigan - School of Information, specializing in Data Science. She has an undergraduate degree in Computer Engineering. Her has previously worked as an Edge Hacker for Zenatix Solutions and also co-founded a company called Pixli, where she worked on Software Development, UX/UI and Marketing"
-      },
-      {
-        name: 'Prithvijit Dasgupta',
-        link: 'https://www.linkedin.com/in/prithvijit-dasgupta/',
-        role: 'Web Developer and Systems Specialist',
-        bio: "Prithvijit is a current Master's student in the University of Michigan-School of Information aiming to specialize in the Big Data Analytics track. He has experience working on distributed cloud Systems and building RESTful APIs. He has an undergraduate degree in Mechanical Engineering."
+        name: 'Hangul',
+        detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
+        logo: './src/lib/assets/hangul2 copy 2.png'
       }
     ];
 
-    const alumni = [
-      {
-        name: 'Harrison Hall',
-        link: 'https://www.linkedin.com/in/harrison-joseph-hall/',
-        role: 'Project Manager & Data Scientist',
-        bio: ''
-      },
-      {
-        name: 'Kensuke Suzuki',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'Consultant',
-        bio: ''
-      },
-      {
-        name: 'Anuya Karnik',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'Web Developer',
-        bio: ''
-      },
-      {
-        name: 'HoJoon Kim',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'Project Manager & Data Scientist',
-        bio: ''
-      },
-      {
-        name: 'Mariah Jacobs',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'Web Developer',
-        bio: ''
-      },
-      {
-        name: 'Shivika Bisen',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'Data Scientist',
-        bio: ''
-      },
-      {
-        name: 'Gordon Nenadovic',
-        link: 'https://www.linkedin.com/in/kensukesuzuki/',
-        role: 'UX Designer & Game Designer',
-        bio: ''
-      }
-    ];
+    const button_text = [
+      {}
+    ]
+
 </script>
 
 <style>
-
-
   .a{
-    margin-top: 0px;
+    /* margin-top: 0px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* align-content: center; */
+    /* gap: 55px; */
+    background: var(--background, #F5F5F5);
   }
 
   .hero {
     /* height: 10%; */
-    background-image: url('$lib/assets/landing_hero.jpg');
+    background-image: url('$lib/assets/final_1.png');
     background-repeat: no-repeat;
     background-size: cover;
     /* margin: 0 !important; */
@@ -89,18 +48,34 @@
     /* -webkit-text-size-adjust: 100%; */
     /* min-width: 320px; */
     line-height: 1.4285em;
-    padding-bottom: 10%;
-    
+    /* padding-right: 0px;
+    padding-left: 0px; */
+    width: 100%;
+    /* height: 50%; */
+    flex: 1 0 0;
+    align-self: stretch;
+    /* margin-top: 5%; */
   }
 
   .hero-contain{
-    max-width: 1050px;
+    max-width: 100%;
     margin: auto;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 40px;
   }
 
   .contain-text{
-    text-align: center;
-    padding-top: 5%;
+    /* text-align: center;
+    padding-top: 5%; */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding-left: 12%;
+    padding-top: 15%;
+    padding-bottom: 15%;
 
   }
 
@@ -123,17 +98,18 @@
     font-size: 1.71428571rem;
     font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
     line-height: 1.28571429em;
-    margin: calc(2rem - 0.14285714em) 0 1rem;
+    margin: 0;
     font-weight: initial;
     padding: 0;
     display: block;
-    text-align: center;
+    /* text-align: center; */
     overflow-x: hidden;
+    width: 600px;
 
-    margin-block-start: 0.83em;
+    /* margin-block-start: 0.83em;
     margin-block-end: 0.83em;
     margin-inline-start: 0px;
-    margin-inline-end: 0px;
+    margin-inline-end: 0px; */
 
     /* line-height: 1.5em; */
     height: 3em;       /* height is 2x line-height, so two lines will display */
@@ -141,18 +117,17 @@
   }
 
   .vertical-container {
-    width: 1127px;
-    margin-left: auto!important;
-    margin-right: auto!important;
+    /* width: 1127px; */
+    margin: auto
   }
 
-  /* .vertical-segment{
-    background-color: white;
+  .vertical-segment{
     width: 100%;
-  } */
+    gap: 50px;
+  }
 
   .ui {
-    width: 80vw !important;
+    width: 80vw;
   }
 
   .horizontal.divider {
@@ -190,51 +165,26 @@
   
 </style>
 
-<!-- <div class="vertical-container" id="about"> -->
 <div class="a">
+  <Navbar />
   <div class="hero">
-    <Navbar />
-    <div class="hero-contain">
+    <!-- make a hero component -->
+    <!-- <div class="hero-contain"> -->
       <div class="contain-text">
         <h1>Data4Good</h1>
         <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
-      </div>
+      <!-- </div> -->
       </div>
     </div>
   <div class="vertical-container">
   
   <div class="vertical-segment">
-  <h2 class="header horizontal divider">About</h2>
-    <h3 class="header">Data4Good's Mission</h3>
-    <p>
-      The UMSI Data4Good center brings together non-profit organizations' data
-      into larger datasets for benchmarking and trend analysis. Putting data in
-      the hands of nonprofits contributes to the body of knowledge about a
-      broad scope of development and relief programs, which in turn will lead
-      to better decision-making in nonprofit work.
-    </p>
-    <h3 class="header">Data4Good's Values</h3>
-    <p>
-      The Data4Good center values transparency and equal access to information
-      and data analysis that has the potential to impact lives through
-      nonprofit organizations.
-    </p>
-    <h3 class="header">Data4Good's Team</h3>
     <div class="ui">
-      {#each team as member}
+      {#each current_project as project}
         <!-- Use a separate component for each card -->
-        <Card {...member} />
-      {/each}
-      
-    </div>
-    <h3 class="header">Alumni</h3>
-    <div class="ui">
-      {#each alumni as member}
-        <!-- Use a separate component for each card -->
-        <Card {...member} />
+        <ProjCard {...project} />
       {/each}
     </div>
   </div>
 </div>
 </div>
-<!-- </div> -->
