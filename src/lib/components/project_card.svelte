@@ -2,12 +2,12 @@
     // Define the props for the card component
     export let name;
     export let detail;
+    // export let link_research;
+    // export let link_try;
     export let logo;
     import Button from "./button.svelte";
 
-    const button_text = [
-        {content: 'View Research'}
-    ]
+    export let index;
 </script>
   
   <style>
@@ -20,6 +20,11 @@
         align-items: flex-start;
         margin-top: 55px;
     }
+
+    .card div:nth-of-type(2n){
+        flex-direction: row-reverse;
+    }
+
 
     .card{
         width: 1120px;
@@ -76,9 +81,9 @@
     }
 
   </style>
-  
-<div class="cards"> 
-  <div class="card">
+
+<div class="cards">
+  <div class="card {index % 2 !== 0 && index !== 0 ? 'second-card' : ''}">
         <img src={logo} alt="logo" height="80%"/>
         <div class="content">
             <div class="text">
@@ -87,11 +92,8 @@
                 <!-- two buttons from button component -->
             </div>
             <div class="buttons">
-                {#each button_text as content}
-                    <!-- Use a separate component for each card -->
-                    <Button {...content} />
-                    <Button {...content} />
-                {/each}
+                <Button text="View Research" link="/research/{name}"/>
+                <Button text="Try {name}" link="/try/{name}" />
             </div>
         </div>
     </div>

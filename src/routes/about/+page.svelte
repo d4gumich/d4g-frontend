@@ -3,6 +3,7 @@
     import Card from '$lib/components/card.svelte';
     import Navbar from '$lib/components/navbar.svelte';
     import Hero from '$lib/components/hero.svelte';
+    import Footer from '$lib/components/footer.svelte'
   
     // Define some data for the cards
     const team = [
@@ -245,4 +246,4 @@
   </div>
   </div>
   <!-- </div> -->
-  
+  <Footer />

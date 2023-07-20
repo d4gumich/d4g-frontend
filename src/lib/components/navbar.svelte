@@ -77,7 +77,7 @@
     </div>
     
     <nav class="nav-links">
-        <a href="{base}/">About</a>
+        <a href="{base}/about">About</a>
         <a href="{base}/project">Projects</a>
         <a href="{base}/team">Team</a>
         <a href="{base}/faq">FAQ</a>

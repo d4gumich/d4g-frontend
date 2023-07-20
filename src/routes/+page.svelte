@@ -2,10 +2,10 @@
   // Import the components from the components folder
   // import Card from '$lib/components/card.svelte';
   import Navbar from '$lib/components/navbar.svelte';
-  import Hero from '$lib/components/hero.svelte';
+  // import Hero from '$lib/components/hero.svelte';
   import ProjCard from '$lib/components/project_card.svelte';
-  // import Footnote from '$lib/components/footnote.svelte'
-
+  import Footer from '$lib/components/footer.svelte'
+  import Button from "$lib/components/button.svelte";
 
   // Define some data for the cards
   const current_project = [
@@ -21,10 +21,6 @@
       }
     ];
 
-    const button_text = [
-      {}
-    ]
-
 </script>
 
 <style>
@@ -36,6 +32,7 @@
     /* align-content: center; */
     /* gap: 55px; */
     background: var(--background, #F5F5F5);
+    padding-bottom: 4%;
   }
 
   .hero {
@@ -55,6 +52,8 @@
     flex: 1 0 0;
     align-self: stretch;
     /* margin-top: 5%; */
+
+    background-position: 30% 0;
   }
 
   .hero-contain{
@@ -82,7 +81,6 @@
   .hero h1 {
     border: none;
     font-size: 4em;
-    margin-top: -0.14285714em;
     padding-top: 2%;
     text-align: center;
     padding-top: 10%;
@@ -92,6 +90,7 @@
     line-height: 1.28571429em;
     text-transform: none;
     color: rgba(0,0,0,.87);
+    margin-bottom: 0;
   }
 
   .hero h2{
@@ -162,7 +161,7 @@
     font-family: 'Roboto', sans-serif;
     font-size: 1rem;
   }
-  
+
 </style>
 
 <div class="a">
@@ -174,10 +173,11 @@
         <h1>Data4Good</h1>
         <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
       <!-- </div> -->
+      <Button text="Learn More" link=""/>
       </div>
     </div>
   <div class="vertical-container">
-  
+
   <div class="vertical-segment">
     <div class="ui">
       {#each current_project as project}
@@ -186,5 +186,6 @@
       {/each}
     </div>
   </div>
+  </div>
 </div>
-</div>
+  <Footer />
