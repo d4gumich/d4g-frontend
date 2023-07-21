@@ -12,12 +12,16 @@
       {
         name: 'Chetah',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
-        logo: './src/lib/assets/Updated_LOGO.png'
+        logo: './src/lib/assets/Updated_LOGO.png',
+        researchLink: 'https',
+        tryLink: 'https'
       },
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
-        logo: './src/lib/assets/hangul2 copy 2.png'
+        logo: './src/lib/assets/hangul2 copy 2.png',
+        researchLink: 'https',
+        tryLink: 'https'
       }
     ];
 
@@ -123,6 +127,8 @@
   .vertical-segment{
     width: 100%;
     gap: 50px;
+    display: flex; /* Add display flex to align cards in a row */
+    flex-wrap: wrap; /* Allow cards to wrap to next row */
   }
 
   .ui {

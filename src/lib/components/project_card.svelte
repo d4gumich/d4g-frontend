@@ -5,9 +5,13 @@
     // export let link_research;
     // export let link_try;
     export let logo;
+    export let researchLink;
+    export let tryLink;
     import Button from "./button.svelte";
 
     export let index;
+
+
 </script>
   
   <style>
@@ -20,11 +24,6 @@
         align-items: flex-start;
         margin-top: 55px;
     }
-
-    .card div:nth-of-type(2n){
-        flex-direction: row-reverse;
-    }
-
 
     .card{
         width: 1120px;
@@ -39,6 +38,11 @@
         align-content: center;
         gap: 114px;
         flex-wrap: wrap;
+    }
+
+    .card:nth-child(even){
+        display: flex;
+        flex-direction: row-reverse;
     }
 
     .content{
@@ -83,7 +87,7 @@
   </style>
 
 <div class="cards">
-  <div class="card {index % 2 !== 0 && index !== 0 ? 'second-card' : ''}">
+    <div class="card">
         <img src={logo} alt="logo" height="80%"/>
         <div class="content">
             <div class="text">
@@ -92,8 +96,8 @@
                 <!-- two buttons from button component -->
             </div>
             <div class="buttons">
-                <Button text="View Research" link="/research/{name}"/>
-                <Button text="Try {name}" link="/try/{name}" />
+                <Button text="View Research" link="{researchLink}}"/>
+                <Button text="Try {name}" link="{tryLink}" />
             </div>
         </div>
     </div>

@@ -6,12 +6,13 @@
 <style>
     .footer {
       background-color: #DDD0C8;
-      padding: 20px;
+      padding: 10%;
       display: flex;
       align-items: flex-start; /* Align items at the top of the footer */
       justify-content: space-between;
       flex-wrap: wrap;
-      padding-top: 4%;
+      padding-top: 7%;
+      padding-bottom: 5%;
     }
   
     .footer-logo {
@@ -41,14 +42,13 @@
       display: flex;
       flex-direction: column;
       gap: 40px; /* Add a gap between rows */
-      margin-right: 130px; /* Add a gap between columns */
     }
   
     .footer-divider {
       width: 100%;
       height: 1px;
       background-color: #ccc;
-      margin: 40px 0; /* Add a gap between rows */
+      margin: 30px 0; /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the divider spans the full width */
     }
   
