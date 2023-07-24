@@ -1,10 +1,8 @@
 <script>
   // Import the components from the components folder
   // import Card from '$lib/components/card.svelte';
-  import Navbar from '$lib/components/navbar.svelte';
   // import Hero from '$lib/components/hero.svelte';
   import ProjCard from '$lib/components/project_card.svelte';
-  import Footer from '$lib/components/footer.svelte'
   import Button from "$lib/components/button.svelte";
 
   // Define some data for the cards
@@ -89,7 +87,7 @@
     text-align: center;
     padding-top: 10%;
     margin: calc(2rem - 0.14285714em) 0 1rem;
-    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-family: Work Sans;
     font-weight: 700;
     line-height: 1.28571429em;
     text-transform: none;
@@ -99,7 +97,7 @@
 
   .hero h2{
     font-size: 1.71428571rem;
-    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+    font-family: Open Sans;
     line-height: 1.28571429em;
     margin: 0;
     font-weight: initial;
@@ -171,7 +169,6 @@
 </style>
 
 <div class="a">
-  <Navbar />
   <div class="hero">
     <!-- make a hero component -->
     <!-- <div class="hero-contain"> -->
@@ -194,4 +191,3 @@
   </div>
   </div>
 </div>
-  <Footer />

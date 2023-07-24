@@ -1,9 +1,3 @@
-<script>
-  import Navbar from '$lib/components/navbar.svelte';
-  import Footer from '$lib/components/footer.svelte'
-
-</script>
-
 <style>
   /* ... Add your global styles here ... */
 
@@ -103,8 +97,6 @@
   }
 </style>
 
-<Navbar />
-
 <div class="about-container">
   <!-- Mission Section -->
   <div class="section odd-section">
@@ -158,5 +150,4 @@
     </div>
   </div>
 </div>
-<Footer />
 
