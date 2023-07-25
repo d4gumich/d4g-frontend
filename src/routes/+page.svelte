@@ -1,9 +1,9 @@
 <script>
   // Import the components from the components folder
   // import Card from '$lib/components/card.svelte';
-  // import Hero from '$lib/components/hero.svelte';
-  import ProjCard from '$lib/components/project_card.svelte';
+  import ProjCard from '$lib/components/home_project_card.svelte';
   import Button from "$lib/components/button.svelte";
+  import { base } from '$app/paths';
 
   // Define some data for the cards
   const current_project = [
@@ -96,7 +96,7 @@
   }
 
   .hero h2{
-    font-size: 1.71428571rem;
+    font-size: 1.5rem;
     font-family: Open Sans;
     line-height: 1.28571429em;
     margin: 0;
@@ -125,12 +125,6 @@
   .vertical-segment{
     width: 100%;
     gap: 50px;
-    display: flex; /* Add display flex to align cards in a row */
-    flex-wrap: wrap; /* Allow cards to wrap to next row */
-  }
-
-  .ui {
-    width: 80vw;
   }
 
   .horizontal.divider {
@@ -170,24 +164,21 @@
 
 <div class="a">
   <div class="hero">
-    <!-- make a hero component -->
-    <!-- <div class="hero-contain"> -->
-      <div class="contain-text">
-        <h1>Data4Good</h1>
-        <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
-      <!-- </div> -->
-      <Button text="Learn More" link=""/>
-      </div>
+    <div class="contain-text">
+      <h1>Data4Good</h1>
+      <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
+    <!-- </div> -->
+    <Button text="Learn More" link="{base}/project"/>
     </div>
-  <div class="vertical-container">
+  </div>
 
-  <div class="vertical-segment">
-    <div class="ui">
+  <div class="vertical-container">
+    <div class="vertical-segment">
       {#each current_project as project}
         <!-- Use a separate component for each card -->
         <ProjCard {...project} />
       {/each}
     </div>
   </div>
-  </div>
+
 </div>

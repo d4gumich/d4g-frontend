@@ -73,6 +73,7 @@
     <div class="footer-column">
       <div class="footer-title">Data4Good</div>
       <a href="{base}/about">About</a>
+      <a href="{base}/news">News</a>
       <a href="{base}/project">Project</a>
       <a href="{base}/team">Team</a>
       <a href="{base}/faq">FAQ</a>

@@ -61,7 +61,7 @@
   font-family: 'Roboto', sans-serif;
   font-weight: 400;
 }
-/* 
+/*
 .nav > .nav-links > a:hover {
   background-color: #54246c;
   color: #fff;
@@ -78,7 +78,9 @@
     
     <nav class="nav-links">
         <a href="{base}/about">About</a>
+        <a href="{base}/news">News</a>
         <a href="{base}/project">Projects</a>
+        <a href="{base}/research">Research</a>
         <a href="{base}/team">Team</a>
         <a href="{base}/faq">FAQ</a>
     </nav>

@@ -16,13 +16,14 @@
   
   <style>
     /* Add any styles specific to the card component */
-    .cards{
+    .card-container{
         width: 1120px;
         height: 450px;
-        display: inline-flex;
-        flex-direction: column;
-        align-items: flex-start;
         margin-top: 55px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 55px;
     }
 
     .card{
@@ -86,7 +87,7 @@
 
   </style>
 
-<div class="cards">
+<div class="card-container">
     <div class="card">
         <img src={logo} alt="logo" height="80%"/>
         <div class="content">
