@@ -25,33 +25,33 @@
     const past_project = [
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
-        detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
+        detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
         researchLink: 'https',
-        tryLink: ''
+        type: 'Project'
       },
       {
         name: 'Think Paper on Digital Identification',
         detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
         researchLink: 'https',
-        tryLink: ''
+        type: 'Research'
       },
       {
         name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
         detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
         researchLink: 'https',
-        tryLink: ''
+        type: 'Research'
       },
       {
         name: 'Topic Extraction from Unstructured NGO Documents',
         detail: 'Insights about the different reports produced by NGOs.',
         researchLink: 'https',
-        tryLink: ''
+        type: 'Research'
       },
       {
         name: 'Digital Crisis Simulation Exercise (SimEx)',
         detail: 'The digital Crisis Simulation Exercise (SimEx) is the latest iteration of a multi-year training lab designed to simulate disaster response strategies and actions within a realistic crisis setting.',
         researchLink: 'https',
-        tryLink: ''
+        type: 'Project'
       }
 
     ]
@@ -110,14 +110,13 @@
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
     }
-  
   </style>
   
   <div class="a">
     <!-- <Navbar /> -->
 
     <h1>Current Project</h1>
-  
+
     <div class="horizontal-segment">
         {#each current_project as project}
         <!-- Use a separate component for each card -->
@@ -131,8 +130,6 @@
       <!-- Use a separate component for each card -->
         <PastProjCard {...project} />
       {/each}
-  </div>
-  
-  </div>
-    <!-- <Footer /> -->
-  
+    </div>
+
+  </div>  

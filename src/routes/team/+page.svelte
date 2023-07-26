@@ -170,8 +170,9 @@
     }
     .alumni-container {
         display: flex;
-        flex-direction: row;
         gap: 2%;
         flex-flow: row wrap;
+        justify-content: space-evenly;
+        flex-wrap: wrap;
     }
 </style>

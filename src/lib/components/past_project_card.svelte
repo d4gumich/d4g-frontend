@@ -3,7 +3,7 @@
     export let name;
     export let detail;
     export let researchLink;
-    export let tryLink;
+    export let type;
     import Button from "./button.svelte";
 
 </script>
@@ -25,13 +25,6 @@
         height: 400px;
         flex-shrink: 0;
     }
-
-    /* .content{
-        display: inline-flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    } */
 
 
     h1{
@@ -75,7 +68,7 @@
             <!-- two buttons from button component -->
         </div>
         <div class="buttons">
-            <Button text="View Research" link="{researchLink}}"/>
+            <Button text="View {type}" link="{researchLink}}"/>
         </div>
     </div>
 </div>

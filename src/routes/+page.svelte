@@ -54,22 +54,19 @@
     flex: 1 0 0;
     align-self: stretch;
     /* margin-top: 5%; */
-
     background-position: 30% 0;
   }
 
-  .hero-contain{
+  /* .hero-contain{
     max-width: 100%;
     margin: auto;
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 40px;
-  }
+  } */
 
   .contain-text{
-    /* text-align: center;
-    padding-top: 5%; */
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
@@ -106,13 +103,6 @@
     /* text-align: center; */
     overflow-x: hidden;
     width: 600px;
-
-    /* margin-block-start: 0.83em;
-    margin-block-end: 0.83em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px; */
-
-    /* line-height: 1.5em; */
     height: 3em;       /* height is 2x line-height, so two lines will display */
     overflow: hidden;  /* prevents extra lines from being visible */
   }
@@ -167,7 +157,6 @@
     <div class="contain-text">
       <h1>Data4Good</h1>
       <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
-    <!-- </div> -->
     <Button text="Learn More" link="{base}/project"/>
     </div>
   </div>
