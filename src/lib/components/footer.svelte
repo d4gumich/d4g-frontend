@@ -18,7 +18,7 @@
     .footer-logo {
       display: flex;
       align-items: center;
-      /* gap: 100px; Adjusted gap between logo and text */
+      gap: 1%px; /*Adjusted gap between logo and text */
       margin-right: 10%; /* Add a gap between rows */
       margin-left: 7%;
     }
@@ -36,26 +36,33 @@
     line-height: 150%; /* Set line height to 150% */
     color: #000; /* Set link color */
   }
+  p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px; /* Set font size to 14px */
+    font-weight: 400;
+    line-height: 150%;
+  }
 
     .footer-column {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 40px; /* Add a gap between rows */
+      gap: 10px; /* Add a gap between rows */
     }
   
     .footer-divider {
       width: 100%;
       height: 1px;
       background-color: #ccc;
-      margin: 30px 0; /* Add a gap between rows */
+      margin: 20px 0; /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the divider spans the full width */
     }
   
     .footer-bottom-text {
       font-size: 12px;
       text-align: center;
-      margin-top: 20px; /* Add a gap between rows */
+      font-family: 'Roboto', sans-serif;
+      /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the bottom text spans the full width */
     }
   </style>
@@ -82,18 +89,18 @@
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Projects</div>
-      <a href="#">Chetah</a>
-      <a href="#">Hangul</a>
+      <a href="{base}/project/chetah">Chetah</a>
+      <a href="{base}/project/hangul">Hangul</a>
     </div>
   
     <!-- Column 3 -->
     <div class="footer-column">
       <div class="footer-title">Location</div>
-      <div>School of Information</div>
-      <div>University of Michigan</div>
-      <div>4322 North Quad, 105 S State St.</div>
-      <div>Ann Arbor, MI 48109-1285</div>
-      <div>info@data4good.center</div>
+      <p>School of Information<br/>
+      University of Michigan<br/>
+      4322 North Quad, 105 S State St.<br/>
+      Ann Arbor, MI 48109-1285<br/>
+      info@data4good.center</p>
     </div>
   
     <!-- Divider -->

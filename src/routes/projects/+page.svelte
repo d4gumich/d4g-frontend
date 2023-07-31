@@ -105,6 +105,13 @@
       color:rgba(0, 0, 0, .87);
       font-family: 'Roboto', sans-serif;
     }
+
+    h1 {
+      font-family: Work Sans;
+      text-decoration: underline rgba(227, 184, 120, 1) 3px;
+      text-underline-offset: 15px;
+
+    }
   
     p{
       font-family: 'Roboto', sans-serif;
@@ -115,7 +122,7 @@
   <div class="a">
     <!-- <Navbar /> -->
 
-    <h1>Current Project</h1>
+    <h1>Latest Projects</h1>
 
     <div class="horizontal-segment">
         {#each current_project as project}
@@ -124,7 +131,7 @@
         {/each}
     </div>
 
-    <h1>Past Project</h1>
+    <h1>Past Projects</h1>
     <div class="horizontal-segment">
       {#each past_project as project}
       <!-- Use a separate component for each card -->

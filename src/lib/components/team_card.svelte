@@ -23,7 +23,7 @@
     }
     img {
         width: 200px;
-        border-radius: 100%;
+        border-radius: 10%;
     }
     .text-container {
         width: 70%;

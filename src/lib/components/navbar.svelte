@@ -19,7 +19,7 @@
   /* margin-left: auto!important;
   margin-right: auto!important; */
 
-  padding: 20px 171px;
+  padding: 15px 171px;
   /* gap: 10px; */
   /* position: absolute; */
   border-bottom: 2px solid rgba(34, 36, 38, 0.15);
@@ -50,22 +50,23 @@
   height: 17px;
   justify-content: center;
   align-items: center;
-  gap: 25px;
+  gap: 15px;
 }
 
 .nav > .nav-links > a {
   display: inline-block;
-  padding: 13px 10px 13px 10px;
+  padding: 10px 10px 10px 10px;
   text-decoration: none;
   color: black;
   font-family: 'Roboto', sans-serif;
   font-weight: 400;
 }
-/*
+
 .nav > .nav-links > a:hover {
-  background-color: #54246c;
+  background-color: rgba(227, 184, 120, 1);
   color: #fff;
-} */
+  border-radius: 20%;
+}
 </style>
 
 
@@ -79,7 +80,7 @@
     <nav class="nav-links">
         <a href="{base}/about">About</a>
         <a href="{base}/news">News</a>
-        <a href="{base}/project">Projects</a>
+        <a href="{base}/projects">Projects</a>
         <a href="{base}/research">Research</a>
         <a href="{base}/team">Team</a>
         <a href="{base}/faq">FAQ</a>
