@@ -1,27 +1,57 @@
 <script>
   // Import the components from the components folder
   // import Card from '$lib/components/card.svelte';
-  import ProjCard from '$lib/components/home_project_card.svelte';
+  // import ProjCard from '$lib/components/home_project_card.svelte';
+  import Card from '$lib/components/new_home_project_card.svelte';
+  import NewsCard from '$lib/components/news_card.svelte';
   import Button from "$lib/components/button.svelte";
   import { base } from '$app/paths';
 
   // Define some data for the cards
-  const current_project = [
-      {
-        name: 'Chetah',
-        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
-        logo: './src/lib/assets/Updated_LOGO.png',
-        researchLink: 'https',
-        tryLink: 'https'
-      },
-      {
-        name: 'Hangul',
-        detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
-        logo: './src/lib/assets/hangul2 copy 2.png',
-        researchLink: 'https',
-        tryLink: 'https'
-      }
-    ];
+  // const current_project = [
+  //     {
+  //       name: 'Chetah',
+  //       detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
+  //       logo: './src/lib/assets/Updated_LOGO.png',
+  //       researchLink: 'https',
+  //       tryLink: 'https'
+  //     },
+  //     {
+  //       name: 'Hangul',
+  //       detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
+  //       logo: './src/lib/assets/hangul2 copy 2.png',
+  //       researchLink: 'https',
+  //       tryLink: 'https'
+  //     }
+  //   ];
+
+  const category = [
+    {
+      text: 'Projects',
+      link: 'facebook.com',
+      icon: './src/lib/assets/icons8-project-100.png'
+    },
+    {
+      text: 'Research',
+      link: '',
+      icon: './src/lib/assets/icons8-research-100.png'
+    }
+  ];
+
+  const latest_news = [
+    {
+      image: '',
+      category: 'Search Engine',
+      title: "UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis.",
+      date: 'July 25th 2023'
+    },
+    {
+      image: '',
+      category: 'Artificial Intelligence',
+      title: "UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis.",
+      date: 'July 25th 2023'
+    }
+  ]
 
 </script>
 
@@ -57,15 +87,6 @@
     background-position: 30% 0;
   }
 
-  /* .hero-contain{
-    max-width: 100%;
-    margin: auto;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 40px;
-  } */
-
   .contain-text{
     display: inline-flex;
     flex-direction: column;
@@ -81,15 +102,16 @@
     border: none;
     font-size: 4em;
     padding-top: 2%;
-    text-align: center;
-    padding-top: 10%;
+    text-align: initial;
     margin: calc(2rem - 0.14285714em) 0 1rem;
-    font-family: Work Sans;
+    font-family: Open Sans;
     font-weight: 700;
+    font-style: normal;
     line-height: 1.28571429em;
     text-transform: none;
-    color: rgba(0,0,0,.87);
+    color: #161616;
     margin-bottom: 0;
+    letter-spacing: -0.7px;
   }
 
   .hero h2{
@@ -105,6 +127,48 @@
     width: 600px;
     height: 3em;       /* height is 2x line-height, so two lines will display */
     overflow: hidden;  /* prevents extra lines from being visible */
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 0 20px 0;
+    gap: 10%;
+    width: 100%; /* Make the sections cover the whole width */
+    align-items: center;
+  }
+
+  .odd-section {
+    background: rgba(221, 208, 200, 0.50);
+  }
+
+  .section-title {
+    color: #000;
+    font-family: Work Sans;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    padding-top: 1.5%;
+    text-underline-offset: 15px;
+    text-transform: uppercase;
+  }
+
+  .section-content {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4%;
+    padding-top: 2%;
+    padding-bottom: 2%;
+  }
+
+  .news{
+    gap: 0%;
   }
 
   .vertical-container {
@@ -155,17 +219,31 @@
 <div class="a">
   <div class="hero">
     <div class="contain-text">
-      <h1>Data4Good</h1>
-      <h2>Connecting data, training and implementation to help create stronger nonprofit organizations.</h2>
-    <Button text="Learn More" link="{base}/project"/>
+      <h1>Data4Good: Empowering 
+       <br> Nonprofits with Data</h1>
+      <h2>Connecting data, research and implementation to help create stronger nonprofit organizations</h2>
+    <Button text="Learn More" link="{base}/projects"/>
     </div>
   </div>
 
-  <div class="vertical-container">
-    <div class="vertical-segment">
-      {#each current_project as project}
+  <!-- Recent Works Section -->
+  <div class="section odd-section">
+    <div class="section-title">Recent Works</div>
+    <div class="section-content">
+      {#each category as types}
+      <!-- Use a separate component for each card -->
+      <Card {...types} />
+      {/each}
+    </div>
+  </div>
+
+  <!-- The Latest News Section -->
+  <div class="section">
+    <div class="section-title">The Latest News</div>
+    <div class="section-content news">
+      {#each latest_news as news}
         <!-- Use a separate component for each card -->
-        <ProjCard {...project} />
+        <NewsCard {...news} />
       {/each}
     </div>
   </div>

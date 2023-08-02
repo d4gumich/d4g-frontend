@@ -11,8 +11,8 @@
       align-items: flex-start; /* Align items at the top of the footer */
       justify-content: space-between;
       flex-wrap: wrap;
-      padding-top: 7%;
-      padding-bottom: 5%;
+      padding-top: 5%;
+      padding-bottom: 3%;
     }
   
     .footer-logo {
@@ -29,25 +29,26 @@
     }
 
     .footer-column a {
-    text-decoration: none; /* Remove link underline */
-    font-family: 'Roboto', sans-serif; /* Set Roboto font */
-    font-size: 14px; /* Set font size to 14px */
-    font-weight: 400; /* Set regular font weight */
-    line-height: 150%; /* Set line height to 150% */
-    color: #000; /* Set link color */
-  }
-  p {
-    font-family: 'Roboto', sans-serif;
-    font-size: 14px; /* Set font size to 14px */
-    font-weight: 400;
-    line-height: 150%;
-  }
+      text-decoration: none; /* Remove link underline */
+      font-family: 'Roboto', sans-serif; /* Set Roboto font */
+      font-size: 14px; /* Set font size to 14px */
+      font-weight: 400; /* Set regular font weight */
+      line-height: 150%; /* Set line height to 150% */
+      color: #000; /* Set link color */
+    }
+    p {
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px; /* Set font size to 14px */
+      font-weight: 400;
+      line-height: 150%;
+      margin: 0px;
+    }
 
     .footer-column {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px; /* Add a gap between rows */
+      gap: 15px; /* Add a gap between rows */
     }
   
     .footer-divider {
@@ -81,7 +82,8 @@
       <div class="footer-title">Data4Good</div>
       <a href="{base}/about">About</a>
       <a href="{base}/news">News</a>
-      <a href="{base}/project">Project</a>
+      <a href="{base}/projects">Projects</a>
+      <a href="{base}/research">Research</a>
       <a href="{base}/team">Team</a>
       <a href="{base}/faq">FAQ</a>
     </div>
@@ -89,18 +91,20 @@
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Projects</div>
-      <a href="{base}/project/chetah">Chetah</a>
-      <a href="{base}/project/hangul">Hangul</a>
+      <a href="{base}/projects/chetah">Chetah</a>
+      <a href="{base}/projects/hangul">Hangul</a>
     </div>
   
     <!-- Column 3 -->
     <div class="footer-column">
       <div class="footer-title">Location</div>
-      <p>School of Information<br/>
-      University of Michigan<br/>
-      4322 North Quad, 105 S State St.<br/>
-      Ann Arbor, MI 48109-1285<br/>
-      info@data4good.center</p>
+      <p>
+        School of Information<br/>
+        University of Michigan<br/>
+        4322 North Quad, 105 S State St.<br/>
+        Ann Arbor, MI 48109-1285<br/>
+        info@data4good.center
+      </p>
     </div>
   
     <!-- Divider -->

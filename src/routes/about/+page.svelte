@@ -23,7 +23,7 @@
   }
 
   .odd-section {
-    background: rgba(221, 208, 200, 0.50);  
+    background: rgba(221, 208, 200, 0.50);
   }
 
   .section-title {
@@ -102,10 +102,10 @@
   <!-- Mission Section -->
   <div class="section odd-section">
     <div class="section-title">Mission</div>
-      <div class="section-content">
-        <!-- Mission content goes here -->
-        <p>The UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis. Putting data in the hands of nonprofits contributes to the body of knowledge about a broad scope of development and relief programs, which in turn will lead to better decision-making in nonprofit work.</p>
-      </div>
+    <div class="section-content">
+      <!-- Mission content goes here -->
+      <p>The UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis. Putting data in the hands of nonprofits contributes to the body of knowledge about a broad scope of development and relief programs, which in turn will lead to better decision-making in nonprofit work.</p>
+    </div>
   </div>
 
   <!-- Values Section -->

@@ -11,7 +11,6 @@
 
     export let index;
 
-
 </script>
   
   <style>

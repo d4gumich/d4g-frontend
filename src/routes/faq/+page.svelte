@@ -83,6 +83,7 @@
         gap: 10%;
         width: 100%; /* Make the sections cover the whole width */
         align-items: center;
+        max-width: 100%;
     }
 
     .odd-section {
@@ -116,5 +117,7 @@
         font-style: normal;
         line-height: 30px; /* 150% */
         padding-left: 30%;
+        max-width: 100%; /* Make sure the content doesn't exceed the screen width */
+        white-space: pre-line; /* Allow the text to wrap and break lines as needed */
     }
 </style>

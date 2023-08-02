@@ -76,7 +76,7 @@
         <a href ='{base}/'><img class='logo' alt = 'Data4Good logo'src={logo}/></a>
       </div>
     </div>
-    
+
     <nav class="nav-links">
         <a href="{base}/about">About</a>
         <a href="{base}/news">News</a>

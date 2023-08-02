@@ -30,7 +30,7 @@
     h1{
         display: flex;
         width: 300px;
-        height: 80px;
+        height: auto;
         flex-direction: column;
         justify-content: center;
         flex-shrink: 0;
@@ -40,6 +40,7 @@
         font-style: normal;
         font-weight: 700;
         line-height: normal;
+        margin: auto;
     }
 
 

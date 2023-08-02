@@ -3,6 +3,7 @@
     // import Card from '$lib/components/card.svelte';
     import CurrProjCard from '$lib/components/current_project_card.svelte';
     import PastProjCard from '$lib/components/past_project_card.svelte';
+    import SectionTitle from "../../lib/components/section_title.svelte";
   
     // Define some data for the cards
     const current_project = [
@@ -14,7 +15,7 @@
         tryLink: 'https'
       },
       {
-        name: 'Chetah',
+        name: 'Chetah 2.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
         logo: './src/lib/assets/Updated_LOGO.png',
         researchLink: 'https',
@@ -24,28 +25,16 @@
 
     const past_project = [
       {
-        name: 'Trends in the IT Sector of Non-Profit Organizations',
-        detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
+        name: 'Chetah 1.0',
+        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
         researchLink: 'https',
         type: 'Project'
       },
       {
-        name: 'Think Paper on Digital Identification',
-        detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
+        name: 'Trends in the IT Sector of Non-Profit Organizations',
+        detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
         researchLink: 'https',
-        type: 'Research'
-      },
-      {
-        name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
-        detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
-        researchLink: 'https',
-        type: 'Research'
-      },
-      {
-        name: 'Topic Extraction from Unstructured NGO Documents',
-        detail: 'Insights about the different reports produced by NGOs.',
-        researchLink: 'https',
-        type: 'Research'
+        type: 'Project'
       },
       {
         name: 'Digital Crisis Simulation Exercise (SimEx)',
@@ -68,6 +57,7 @@
       /* gap: 55px; */
       background: var(--background, #F5F5F5);
       padding-bottom: 4%;
+      padding-top: 1.5%;
     }
 
     .horizontal-segment {
@@ -76,6 +66,8 @@
         gap: 50px; /* Adjust the gap between the cards */
         flex-direction: row;
         flex-flow: row wrap;
+        padding-top: 1%;
+        padding-bottom: 2%
     }
   
     .horizontal.divider {
@@ -112,7 +104,7 @@
       text-underline-offset: 15px;
 
     }
-  
+
     p{
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
@@ -122,8 +114,8 @@
   <div class="a">
     <!-- <Navbar /> -->
 
-    <h1>Latest Projects</h1>
-
+    <!-- <h1>Latest Projects</h1> -->
+    <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">
         {#each current_project as project}
         <!-- Use a separate component for each card -->
@@ -131,7 +123,7 @@
         {/each}
     </div>
 
-    <h1>Past Projects</h1>
+    <SectionTitle title="Past Projects" />
     <div class="horizontal-segment">
       {#each past_project as project}
       <!-- Use a separate component for each card -->
