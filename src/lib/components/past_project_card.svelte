@@ -69,7 +69,7 @@
             <!-- two buttons from button component -->
         </div>
         <div class="buttons">
-            <Button text="View {type}" link="{researchLink}}"/>
+            <Button text="View {type}" link="{researchLink}"/>
         </div>
     </div>
 </div>

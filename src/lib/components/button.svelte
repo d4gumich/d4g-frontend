@@ -1,6 +1,7 @@
 <script>
     export let text;
     export let link
+    export let click;
 </script>
 
 <style>
@@ -28,7 +29,7 @@
 </style>
 
 
-<a href={link} class="button"> 
+<a href={link} class="button" on:click={click}>
     <div class="text">
         <h3>{text}</h3>
     </div>

@@ -4,6 +4,7 @@
     import CurrProjCard from '$lib/components/current_project_card.svelte';
     import PastProjCard from '$lib/components/past_project_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
+    import { base } from '$app/paths';
   
     // Define some data for the cards
     const current_project = [
@@ -27,7 +28,7 @@
       {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-        researchLink: 'https',
+        researchLink: `${base}/projects/chetah1.0`,
         type: 'Project'
       },
       {

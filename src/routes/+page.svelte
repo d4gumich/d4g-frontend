@@ -28,12 +28,12 @@
   const category = [
     {
       text: 'Projects',
-      link: 'facebook.com',
+      link: '/projects',
       icon: './src/lib/assets/icons8-project-100.png'
     },
     {
       text: 'Research',
-      link: '',
+      link: '/research',
       icon: './src/lib/assets/icons8-research-100.png'
     }
   ];

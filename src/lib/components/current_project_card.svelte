@@ -86,7 +86,7 @@
                 <!-- two buttons from button component -->
             </div>
             <div class="buttons">
-                <Button text="View Research" link="{researchLink}}"/>
+                <Button text="View Research" link="{researchLink}"/>
                 <Button text="Try {name}" link="{tryLink}" />
             </div>
         </div>

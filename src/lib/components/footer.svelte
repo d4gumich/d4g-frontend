@@ -1,6 +1,7 @@
 <script>
     // No props needed as the content is static
     import { base } from '$app/paths';
+    import logo from '$lib/assets/D4G-Logo-2.png'
 </script>
 
 <style>
@@ -14,7 +15,7 @@
       padding-top: 5%;
       padding-bottom: 3%;
     }
-  
+
     .footer-logo {
       display: flex;
       align-items: center;
@@ -73,10 +74,10 @@
   <div class="footer">
     <!-- Left Side with Logo -->
     <div class="footer-logo">
-      <img src="./src/lib/assets/D4G-Logo-2.png" alt="Data4Good Logo" height="90px">
+      <img src="{logo}" alt="Data4Good Logo" height="75px">
       <!-- <div class="footer-title">Data4Good</div> -->
     </div>
-  
+
     <!-- Column 1 -->
     <div class="footer-column">
       <div class="footer-title">Data4Good</div>
@@ -91,7 +92,7 @@
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Projects</div>
-      <a href="{base}/projects/chetah">Chetah</a>
+      <a href="{base}/projects/chetah1.0">Chetah</a>
       <a href="{base}/projects/hangul">Hangul</a>
     </div>
   
