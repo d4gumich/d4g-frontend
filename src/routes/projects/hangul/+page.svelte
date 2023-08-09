@@ -69,7 +69,7 @@
         justify-content: center;
         align-items: flex-start;
         gap: 10px;
-        padding-top: 10%;
+        padding-top: 5%;
         margin:auto;
     }
 
@@ -125,7 +125,7 @@
 
     .about-hangul-text {
         width: 50%;
-        text-align: center;
+        text-align: left;
         margin-top: -3%;
         color: #000;
         font-family: Open Sans;
@@ -141,8 +141,13 @@
         align-items: flex-start;
     }
 
-    .analyze-button{
-        padding-top: 1%;
+    #analyze-button{
+        padding-top: 2%;
+    }
+
+    .filter{
+        padding-top: 3%;
+        text-align: center;
     }
 
     /* modal */
@@ -184,13 +189,28 @@
 
         </div>
     </div>
-    <div class="rectangle" on:drop|preventDefault={handleFileSelect} on:dragover|preventDefault={handleDragOver}>
-        <img src="{base}/src/lib/assets/icons8-pdf-90.png" class="pdf-icon" alt="PDF icon" />
-        <p class="drop-text">{dropText}</p>
-        <input type="file" id="file-input" on:change={handleFileSelect} />
-        {#if showAnalyzeButton}
-            <Button class="analyze-button" text="Analyze PDF" click={handleAnalyzeClick} />
-        {/if}
+    <div>
+        <div class="rectangle" on:drop|preventDefault={handleFileSelect} on:dragover|preventDefault={handleDragOver}>
+            <img src="{base}/src/lib/assets/icons8-pdf-90.png" class="pdf-icon" alt="PDF icon" />
+            <p class="drop-text">{dropText}</p>
+            <input type="file" id="file-input" on:change={handleFileSelect} />
+            {#if showAnalyzeButton}
+                <Button text="Analyze PDF" click={handleAnalyzeClick} />
+            {/if}
+        </div>
+        <div class="filter">
+            <!-- Verbose checkbox -->
+            <label for="verbose">Verbose:</label>
+            <input type="checkbox" id="verbose" name="verbose">
+
+            <!-- Keyphrase selection -->
+            <label for="keyphrases">Number of keyphrases:</label>
+            <select name="keyphrases" id="keyphrases">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+            </select>
+        </div>
     </div>
 
     <div class="button-container">
@@ -200,7 +220,8 @@
     </div>
     <div class="about-hangul-text">
         {#if aboutHangul}
-            <p>Chetah is a search engine for UN and NGOs reports and it summarizes reports with the state of the art deep learning algorithm, BERT. Users can search by applying filters of UN Clusters. This phase 1 product has reports from IFRC, IWA and UNICEF. It retrieves evidence-based program reports and annual reports. The results have been proven better than the Google and Bing for Non-profit sector, with an F1-score of 0.78. It is developed to help NGO program managers and policy makers to design programs and grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that NGO and UN are facing.
+            <p>
+                Hangul is an NLP-based assistant for digital curators at ReliefWeb envisioned to enable curators to handle three times, four times the number of documents that they're processing. Once a text PDF is uploaded to the platform, relevant metadata is extracted from it. Current metadata includes the Document Title, the date the document is published, the number of pages in the document, the word length of the document, the language of the document, and the entities in the document. More complex features like extraction of abstract, conclusion, executive summary, and recognizing the theme(cluster) of the document are also in scope.
             </p>
         {/if}
     </div>
