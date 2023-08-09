@@ -1,38 +1,181 @@
 <script>
-    import { base } from '$app/paths';
-    import Button from '$lib/components/button.svelte';
+    import { base } from "$app/paths";
+    import Button from "$lib/components/button.svelte";
+    import ChetahResults from "../../../lib/components/chetah_results.svelte";
 
-    let searchQuery = '';
+    let searchQuery = "";
     let aboutCheetah = false;
-    let version = 'Cheetah 1.0';
-    const versions = ['Cheetah 1.0', 'Cheetah 2.0'];
+    let version = "Chetah 1.0";
+    let results = null;
+    let time = 0;
+    let num_res = 0;
+    const versions = ["Chetah 1.0", "Chetah 2.0"];
     const handleVersionChange = (event) => {
         version = event.target.value;
-        if (version === 'Cheetah 2.0') {
-            window.location.href = '<URL>';
+        if (version === "Chetah 2.0") {
+            window.location.href = "<URL>";
         }
-    }
+    };
 
     let showModal = false;
-    let formUrl = 'https://forms.gle/n51U4g2K9cafpZUu5';
+    let formUrl = "https://forms.gle/n51U4g2K9cafpZUu5";
 
     function handleFeedbackClick() {
         showModal = true;
     }
+
+    async function doFetch(searchQuery) {
+        const url = "http://127.0.0.1:8000/api/v1/products/chetah";
+        const data = { query: searchQuery };
+        const response = await fetch(url, {
+            method: "POST",
+            cors: "cors",
+            headers: {
+                "content-type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+        return response.json();
+    }
+
+    function search(searchQuery) {
+        time = Date.now();
+        num_res = 0;
+        const cleanedQuery = searchQuery.trim();
+        doFetch(cleanedQuery).then((data) => {
+            results = data;
+            num_res = results.length;
+            time = Date.now() - time;
+        });
+    }
+
+    function filterEnter(event){
+        switch (event.keyCode) {
+            case 13:
+                search(searchQuery)
+        }
+    }
+
+    
 </script>
+
+<div class="container">
+    <div class="content-container">
+        <img
+            class="logo"
+            src="{base}/src/lib/assets/Updated_LOGO.png"
+            alt="Chetah Logo"
+            height="115px"
+        />
+        <div class="text-container">
+            <p class="info-text">
+                Search a phrase below and receive a list of UN and NGO report
+                links in order of relevancy.
+            </p>
+            <select
+                class="version-select"
+                bind:value={version}
+                on:change={handleVersionChange}
+            >
+                {#each versions as version}
+                        <option value={version}>{version}</option>
+                {/each}
+            </select>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <input
+            class="search-input"
+            type="text"
+            placeholder="Enter Queries"
+            bind:value={searchQuery}
+            on:keypress={filterEnter}
+        />
+        {#if searchQuery && searchQuery != ""}
+            <button
+                class="search-button"
+                height="10px"
+                on:click={search(searchQuery)}
+            />
+        {:else}
+            <button class="search-button" height="10px" disabled />
+        {/if}
+    </div>
+
+    <div class="button-container">
+        <Button
+            text="About Chetah"
+            click={() => (aboutCheetah = !aboutCheetah)}
+        />
+        <Button text="View Research" link="<URL>" />
+        <Button text="Provide Feedback" click={handleFeedbackClick} />
+    </div>
+    <div class="about-cheetah-text">
+        {#if aboutCheetah}
+            <p>
+                Chetah is a search engine for UN and NGOs reports and it
+                summarizes reports with the state of the art deep learning
+                algorithm, BERT. Users can search by applying filters of UN
+                Clusters. This phase 1 product has reports from IFRC, IWA and
+                UNICEF. It retrieves evidence-based program reports and annual
+                reports. The results have been proven better than the Google and
+                Bing for Non-profit sector, with an F1-score of 0.78. It is
+                developed to help NGO program managers and policy makers to
+                design programs and grant funds. This tool aims to provide
+                better answers for nonprofit work and eventually to help solve
+                the crucial real problems that NGO and UN are facing.
+            </p>
+        {/if}
+    </div>
+    <div class="results-container">
+        {#if results}
+            {#if num_res === 0}
+                <p style="margin: auto; width:100%; text-align:center; font-family: Open Sans;">
+                    <strong>No results available.</strong>
+                </p>
+            {:else}
+                <p
+                    style="margin: auto; width:100%; text-align:center; font-family: Open Sans;"
+                >
+                    <strong>{num_res} results fetched in {time} ms.</strong>
+                </p>
+            {/if}
+            {#each results as result}
+                <ChetahResults {...result} />
+            {/each}
+        {/if}
+    </div>
+
+    {#if showModal}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div class="modal" on:click|self={() => (showModal = false)}>
+            <div class="modal-content">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <span
+                    class="modal-close"
+                    on:click|stopPropagation={() => (showModal = false)}
+                    >&times;</span
+                >
+                <!-- svelte-ignore a11y-missing-attribute -->
+                <iframe src={formUrl} width="100%" height="100%" />
+            </div>
+        </div>
+    {/if}
+</div>
 
 <style>
     .container {
         margin: auto;
         display: flex;
-        padding: 10% 0;
+        padding: 5% 0;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         gap: 45px;
     }
 
-    .content-container{
+    .content-container {
         display: flex;
         width: auto;
         justify-content: center;
@@ -42,7 +185,7 @@
         flex-wrap: wrap;
     }
 
-    .text-container{
+    .text-container {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -56,7 +199,7 @@
         width: 914.311px;
         height: 66px;
         flex-shrink: 0;
-        fill: var(--white, #FFF);
+        fill: var(--white, #fff);
         stroke-width: 0.5px;
         stroke: #000;
         border-radius: 10px;
@@ -65,10 +208,10 @@
         width: 100%;
         /* padding: 10px 20px; */
         font-size: 16px;
-        fill: var(--white, #FFF);
+        fill: var(--white, #fff);
         stroke-width: 0.5px;
         stroke: #000;
-        color: rgba(0, 0, 0, 0.50);
+        color: rgba(0, 0, 0, 0.5);
         font-family: Open Sans;
         font-size: 20px;
         font-style: normal;
@@ -83,7 +226,7 @@
         height: 100%;
         border-radius: 0 10px 10px 0;
         border: none;
-        background-color: #1B3350;
+        background-color: #1b3350;
         color: white;
         font-size: 16px;
         cursor: pointer;
@@ -109,6 +252,7 @@
         color: #000;
         border-radius: 10px;
         padding-left: 1%;
+        font-family: Open Sans;
 
         /* Body 2 */
         font-family: Roboto;
@@ -144,23 +288,22 @@
         /* margin-top: 20px; */
     }
     .button {
-        background-color: #1B3350;
+        background-color: #1b3350;
         color: white;
         border-radius: 5px;
         border: none;
         padding: 10px 20px;
-        cursor: pointer
+        cursor: pointer;
     }
 
-    h3{
-        color: #FAEFEF;
+    h3 {
+        color: #faefef;
         font-family: Open Sans;
         font-size: 20px;
         font-style: normal;
         font-weight: 700;
         line-height: 30.857px; /* 154.285% */
     }
-
 
     /* modal */
     .modal {
@@ -186,46 +329,4 @@
         right: 10px;
         cursor: pointer;
     }
-
 </style>
-
-<div class="container">
-    <div class="content-container">
-        <img class="logo" src="{base}/src/lib/assets/Updated_LOGO.png" alt="Cheetah Logo" height="115px" />
-        <div class="text-container">
-            <p class="info-text">Search a phrase below and receive a list of UN and NGO report links in order of relevancy.</p>
-            <select class="version-select" bind:value={version} on:change={handleVersionChange}>
-            {#each versions as version}
-                <option value={version}>{version}</option>
-            {/each}
-            </select>
-        </div>
-    </div>
-    
-    <div class="search-container">
-      <input class="search-input" type="text" placeholder="Enter Queries" bind:value={searchQuery} />
-      <button class="search-button" height="10px"></button>
-    </div>
-
-    <div class="button-container">
-        <Button text="About Cheetah" click={() => aboutCheetah = !aboutCheetah} />
-        <Button text="View Research" link="<URL>"  />
-        <Button text="Provide Feedback" click={handleFeedbackClick} />
-    </div>
-    <div class="about-cheetah-text">
-        {#if aboutCheetah}
-            <p>Chetah is a search engine for UN and NGOs reports and it summarizes reports with the state of the art deep learning algorithm, BERT. Users can search by applying filters of UN Clusters. This phase 1 product has reports from IFRC, IWA and UNICEF. It retrieves evidence-based program reports and annual reports. The results have been proven better than the Google and Bing for Non-profit sector, with an F1-score of 0.78. It is developed to help NGO program managers and policy makers to design programs and grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that NGO and UN are facing.
-            </p>
-        {/if}
-    </div>
-    {#if showModal}
-    <div class="modal" on:click|self={() => showModal = false}>
-        <div class="modal-content">
-            <span class="modal-close" on:click|stopPropagation={() => showModal = false}>&times;</span>
-            <iframe src={formUrl} width="100%" height="100%"></iframe>
-        </div>
-    </div>
-    {/if}
-
-
-</div>
