@@ -13,14 +13,10 @@
 </script>
 
 <div class="result">
-    <p><strong>Report Title: </strong>{title}</p>
-    <p><strong>Date Published: </strong>{date}</p>
-    <p>
-        <strong>Link: </strong><a href={link} target="_blank">Go to report</a>
-    </p>
+    <p><a href={link} target="_blank" class="title">{title}</a> - {date}</p>
+    <!-- <p>{date}</p> -->
     <p><strong>Clusters: </strong>{cluster}</p>
-    <p>
-        <strong>Summary: </strong>{summary_full.substring(0, 200)}... <button on:click={toggleModal}>+More</button>
+    <p>{summary_full.substring(0, 250)} ... <button on:click={toggleModal}>+More</button>
     </p>
 
     {#if showModal}
@@ -42,16 +38,40 @@
 <style>
     p {
         font-family: Open Sans;
+        margin: 1%;
     }
     .result {
         width: 60%;
         word-wrap: normal;
-        background-color: #ddd0c8;
-        padding: 2%;
+        /* background-color: #ddd0c8; */
+        /* padding: 2%; */
         margin: auto;
-        margin-bottom: 2%;
+        margin-bottom: 2.3rem;
+        margin-top: 2%;
         border-radius: 3%;
     }
+
+    .title{
+        /* color: #446FDB; */
+        font-family: Work Sans;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: normal;
+        letter-spacing: -0.4px;
+        text-transform: capitalize;
+    }
+
+    a {
+        text-decoration: none;
+        color: #1a0dab;
+    }
+    
+
+    a:visited {
+        color: #4c2c92;
+    }
+
     /* modal */
     .modal {
         position: fixed;
@@ -80,10 +100,9 @@
     }
     button{
         display: inline-flex;
-        padding: 1%;
         justify-content: center;
         align-items: center;
-        border-radius: 10px;
+        border-radius: 20px;
         background: #1B3350;
         margin: 5px;
         color: white;

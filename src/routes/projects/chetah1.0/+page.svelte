@@ -3,7 +3,7 @@
     import Button from "$lib/components/button.svelte";
     import ChetahResults from "../../../lib/components/chetah_results.svelte";
 
-    let searchQuery = "";
+    let searchQuery = ""; // let searchResults = [];
     let aboutCheetah = false;
     let version = "Chetah 1.0";
     let results = null;
@@ -13,7 +13,7 @@
     const handleVersionChange = (event) => {
         version = event.target.value;
         if (version === "Chetah 2.0") {
-            window.location.href = "<URL>";
+            window.location.href = "/projects/chetah2.0";
         }
     };
 
@@ -46,6 +46,9 @@
             results = data;
             num_res = results.length;
             time = Date.now() - time;
+
+            // Redirect to the results page
+            // window.location.href = `/projects/chetah1.0/search_result?query=${encodeURIComponent(searchQuery)}`;
         });
     }
 
@@ -55,8 +58,6 @@
                 search(searchQuery)
         }
     }
-
-    
 </script>
 
 <div class="container">
@@ -108,7 +109,7 @@
             text="About Chetah"
             click={() => (aboutCheetah = !aboutCheetah)}
         />
-        <Button text="View Research" link="<URL>" />
+        <Button text="View Research" link="https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view" />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-cheetah-text">
@@ -138,7 +139,7 @@
                 <p
                     style="margin: auto; width:100%; text-align:center; font-family: Open Sans;"
                 >
-                    <strong>{num_res} results fetched in {time} ms.</strong>
+                    <strong>{num_res} results in {time} ms.</strong>
                 </p>
             {/if}
             {#each results as result}
@@ -168,7 +169,7 @@
     .container {
         margin: auto;
         display: flex;
-        padding: 5% 0;
+        padding: 7% 0;
         flex-direction: column;
         justify-content: center;
         align-items: center;
@@ -185,7 +186,7 @@
         flex-wrap: wrap;
     }
 
-    .text-container {
+    .text-containe r{
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -269,7 +270,7 @@
 
     .about-cheetah-text {
         width: 50%;
-        text-align: center;
+        text-align: left;
         margin-top: -3%;
         color: #000;
         font-family: Open Sans;
@@ -296,7 +297,7 @@
         cursor: pointer;
     }
 
-    h3 {
+    h3{
         color: #faefef;
         font-family: Open Sans;
         font-size: 20px;
@@ -304,6 +305,7 @@
         font-weight: 700;
         line-height: 30.857px; /* 154.285% */
     }
+
 
     /* modal */
     .modal {
@@ -329,4 +331,7 @@
         right: 10px;
         cursor: pointer;
     }
+
 </style>
+
+<!-- when the user click search, it will direct them to a page that have a different layout/format of the webpage that displays the result below the search bar without the three buttons of 'about chetah', 'view research' and 'provide feedback'. the search bar will move to the top of the page with the logo at the left side of the search bar. this is the code for the main page -->
