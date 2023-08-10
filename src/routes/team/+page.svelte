@@ -51,7 +51,7 @@
         {
             name: "Feng-Yu (Leo) Yeh",
             position: "Web Developer and UX Design",
-            description: "<INSERT TEXT HERE>",
+            description: "Leo is currently a Master's student in the University of Michigan School of information specializing in User-Centered Agile Development. He has an undergraduate degree in Molecular Biology from University of Washington where he worked as a Research Assistant in aging lab. He also worked in a startup as a Assistant Project Manager.",
             image: "https://media.licdn.com/dms/image/C5603AQEGEyFo3e21jQ/profile-displayphoto-shrink_200_200/0/1517068890724?e=1694044800&v=beta&t=n_FZHmTk_E9k_j3oFZLjYOzU7WF_33PuozZ5ZoBdlho",
             linkedin: "https://www.linkedin.com/in/leoyeh/",
         },
