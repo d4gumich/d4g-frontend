@@ -69,7 +69,7 @@
 
   .hero {
     /* height: 10%; */
-    background-image: url('$lib/assets/final_1.png');
+    background-image: url('$lib/assets/final_2.png');
     background-repeat: no-repeat;
     background-size: cover;
     /* margin: 0 !important; */

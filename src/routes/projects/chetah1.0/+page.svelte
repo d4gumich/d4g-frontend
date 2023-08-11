@@ -120,34 +120,6 @@
                 <Button text="View Research" link="https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view" />
                 <Button text="Provide Feedback" click={handleFeedbackClick} />
             </div>
-        {:else}
-            <div class="button-container">
-                <Button text="UN Clusters" click={handleUNClustersClick} />
-            </div>
-            {#if showUNClustersModal}
-                <div class="modal">
-                    <div class="modal-content">
-                        <span class="modal-close" on:click={() => (showUNClustersModal = false)}>×</span>
-                        <h2>Select UN Cluster</h2>
-                        <form>
-                            <label><input type="checkbox" name="cluster" value="Health"> Health</label><br>
-                            <label><input type="checkbox" name="cluster" value="Education"> Education</label><br>
-                            <label><input type="checkbox" name="cluster" value="Nutrition"> Nutrition</label><br>
-                            <label><input type="checkbox" name="cluster" value="Protection"> Protection</label><br>
-                            <label><input type="checkbox" name="cluster" value="Water"> Water</label><br>
-                            <label><input type="checkbox" name="cluster" value="Camp"> Camp</label><br>
-                            <label><input type="checkbox" name="cluster" value="Early Recovery"> Early Recovery</label><br>
-                            <label><input type="checkbox" name="cluster" value="Emergency Telecom"> Emergency Telecom</label><br>
-                            <label><input type="checkbox" name="cluster" value="Food Security"> Food Security</label><br>
-                            <label><input type="checkbox" name="cluster" value="Humanitarian"> Humanitarian</label><br>
-                            <label><input type="checkbox" name="cluster" value="Logistics"> Logistics</label><br>
-                        </form>
-                    </div>
-                </div>
-            {/if}
-
-
-            <!-- here add the provide feedback icon and have it stick to the bottom of the page -->
         {/if}
 
         <div class="about-chetah-text">
@@ -168,7 +140,7 @@
             {/if}
         </div>
 
-        <div class="results-container">
+        <div class="results-filter-container">
             {#if results}
                 {#if num_res === 0}
                     <p style="margin: auto; width:100%; text-align:center; font-family: Open Sans;">
@@ -181,9 +153,48 @@
                         <strong>{num_res} results in {time} ms.</strong>
                     </p>
                 {/if}
-                {#each results as result}
-                    <ChetahResults {...result} />
-                {/each}
+                <div class="res-container">
+                    <div class="filter-container">
+                        <Button text="UN Clusters" click={handleUNClustersClick} />
+                    </div>
+                    {#if showUNClustersModal}
+                        <div class="cluster-modal">
+                            <div class="cluster-modal-content">
+                                <span class="modal-close" on:click={() => (showUNClustersModal = false)}>×</span>
+                                <div class="modal-header">
+                                    <h2 class="selected">UN Clusters</h2>
+                                </div>
+                                <div class="modal-body">
+                                    <form on:submit|preventDefault={handleUNClustersSubmit}>
+                                        <fieldset>
+                                            <legend>Select UN Cluster</legend>
+                                            <label><input type="checkbox" name="cluster" value="Health"> Health</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Education"> Education</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Nutrition"> Nutrition</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Protection"> Protection</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Water"> Water</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Camp"> Camp</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Early Recovery"> Early Recovery</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Emergency Telecom"> Emergency Telecom</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Food Security"> Food Security</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Humanitarian"> Humanitarian</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Logistics"> Logistics</label><br>
+                                        </fieldset>
+                                        <div class="modal-footer">
+                                            <button type="button" on:click={() => (showUNClustersModal = false)}>Cancel</button>
+                                            <button type="submit">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+                    <div class="res">
+                        {#each results as result}
+                            <ChetahResults {...result} />
+                        {/each}
+                    </div>
+                </div>
             {/if}
         </div>
     </div>
@@ -208,10 +219,6 @@
 <style>
 
     /* new */
-    /* .search-container {
-        display: flex;
-        align-items: center;
-    } */
 
     .logo-container {
         display: flex;
@@ -222,7 +229,7 @@
         margin-right: 20px;
     }
 
-    .results-container {
+    .results-filter-container {
         margin-top: 20px;
     }
 
@@ -245,13 +252,13 @@
         justify-content: center;
         align-items: center;
         align-content: center;
-        gap: 0px 25px;
+        gap: 0px 1%;
         flex-wrap: wrap;
         flex-direction: column;
     }
 
     .content-container.flex-row{
-      flex-direction: row; 
+      flex-direction: row;
     }
 
     .text-containe r{
@@ -265,7 +272,7 @@
     .search-container {
         display: flex;
         align-items: center;
-        width: 914.311px;
+        width: 900px;
         height: 66px;
         flex-shrink: 0;
         fill: var(--white, #fff);
@@ -373,6 +380,102 @@
         line-height: 30.857px; /* 154.285% */
     }
 
+    .res-container{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .res{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-container{
+        display: flex;
+        align-items: flex-start;
+        text-align: center;
+        flex-direction: row;
+        justify-content: center;
+        width: 55%;
+        margin-right: -3%;
+        margin-top: 1.7%;
+    }
+
+    /* un cluster modal */
+
+    .cluster-modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .cluster-modal-content {
+        display: flex;
+        flex-direction: row;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-left: 2%;
+        margin-right: 2%;
+    }
+
+    .modal-header h2 {
+        margin-right: auto;
+    }
+
+    .modal-header h2.selected {
+        font-weight: bold;
+        border-left: 3px solid #E3B878;;
+        padding-left: 10px;
+        color: var(--tertiary, #1B3350);
+        font-family: Open Sans;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 30.857px; /* 154.285% */
+    }
+
+    .modal-body {
+        display: flex;
+    }
+
+    .modal-body form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-body fieldset {
+        border: 1px solid black;
+        display: flex;
+        width: 425px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2%;
+        /* margin: 5%; */
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .modal-footer button {
+        margin-left: 10px;
+    }
+
 
     /* modal */
     .modal {
@@ -400,7 +503,3 @@
     }
 
 </style>
-
-<!-- when the user click search, it will direct them to a page that have a different layout/format of the webpage that displays the result below the search bar without the three buttons of 'about chetah', 'view research' and 'provide feedback'. the search bar will move to the top of the page with the logo at the left side of the search bar. this is the code for the main page -->
-
-<!-- please update the code here so that when the user entered their query, the three buttons will disappear, the info-text will disappear and the search bar will be at the right side of the logo (while the whole thing will move to the top of the page). the result will display underneath the search bar, and there's a filter button called 'UN Clusters' that allow the user to filter their results. -->

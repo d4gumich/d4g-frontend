@@ -41,12 +41,13 @@
         margin: 1%;
     }
     .result {
-        width: 60%;
+        width: 70%;
         word-wrap: normal;
         /* background-color: #ddd0c8; */
         /* padding: 2%; */
         margin: auto;
-        margin-bottom: 2.3rem;
+        margin-left: 0;
+        margin-bottom: 1%;
         margin-top: 2%;
         border-radius: 3%;
     }
