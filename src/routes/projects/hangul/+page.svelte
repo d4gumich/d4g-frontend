@@ -101,7 +101,7 @@
                 on:change={handleFileSelect}
             />
             {#if showAnalyzeButton}
-                <Button text="Analyze PDF" click={handleAnalyzeClick} />
+                <Button text="Analyze PDF" click={handleAnalyzeClick} style="margin-top: 10px;" />
             {/if}
         </div>
         <div class="filter">

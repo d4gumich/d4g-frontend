@@ -126,9 +126,8 @@
     </div>
   </div>
 
-  <!-- Contact Form Section -->
   <!-- Contact Section -->
-  <div class="section">
+  <!-- <div class="section">
     <div class="section-title">Contact</div>
     <div class="section-content">
       <div class="form-group">
@@ -149,6 +148,6 @@
       </div>
       <button class="submit-button">Submit</button>
     </div>
-  </div>
+  </div> -->
 </div>
 

@@ -38,8 +38,7 @@
         <div class="section-content">
             <!-- History content goes here -->
             <p>
-                Fill out our Google Feedback form with any suggestions. We'd be
-                happy to hear from you!
+                Fill out our <a href="https://forms.gle/n51U4g2K9cafpZUu5">Google Feedback</a> form with any suggestions. We'd be happy to hear from you!
             </p>
         </div>
     </div>

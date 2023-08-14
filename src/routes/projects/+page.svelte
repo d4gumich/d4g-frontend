@@ -25,7 +25,7 @@
     ];
 
     const past_project = [
-      // {
+       // {
       //   name: 'Chetah 2.0',
       //   detail: '',
       //   researchLink: `${base}/projects/chetah2.0`,

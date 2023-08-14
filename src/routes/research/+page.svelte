@@ -24,12 +24,12 @@
     ];
 
     const past_research = [
-        {
-            name: 'Chetah 1.0',
-            detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-            researchLink: 'https',
-            type: 'Research'
-        },
+        // {
+        //     name: 'Chetah 1.0',
+        //     detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
+        //     researchLink: 'https',
+        //     type: 'Research'
+        // },
         {
             name: 'Think Paper on Digital Identification',
             detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
@@ -37,21 +37,21 @@
             type: 'Research'
         },
         {
-        name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
-        detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
-        researchLink: 'https',
-        type: 'Research'
+            name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
+            detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
+            researchLink: 'https',
+            type: 'Research'
         },
         {
-        name: 'Topic Extraction from Unstructured NGO Documents',
-        detail: 'Insights about the different reports produced by NGOs.',
-        researchLink: 'https',
-        type: 'Research'
+            name: 'Topic Extraction from Unstructured NGO Documents',
+            detail: 'Insights about the different reports produced by NGOs.',
+            researchLink: 'https',
+            type: 'Research'
         }
     ]
-  
+
   </script>
-  
+
   <style>
     .a{
       /* margin-top: 0px; */
@@ -115,7 +115,7 @@
       font-size: 1rem;
     }
   </style>
-  
+
   <div class="a">
     <!-- <Navbar /> -->
 
@@ -136,4 +136,4 @@
       {/each}
     </div>
 
-  </div>  
+  </div> 

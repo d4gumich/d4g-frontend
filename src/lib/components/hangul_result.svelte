@@ -16,7 +16,7 @@
 
 <div class="hangul-result">
     <p><strong>Time taken: </strong>{hangul_time} seconds</p>
-    <h3><u>METADATA</u></h3>
+    <h3 class="heading"><u>METADATA</u></h3>
     <div class="row-field">
         <p><strong>File name:</strong></p>
         <div class="selectable-content">
@@ -49,7 +49,7 @@
             <p>{metadata.doc_modified_date}</p>
         </div>
     </div>
-    <h3><u>CONTENT-BASED INFORMATION</u></h3>
+    <h3 class="heading"><u>CONTENT-BASED INFORMATION</u></h3>
     {#if metadata.Author}
         <div class="row-field">
             <p><strong>Author: </strong></p>
@@ -119,7 +119,7 @@
     {#if verbose}
     <div class="row-field">
         <div id="meta-content">
-            <h3><u>VERBOSE OUTPUT </u></h3>
+            <h3 class="heading"><u>VERBOSE OUTPUT </u></h3>
             <pre class="prettyprint">
               {JSON.stringify({metadata, document_language, document_summary, document_title,content, report_type, locations, disasters, full_content, keywords}, null, 2)}
             </pre>
@@ -137,7 +137,14 @@
         flex-direction: column;
         overflow-wrap: break-word;
         font-family: Open Sans;
+        gap: 5%
     }
+
+    .heading{
+        margin-top: 7%;
+        margin-bottom: -1.5%;
+    }
+
     p {
         margin-bottom: 5px;
         padding-top: 2px;

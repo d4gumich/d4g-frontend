@@ -1,3 +1,4 @@
+<!-- logo and un cluster needs to be in the same div class, and the search-container and the result need to be in the same div class when the user entered their queries -->
 <script>
     import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
@@ -85,13 +86,13 @@
                     on:change={handleVersionChange}
                     >
                         {#each versions as version}
-                                <option value={version}>{version}</option>
+                            <option value={version}>{version}</option>
                         {/each}
                     </select>
                 {/if}
             </div>
         </div>
-        
+
         <div class="search-container">
             <input
                 class="search-input"
@@ -111,6 +112,7 @@
             {/if}
         </div>
 
+        <!-- this can be a component -->
         {#if !results}
             <div class="button-container">
                 <Button
@@ -121,6 +123,7 @@
                 <Button text="Provide Feedback" click={handleFeedbackClick} />
             </div>
         {/if}
+        <!-- until here -->
 
         <div class="about-chetah-text">
             {#if aboutChetah}
@@ -231,6 +234,10 @@
 
     .results-filter-container {
         margin-top: 20px;
+    }
+
+    .modal-footer{
+        margin-top: 3%;
     }
 
 
