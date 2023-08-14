@@ -13,24 +13,24 @@
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
         logo: './src/lib/assets/hangul2 copy 2.png',
         researchLink: 'https',
-        tryLink: 'https'
+        tryLink: `${base}/projects/hangul`
       },
       {
-        name: 'Chetah 2.0',
+        name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
         logo: './src/lib/assets/Updated_LOGO.png',
         researchLink: 'https',
-        tryLink: 'https'
+        tryLink: `${base}/projects/chetah1.0`
       }
     ];
 
     const past_project = [
-      {
-        name: 'Chetah 1.0',
-        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-        researchLink: `${base}/projects/chetah1.0`,
-        type: 'Project'
-      },
+      // {
+      //   name: 'Chetah 2.0',
+      //   detail: '',
+      //   researchLink: `${base}/projects/chetah2.0`,
+      //   type: 'Project'
+      // },
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
         detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',

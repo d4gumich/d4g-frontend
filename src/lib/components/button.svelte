@@ -16,6 +16,10 @@
         margin: 5px;
     }
 
+    .button:hover {
+        background: #30598b;
+    }
+
     .text{
         color: #FAEFEF;
         font-family: Open Sans;

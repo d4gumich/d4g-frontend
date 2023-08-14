@@ -15,7 +15,7 @@
         tryLink: 'https'
       },
       {
-        name: 'Chetah 2.0',
+        name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
         logo: './src/lib/assets/Updated_LOGO.png',
         researchLink: 'https',
