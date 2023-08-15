@@ -146,8 +146,9 @@
     }
 
     p {
-        margin-bottom: 5px;
+        margin-bottom: 7px;
         padding-top: 2px;
+        margin-top: 7px;
     }
 
     pre {

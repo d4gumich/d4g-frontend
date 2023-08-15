@@ -228,7 +228,7 @@
 
   <!-- Recent Works Section -->
   <div class="section odd-section">
-    <div class="section-title">Recent Works</div>
+    <div class="section-title">Recent Work</div>
     <div class="section-content">
       {#each category as types}
       <!-- Use a separate component for each card -->

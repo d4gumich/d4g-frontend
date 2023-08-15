@@ -63,6 +63,23 @@
         showUNClustersModal = true;
     }
 
+    function handleUNClustersSubmit(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Get the selected UN Cluster filters
+        const clusterInputs = document.querySelectorAll('input[name="cluster"]:checked');
+        const selectedClusters = Array.from(clusterInputs).map(input => input.value);
+
+        // Update the search query with the selected UN Cluster filters
+        searchQuery = `${selectedClusters.join(':')}:${searchQuery}`;
+
+        // Close the modal and trigger a new search with the updated query
+        showUNClustersModal = false;
+        search(searchQuery);
+    }
+
+
 </script>
 
 <div class="container">
@@ -153,7 +170,7 @@
                     <p
                         style="margin: auto; width:100%; text-align:center; font-family: Open Sans;"
                     >
-                        <strong>{num_res} results in {time} ms.</strong>
+                        <strong>{num_res} out of 238 results in {time} ms.</strong>
                     </p>
                 {/if}
                 <div class="res-container">
@@ -185,7 +202,21 @@
                                         </fieldset>
                                         <div class="modal-footer">
                                             <button type="button" on:click={() => (showUNClustersModal = false)}>Cancel</button>
-                                            <button type="submit">Submit</button>
+                                            <!-- <button type="submit">Submit</button> -->
+
+                                            <button type="submit" on:click={() => {
+                                                // Get the selected UN Cluster filters
+                                                const clusterInputs = document.querySelectorAll('input[name="cluster"]:checked');
+                                                const selectedClusters = Array.from(clusterInputs).map(input => input.value);
+
+                                                // Update the search query with the selected UN Cluster filters
+                                                searchQuery = `${selectedClusters.join(':')}:${searchQuery}`;
+
+                                                // Close the modal and trigger a new search with the updated query
+                                                showUNClustersModal = false;
+                                                search(searchQuery);
+                                            }}>Submit</button>
+
                                         </div>
                                     </form>
                                 </div>
