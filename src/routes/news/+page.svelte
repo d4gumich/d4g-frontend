@@ -3,12 +3,13 @@
     // import Card from '$lib/components/card.svelte';
     import NewsCard from '$lib/components/news_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
+    import Poster from '$lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg'
   
     // Define some data for the cards
 
     const latest_news = [
         {
-            image: './src/lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg',
+            image: Poster,
             category: 'Exposition',
             title: "UMSI Exposition by Sidra and Prithvi on Hangul",
             date: 'April 17th 2023'

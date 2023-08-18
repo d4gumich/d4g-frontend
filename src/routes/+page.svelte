@@ -8,6 +8,7 @@
   import { base } from '$app/paths';
   import ProjectIcon from '$lib/assets/icons8-project-100.png'
   import ResearchIcon from '$lib/assets/icons8-research-100.png'
+  import Poster from '$lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg'
 
   // Define some data for the cards
 
@@ -26,7 +27,7 @@
 
   const latest_news = [
     {
-      image: './src/lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg',
+      image: Poster,
       category: 'Exposition',
       title: "UMSI Exposition by Sidra and Prithvi on Hangul",
       date: 'April 17th 2023'
