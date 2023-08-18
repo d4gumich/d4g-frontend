@@ -1,8 +1,9 @@
 <!-- logo and un cluster needs to be in the same div class, and the search-container and the result need to be in the same div class when the user entered their queries -->
 <script>
-    import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
     import ChetahResults from "../../../lib/components/chetah_results.svelte";
+    import SearchLogo from '$lib/assets/icons8-search-100.png';
+    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
 
     let searchQuery = "";
     let aboutChetah = false;
@@ -87,7 +88,7 @@
         <div class="logo-container">
             <img
                 class="logo"
-                src="{base}/src/lib/assets/Updated_LOGO.png"
+                src={ChetahLogo}
                 alt="Chetah Logo"
                 height="115px"
             />
@@ -121,11 +122,12 @@
             {#if searchQuery && searchQuery != ""}
                 <button
                     class="search-button"
+                    style = "background-image: url({SearchLogo});"
                     height="10px"
                     on:click={search(searchQuery)}
                 />
             {:else}
-                <button class="search-button" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
             {/if}
         </div>
 
@@ -345,7 +347,6 @@
         color: white;
         font-size: 16px;
         cursor: pointer;
-        background-image: url("/src/lib/assets/icons8-search-100.png");
         background-size: 65%;
         background-repeat: no-repeat;
         background-position: center;

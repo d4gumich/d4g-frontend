@@ -9,9 +9,7 @@ const config = {
  
     kit: {
         adapter: adapter(),
-		paths: {
-            base: '/d4g-frontend'
-        }
+
     }
 };
  

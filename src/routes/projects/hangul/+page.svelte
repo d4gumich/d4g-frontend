@@ -2,6 +2,8 @@
     import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
     import HangulResult from "../../../lib/components/hangul_result.svelte";
+    import PDFLogo from '$lib/assets/icons8-pdf-90.png';
+    import HangulLogo from '$lib/assets/hangul2 copy 2.png';
 
     let aboutHangul = false;
     let verbose = false;
@@ -65,7 +67,7 @@
 <div class="container">
     <div class="content-container">
         <img
-            src="{base}/src/lib/assets/hangul2 copy 2.png"
+            src={HangulLogo}
             alt="Hangul logo"
             height="150px"
         />
@@ -89,7 +91,7 @@
             on:dragover|preventDefault={handleDragOver}
         >
             <img
-                src="{base}/src/lib/assets/icons8-pdf-90.png"
+                src={PDFLogo}
                 class="pdf-icon"
                 alt="PDF icon"
             />
@@ -129,7 +131,7 @@
             text="About Hangul"
             click={() => (aboutHangul = !aboutHangul)}
         />
-        <Button text="View Research" link="<URL>" />
+        <Button text="View Research" link={base} />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-hangul-text">

@@ -1,14 +1,16 @@
 <script>
     import { base } from '$app/paths';
     import Button from '$lib/components/button.svelte';
+    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
+    import SearchLogo from '$lib/assets/icons8-search-100.png';
 
     let searchQuery = '';
     let aboutCheetah = false;
-    let version = 'Cheetah 2.0';
-    const versions = ['Cheetah 1.0', 'Cheetah 2.0'];
+    let version = 'Chetah 2.0';
+    const versions = ['Chetah 1.0', 'Chetah 2.0'];
     const handleVersionChange = (event) => {
         version = event.target.value;
-        if (version === 'Cheetah 1.0') {
+        if (version === 'Chetah 1.0') {
             window.location.href = '/projects/chetah1.0';
         }
     }
@@ -191,7 +193,7 @@
 
 <div class="container">
     <div class="content-container">
-        <img class="logo" src="{base}/src/lib/assets/Updated_LOGO.png" alt="Cheetah Logo" height="115px" />
+        <img class="logo" src={ChetahLogo} alt="Chetah Logo" height="115px" />
         <div class="text-container">
             <p class="info-text">Search a phrase below and receive a list of UN and NGO report links in order of relevancy.</p>
             <select class="version-select" bind:value={version} on:change={handleVersionChange}>
@@ -204,12 +206,12 @@
     
     <div class="search-container">
       <input class="search-input" type="text" placeholder="Enter Queries" bind:value={searchQuery} />
-      <button class="search-button" height="10px"></button>
+      <button class="search-button" style="background-image: url({SearchLogo});" height="10px"></button>
     </div>
 
     <div class="button-container">
-        <Button text="About Cheetah 2.0" click={() => aboutCheetah = !aboutCheetah} />
-        <Button text="View Research" link="<URL>"  />
+        <Button text="About Chetah 2.0" click={() => aboutCheetah = !aboutCheetah} />
+        <Button text="View Research" link={base}  />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-cheetah-text">
@@ -219,9 +221,12 @@
         {/if}
     </div>
     {#if showModal}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="modal" on:click|self={() => showModal = false}>
         <div class="modal-content">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <span class="modal-close" on:click|stopPropagation={() => showModal = false}>&times;</span>
+            <!-- svelte-ignore a11y-missing-attribute -->
             <iframe src={formUrl} width="100%" height="100%"></iframe>
         </div>
     </div>

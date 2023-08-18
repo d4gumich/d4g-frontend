@@ -1,25 +1,26 @@
 <script>
-    // Import the components from the components folder
-    // import Card from '$lib/components/card.svelte';
+    import { base } from "$app/paths";
     import CurrResearchCard from '$lib/components/current_project_card.svelte';
     import PastResearchCard from '$lib/components/past_project_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
+    import HangulLogo from '$lib/assets/hangul2 copy 2.png';
+    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
   
     // Define some data for the cards
     const current_research = [
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
-        logo: './src/lib/assets/hangul2 copy 2.png',
-        researchLink: 'https',
-        tryLink: 'https'
+        logo: HangulLogo,
+        researchLink: base,
+        tryLink: base
       },
       {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
-        logo: './src/lib/assets/Updated_LOGO.png',
-        researchLink: 'https',
-        tryLink: 'https'
+        logo: ChetahLogo,
+        researchLink: base,
+        tryLink: base
       }
     ];
 
@@ -27,25 +28,25 @@
         // {
         //     name: 'Chetah 1.0',
         //     detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-        //     researchLink: 'https',
+        //     researchLink: base,
         //     type: 'Research'
         // },
         {
             name: 'Think Paper on Digital Identification',
             detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
-            researchLink: 'https',
+            researchLink: base,
             type: 'Research'
         },
         {
             name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
             detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
-            researchLink: 'https',
+            researchLink: base,
             type: 'Research'
         },
         {
             name: 'Topic Extraction from Unstructured NGO Documents',
             detail: 'Insights about the different reports produced by NGOs.',
-            researchLink: 'https',
+            researchLink: base,
             type: 'Research'
         }
     ]

@@ -5,21 +5,23 @@
     import PastProjCard from '$lib/components/past_project_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
     import { base } from '$app/paths';
+    import HangulLogo from '$lib/assets/hangul2 copy 2.png';
+    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
   
     // Define some data for the cards
     const current_project = [
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
-        logo: './src/lib/assets/hangul2 copy 2.png',
-        researchLink: 'https',
+        logo: HangulLogo,
+        researchLink: base,
         tryLink: `${base}/projects/hangul`
       },
       {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
-        logo: './src/lib/assets/Updated_LOGO.png',
-        researchLink: 'https',
+        logo: ChetahLogo,
+        researchLink: base,
         tryLink: `${base}/projects/chetah1.0`
       }
     ];
@@ -34,13 +36,13 @@
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
         detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
-        researchLink: 'https',
+        researchLink: base,
         type: 'Project'
       },
       {
         name: 'Digital Crisis Simulation Exercise (SimEx)',
         detail: 'The digital Crisis Simulation Exercise (SimEx) is the latest iteration of a multi-year training lab designed to simulate disaster response strategies and actions within a realistic crisis setting.',
-        researchLink: 'https',
+        researchLink: base,
         type: 'Project'
       }
 
