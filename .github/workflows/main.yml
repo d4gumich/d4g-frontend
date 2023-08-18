@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/configure-pages@v1
+      - uses: actions/configure-pages@v3
         id: pages
       - uses: actions/setup-node@v3
         with:
@@ -32,7 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./build
 
@@ -43,5 +43,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v1
+      - uses: actions/deploy-pages@v2
         id: deployment
