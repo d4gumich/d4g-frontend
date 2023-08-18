@@ -195,7 +195,8 @@
     <div class="content-container">
         <img class="logo" src={ChetahLogo} alt="Chetah Logo" height="115px" />
         <div class="text-container">
-            <p class="info-text">Search a phrase below and receive a list of UN and NGO report links in order of relevancy.</p>
+            <p class="info-text">Currently Under Construction. Coming Soon!</p>
+            <!-- Search a phrase below and receive a list of UN and NGO report links in order of relevancy. -->
             <select class="version-select" bind:value={version} on:change={handleVersionChange}>
             {#each versions as version}
                 <option value={version}>{version}</option>
@@ -203,11 +204,11 @@
             </select>
         </div>
     </div>
-    
-    <div class="search-container">
+
+    <!-- <div class="search-container">
       <input class="search-input" type="text" placeholder="Enter Queries" bind:value={searchQuery} />
       <button class="search-button" style="background-image: url({SearchLogo});" height="10px"></button>
-    </div>
+    </div> -->
 
     <div class="button-container">
         <Button text="About Chetah 2.0" click={() => aboutCheetah = !aboutCheetah} />

@@ -18,21 +18,21 @@
         tryLink: `${base}/projects/hangul`
       },
       {
-        name: 'Chetah 1.0',
-        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
+        name: 'Chetah 2.0',
+        detail: 'Chetah is a search engine for nonprofits reports published on the web. It summarizes reports with a state of the art deep learning algorithm. It is developed to help NGO program managers and policy makers to design programs and apply for grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that nonprofits are facing.',
         logo: ChetahLogo,
         researchLink: base,
-        tryLink: `${base}/projects/chetah1.0`
+        tryLink: `${base}/projects/chetah2.0`
       }
     ];
 
     const past_project = [
-       // {
-      //   name: 'Chetah 2.0',
-      //   detail: '',
-      //   researchLink: `${base}/projects/chetah2.0`,
-      //   type: 'Project'
-      // },
+       {
+        name: 'Chetah 1.0',
+        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
+        researchLink: `${base}/projects/chetah1.0`,
+        type: 'Project'
+      },
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
         detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',

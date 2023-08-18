@@ -3,7 +3,7 @@
 </script>
 
 <div class="about-container">
-    <!-- Mission Section -->
+    
     <div class="section odd-section">
         <div class="section-title">What is Data4Good?</div>
         <div class="section-content">
@@ -15,7 +15,6 @@
         </div>
     </div>
 
-    <!-- Values Section -->
     <div class="section">
         <div class="section-title">
             What projects are we working on at Data4Good?
@@ -30,7 +29,6 @@
         </div>
     </div>
 
-    <!-- History Section -->
     <div class="section odd-section">
         <div class="section-title">
             How can I provide feedback on Data4Good's website or projects?
@@ -43,22 +41,40 @@
         </div>
     </div>
 
-    <!-- History Section -->
     <div class="section">
+        <div class="section-title">
+            What's the benefit of joining Data4Good team?
+        </div>
+        <div class="section-content">
+            <p>
+                Here are some of the benefits that are being realized and will grow:
+                <ul>
+                    <li>Engages students who desire nonprofit and consulting experience</li>
+                    <li>Builds participatory, hands-on learning</li>
+                    <li>Interdisciplinary team building (web, database, API, data science -- analytics, visualization)</li>
+                    <li>Contributes to student credential building</li>
+                    <li>Contributes to UMSI brand</li>
+                    <li>Will help attract students and potential new funding (as students publish research)</li>
+                    <li>Non-profit IT leaders and program managers gain important decision-making tools</li>
+                    <li>Non-profits gain a potential IT staffing pipeline</li>
+                </ul>
+        </div>
+    </div>
+
+    <div class="section odd-section">
         <div class="section-title">
             How else can I get in touch with Data4Good?
         </div>
         <div class="section-content">
-            <!-- History content goes here -->
             <p>Reach us at: <strong>info@data4good.center</strong>
-            <br/>
-                <address>
-                Data4Good Center<br/>
-                School of Information<br/>
-                4322 North Quad<br/>
-                105 S. State Street<br/>
-                Ann Arbor, MI 48109-1285<br/>
-            </address>
+                <br/>
+                    <address>
+                    Data4Good Center<br/>
+                    School of Information<br/>
+                    4322 North Quad<br/>
+                    105 S. State Street<br/>
+                    Ann Arbor, MI 48109-1285<br/>
+                </address>
         </div>
     </div>
 </div>

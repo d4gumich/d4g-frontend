@@ -26,17 +26,17 @@
 
   const latest_news = [
     {
-      image: '',
-      category: 'Search Engine',
-      title: "UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis.",
-      date: 'July 25th 2023'
-    },
-    {
-      image: '',
-      category: 'Artificial Intelligence',
-      title: "UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis.",
-      date: 'July 25th 2023'
+      image: './src/lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg',
+      category: 'Exposition',
+      title: "UMSI Exposition by Sidra and Prithvi on Hangul",
+      date: 'April 17th 2023'
     }
+    // {
+    //   image: '',
+    //   category: 'API',
+    //   title: "Demo for Relief Web API",
+    //   date: 'July 25th 2023'
+    // }
   ]
 
 </script>

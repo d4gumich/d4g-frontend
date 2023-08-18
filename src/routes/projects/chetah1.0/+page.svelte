@@ -1,5 +1,6 @@
 <!-- logo and un cluster needs to be in the same div class, and the search-container and the result need to be in the same div class when the user entered their queries -->
 <script>
+    import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
     import ChetahResults from "../../../lib/components/chetah_results.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
@@ -79,7 +80,6 @@
         showUNClustersModal = false;
         search(searchQuery);
     }
-
 
 </script>
 

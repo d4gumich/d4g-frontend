@@ -1,4 +1,6 @@
 <script>
+    // Import the components from the components folder
+    // import Card from '$lib/components/card.svelte';
     import { base } from "$app/paths";
     import CurrResearchCard from '$lib/components/current_project_card.svelte';
     import PastResearchCard from '$lib/components/past_project_card.svelte';
@@ -13,28 +15,28 @@
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
         logo: HangulLogo,
         researchLink: base,
-        tryLink: base
+        tryLink: `${base}/projects/hangul`
       },
       {
-        name: 'Chetah 1.0',
-        detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF. It is designed to help NGO program managers and policy makers with better results than Google and Bing.',
+        name: 'Chetah 2.0',
+        detail: 'Chetah is a search engine for nonprofits reports published on the web. It summarizes reports with a state of the art deep learning algorithm. It is developed to help NGO program managers and policy makers to design programs and apply for grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that nonprofits are facing.',
         logo: ChetahLogo,
         researchLink: base,
-        tryLink: base
+        tryLink: `${base}/projects/chetah2.0`
       }
     ];
 
     const past_research = [
-        // {
-        //     name: 'Chetah 1.0',
-        //     detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-        //     researchLink: base,
-        //     type: 'Research'
-        // },
+        {
+            name: 'Chetah 1.0',
+            detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
+            researchLink: base,
+            type: 'Research'
+        },
         {
             name: 'Think Paper on Digital Identification',
             detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
-            researchLink: base,
+            researchLink: 'https',
             type: 'Research'
         },
         {

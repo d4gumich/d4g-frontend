@@ -18,7 +18,7 @@
 
     .card{
         width: auto;
-        max-width: 65%;
+        max-width: 35%;
         flex-direction: column;
         align-items: center;
         justify-content: center; /* Center content vertically */
@@ -27,6 +27,10 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+        background-repeat: no-repeat;
+        background-size: cover;
+        line-height: 1.4285em;
+        background-position: 30% 0;
     }
 
     .content{
@@ -83,6 +87,24 @@
         font-style: normal;
         font-weight: 200;
         line-height: 10px; /* 66.667% */
+    }
+
+    img{
+        background-repeat: no-repeat;
+        background-size: cover;
+        /* margin: 0 !important; */
+        display: block;
+        /* -webkit-text-size-adjust: 100%; */
+        /* min-width: 320px; */
+        line-height: 1.4285em;
+        /* padding-right: 0px;
+        padding-left: 0px; */
+        width: 100%;
+        /* height: 50%; */
+        flex: 1 0 0;
+        align-self: stretch;
+        /* margin-top: 5%; */
+        background-position: 30% 0;
     }
 
   </style>
