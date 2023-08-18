@@ -36,7 +36,7 @@
         {
             name: 'Think Paper on Digital Identification',
             detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
-            researchLink: 'https',
+            researchLink: base,
             type: 'Research'
         },
         {
