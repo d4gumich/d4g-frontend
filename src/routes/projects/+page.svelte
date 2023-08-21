@@ -7,21 +7,21 @@
     import { base } from '$app/paths';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/Updated_LOGO.png';
-  
+
     // Define some data for the cards
     const current_project = [
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
         logo: HangulLogo,
-        researchLink: base,
+        researchLink: 'https://drive.google.com/file/d/1U_wHtC6DtPsfIBXHCeESfQXlDsXe5lHv/view',
         tryLink: `${base}/projects/hangul`
       },
       {
         name: 'Chetah 2.0',
         detail: 'Chetah is a search engine for nonprofits reports published on the web. It summarizes reports with a state of the art deep learning algorithm. It is developed to help NGO program managers and policy makers to design programs and apply for grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that nonprofits are facing.',
         logo: ChetahLogo,
-        researchLink: base,
+        researchLink: 'https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view',
         tryLink: `${base}/projects/chetah2.0`
       }
     ];

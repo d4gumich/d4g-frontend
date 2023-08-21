@@ -15,12 +15,12 @@
   const category = [
     {
       text: 'Projects',
-      link: '/projects',
+      link: `${base}/projects/`,
       icon: ProjectIcon
     },
     {
       text: 'Research',
-      link: '/research',
+      link: `${base}/research/`,
       icon: ResearchIcon
     }
   ];
@@ -32,45 +32,28 @@
       title: "UMSI Exposition by Sidra and Prithvi on Hangul",
       date: 'April 17th 2023'
     }
-    // {
-    //   image: '',
-    //   category: 'API',
-    //   title: "Demo for Relief Web API",
-    //   date: 'July 25th 2023'
-    // }
   ]
 
 </script>
 
 <style>
   .a{
-    /* margin-top: 0px; */
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* align-content: center; */
-    /* gap: 55px; */
     background: var(--background, #F5F5F5);
     padding-bottom: 4%;
   }
 
   .hero {
-    /* height: 10%; */
     background-image: url('$lib/assets/final_2.png');
     background-repeat: no-repeat;
     background-size: cover;
-    /* margin: 0 !important; */
     display: block;
-    /* -webkit-text-size-adjust: 100%; */
-    /* min-width: 320px; */
     line-height: 1.4285em;
-    /* padding-right: 0px;
-    padding-left: 0px; */
     width: 100%;
-    /* height: 50%; */
     flex: 1 0 0;
     align-self: stretch;
-    /* margin-top: 5%; */
     background-position: 30% 0;
   }
 
@@ -106,13 +89,11 @@
     font-family: Open Sans;
     line-height: 1.28571429em;
     margin: 0;
-    font-weight: initial;
+    font-weight: 900;
     padding: 0;
     display: block;
     /* text-align: center; */
-    overflow-x: hidden;
     width: 600px;
-    height: 3em;       /* height is 2x line-height, so two lines will display */
     overflow: hidden;  /* prevents extra lines from being visible */
   }
 
@@ -156,49 +137,6 @@
 
   .news{
     gap: 0%;
-  }
-
-  .vertical-container {
-    /* width: 1127px; */
-    margin: auto
-  }
-
-  .vertical-segment{
-    width: 100%;
-    gap: 50px;
-  }
-
-  .horizontal.divider {
-    /* place the header at the middle of the page */
-    margin-top: 0;
-    margin-bottom: 0;
-    /* make the header span the entire width of the page */
-    width: 100%;
-    /* center the text */
-    text-align: center;
-  }
-
-  .header:first-child {
-    margin-top: 1em;
-  }
-
-  .header{
-    font: 1.28571429rem;
-    padding-top: 2%;
-    border: none;
-    margin: calc(2rem - .14285714em) 0 1rem;
-    padding: 0 0;
-    /* font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif; */
-    font-weight: 700;
-    line-height: 1.28571429em;
-    text-transform: none;
-    color:rgba(0, 0, 0, .87);
-    font-family: 'Roboto', sans-serif;
-  }
-
-  p{
-    font-family: 'Roboto', sans-serif;
-    font-size: 1rem;
   }
 
 </style>

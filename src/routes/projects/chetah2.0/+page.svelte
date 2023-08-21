@@ -11,7 +11,7 @@
     const handleVersionChange = (event) => {
         version = event.target.value;
         if (version === 'Chetah 1.0') {
-            window.location.href = '/projects/chetah1.0';
+            window.location.href = `${base}/projects/chetah1.0`;
         }
     }
 
@@ -127,7 +127,7 @@
 
     .about-cheetah-text {
         width: 50%;
-        text-align: center;
+        text-align: left;
         margin-top: -3%;
         color: #000;
         font-family: Open Sans;
@@ -212,12 +212,13 @@
 
     <div class="button-container">
         <Button text="About Chetah 2.0" click={() => aboutCheetah = !aboutCheetah} />
-        <Button text="View Research" link={base}  />
+        <Button text="View Research" link={'https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view'}  />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-cheetah-text">
         {#if aboutCheetah}
-            <p>Chetah is a search engine for UN and NGOs reports and it summarizes reports with the state of the art deep learning algorithm, BERT. Users can search by applying filters of UN Clusters. This phase 1 product has reports from IFRC, IWA and UNICEF. It retrieves evidence-based program reports and annual reports. The results have been proven better than the Google and Bing for Non-profit sector, with an F1-score of 0.78. It is developed to help NGO program managers and policy makers to design programs and grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that NGO and UN are facing.
+            <p>
+                Chetah is a search engine for nonprofits reports published on the web. It summarizes reports with a state of the art deep learning algorithm. Users can search by using natural language queries. This phase 2 product has 3,000+ reports from 30+ organizations. It retrieves 10+ evidence-based report types, including program reports, situation reports, news reports, annual reports, and others. The results have been proven better than the Google and Bing for  the nonprofit sector, with an F1-score of 0.78. It is developed to help NGO program managers and policy makers to design programs and apply for grant funds. This tool aims to provide better answers for nonprofit work and eventually to help solve the crucial real problems that nonprofits are facing.
             </p>
         {/if}
     </div>

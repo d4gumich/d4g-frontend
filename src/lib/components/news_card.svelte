@@ -18,14 +18,12 @@
 
     .card{
         width: auto;
-        max-width: 35%;
+        max-width: 70%;
         flex-direction: column;
         align-items: center;
         justify-content: center; /* Center content vertically */
         flex-shrink: 0;
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
         gap: 10px;
         background-repeat: no-repeat;
         background-size: cover;
@@ -105,6 +103,10 @@
         align-self: stretch;
         /* margin-top: 5%; */
         background-position: 30% 0;
+        width: 20em;
+        height: 12em;
+        object-fit: cover;
+
     }
 
   </style>

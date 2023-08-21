@@ -131,7 +131,7 @@
             text="About Hangul"
             click={() => (aboutHangul = !aboutHangul)}
         />
-        <Button text="View Research" link={base} />
+        <Button text="View Research" link="https://drive.google.com/file/d/1U_wHtC6DtPsfIBXHCeESfQXlDsXe5lHv/view" />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-hangul-text">
