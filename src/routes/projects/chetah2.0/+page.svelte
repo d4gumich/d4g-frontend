@@ -11,7 +11,7 @@
     const handleVersionChange = (event) => {
         version = event.target.value;
         if (version === 'Chetah 1.0') {
-            window.location.href = `${base}/projects/chetah1.0`;
+            window.location.href = `/projects/chetah1.0`;
         }
     }
 
@@ -212,7 +212,7 @@
 
     <div class="button-container">
         <Button text="About Chetah 2.0" click={() => aboutCheetah = !aboutCheetah} />
-        <Button text="View Research" link={'https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view'}  />
+        <Button text="View Research" link='https://drive.google.com/file/d/13Jij3MG6P_P5OGGMLNIbGdgpCUaDVGce/view'  />
         <Button text="Provide Feedback" click={handleFeedbackClick} />
     </div>
     <div class="about-cheetah-text">
