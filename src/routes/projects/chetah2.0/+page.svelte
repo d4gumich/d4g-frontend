@@ -11,7 +11,7 @@
     const handleVersionChange = (event) => {
         version = event.target.value;
         if (version === 'Chetah 1.0') {
-            window.location.href = `/projects/chetah1.0`;
+            window.location.href = `${base}/projects/chetah1.0`;
         }
     }
 

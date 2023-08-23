@@ -106,8 +106,23 @@
         width: 20em;
         height: 12em;
         object-fit: cover;
-
     }
+
+    @media (max-width: 670px) {
+        img{
+            width: 100%;
+            height: 10em;
+        }
+
+        h2{
+            font-size: 15px;
+        }
+
+        h3{
+            font-size: 12px;
+        }
+    }
+
 
   </style>
 

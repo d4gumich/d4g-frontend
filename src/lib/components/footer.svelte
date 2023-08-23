@@ -67,6 +67,22 @@
       /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the bottom text spans the full width */
     }
+
+    @media (max-width: 670px) {
+      img{
+        height: 50px;
+      }
+
+      .footer-column:nth-child(4) {
+        display:none;
+      }
+
+      .footer{
+        padding: 5%;
+        padding-top: 10%;
+      }
+    }
+
   </style>
   
 

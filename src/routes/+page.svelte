@@ -139,6 +139,22 @@
     gap: 0%;
   }
 
+
+  @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2em;
+
+      }
+
+      .hero h2 {
+        font-size: 1em;
+        width: auto;
+      }
+
+      .section-title{
+        font-size: 25px;
+      }
+  }
 </style>
 
 <div class="a">

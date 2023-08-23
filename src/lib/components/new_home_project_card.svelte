@@ -54,6 +54,22 @@
         text-decoration: none;
     }
 
+    @media (max-width: 600px) {
+        .card{
+            width: 130px;
+            height: 200px;
+        }
+
+        /* Update the styles for the img element inside the .card element */
+        .card img {
+            height: 20%;
+        }
+
+        h1{
+            font-size: 20px;
+        }
+    }
+
 </style>
 
 <a href="{link}" target="_blank">

@@ -31,6 +31,17 @@
         margin: 0;
     }
 
+    @media (max-width: 600px) {
+        .button{
+            padding: 0 15px;
+        }
+
+        .text{
+            font-size: 10px;
+        }
+
+    }
+
 </style>
 
 
