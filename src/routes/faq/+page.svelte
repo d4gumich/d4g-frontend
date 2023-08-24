@@ -106,7 +106,6 @@
     }
 
     .section-title {
-        width: 100%; /* Fixed width for section title */
         margin-left: 15%;
         align-self: flex-start;
         color: #000;
@@ -119,20 +118,37 @@
         text-decoration: underline rgba(227, 184, 120, 1) 2px;
         text-underline-offset: 10px;
     }
+
     a {
         color: #000;
         text-decoration: underline rgba(227, 184, 120, 1) 2px;
         text-underline-offset: 10px;
     }
+
     .section-content {
         color: rgba(0, 0, 0, 0.87);
         font-family: Open Sans;
-        width: 100%;
+        width: 70%;
         font-size: 20px;
         font-style: normal;
         line-height: 30px; /* 150% */
-        padding-left: 30%;
-        max-width: 100%; /* Make sure the content doesn't exceed the screen width */
         white-space: pre-line; /* Allow the text to wrap and break lines as needed */
     }
+
+    @media (max-width: 900px) {
+
+        ul{
+            width: 70%;
+        }
+
+        .section-content{
+            width: 80%;
+            padding-left: 10%;
+        }
+
+        .section-title{
+            width: 70%;
+        }
+    }
+
 </style>

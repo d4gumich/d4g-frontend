@@ -33,6 +33,17 @@
     a {
         color: #000;
     }
+
+    @media (max-width: 850px) {
+        .card {
+            flex-direction: column;
+            align-items: center;
+        }
+        h1{
+            font-size: 1.5em;
+        }
+    }
+
 </style>
 
 <div class="card">

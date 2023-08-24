@@ -37,7 +37,9 @@
     font-weight: 700;
     line-height: normal;
     padding-top: 1.5%;
-    text-decoration: underline rgba(227, 184, 120, 1) 4px;
+    text-decoration: underline;
+    text-decoration-color: rgba(227, 184, 120, 1);
+    text-decoration-thickness: 4px;
     text-underline-offset: 15px;
   }
 
