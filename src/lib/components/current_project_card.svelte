@@ -23,7 +23,7 @@
     .card{
         display: flex;
         width: auto;
-        max-width: 540px;
+        max-width: 400px;
         height: 800px;
         padding: 0px 86px;
         flex-direction: column;
@@ -65,14 +65,46 @@
 
 
     h3{
-        width: 451px;
+        /* width: 451px; */
         color: rgba(0, 0, 0, 0.87);
         font-family: Open Sans;
         font-size: 20px;
         font-style: normal;
         font-weight: 400;
         line-height: 25px; /* 125% */
+        width: auto;
     }
+
+    @media (max-width: 600px) {
+
+        .card{
+            max-width: 50%;
+            height: auto;
+            padding: 0px 60px;
+        }
+
+        .content{
+            width: 120%;
+        }
+
+        img{
+            height: 10em;
+            padding-top: 10%;
+        }
+
+        h1{
+            font-size: 25px;
+        }
+
+        h3{
+            font-size: 10px;
+        }
+
+        .buttons{
+            padding-bottom: 5%;
+        }
+    }
+
 
   </style>
 

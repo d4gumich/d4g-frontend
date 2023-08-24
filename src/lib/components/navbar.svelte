@@ -119,7 +119,7 @@
 }
 
   /* Use a media query to change the styles for smaller screens */
-  @media (max-width: 670px) {
+  @media (max-width: 780px) {
     .nav {
       padding: 15px;
       justify-content: space-between;

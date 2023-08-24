@@ -15,12 +15,12 @@
   const category = [
     {
       text: 'Projects',
-      link: `${base}/projects/`,
+      link: `${base}/projects`,
       icon: ProjectIcon
     },
     {
       text: 'Research',
-      link: `${base}/research/`,
+      link: `${base}/research`,
       icon: ResearchIcon
     }
   ];
@@ -143,18 +143,29 @@
   @media (max-width: 600px) {
       .hero h1 {
         font-size: 2em;
-
+        width: 90%;
       }
 
       .hero h2 {
         font-size: 1em;
-        width: auto;
+        width: 90%;
       }
 
       .section-title{
         font-size: 25px;
       }
+
+      .hero {
+        background-position: 20% 0;
+      }
   }
+
+  @media (max-width: 670px) {
+    .hero {
+        background-position: 20% 0;
+      }
+  }
+
 </style>
 
 <div class="a">

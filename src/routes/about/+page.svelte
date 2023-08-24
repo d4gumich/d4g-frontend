@@ -95,6 +95,35 @@
     padding: 20px 0 20px 0;
     width: 100%;
   }
+
+  @media (max-width: 600px) {
+    .section-title {
+      width: 20%;
+      font-size: 20px;
+      padding-top: 4%;
+      margin-left: 10%;
+    }
+
+    .section-content {
+      font-size: 10px;
+      padding-right: 5%;
+    }
+  }
+
+  @media (min-width: 601px) and (max-width: 670px) {
+    .section-title {
+      width: 15%;
+      font-size: 30px;
+      padding-top: 3%;
+    }
+
+    .section-content {
+      font-size: 20px;
+      padding-right: 7%;
+    }
+  }
+
+
 </style>
 
 

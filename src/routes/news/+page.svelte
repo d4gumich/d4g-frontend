@@ -89,6 +89,13 @@
         font-family: 'Roboto', sans-serif;
         font-size: 1rem;
     }
+
+    @media (max-width: 600px) {
+        .a{
+            gap: 20px;
+        }
+    }
+
 </style>
 
 <div class="a">

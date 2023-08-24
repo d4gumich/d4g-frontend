@@ -116,6 +116,7 @@
 
         h2{
             font-size: 15px;
+            line-height: 23px;
         }
 
         h3{

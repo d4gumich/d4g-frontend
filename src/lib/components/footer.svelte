@@ -108,7 +108,7 @@
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Projects</div>
-      <a href="{base}/projects/chetah1.0">Chetah 1.0</a>
+      <a href="{base}/projects/chetah1.0">Chetah</a>
       <a href="{base}/projects/hangul">Hangul</a>
     </div>
   

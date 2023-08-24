@@ -26,4 +26,11 @@
         justify-content: center;
         padding: 20px;
     }
+
+    @media (max-width: 600px) {
+        h1{
+            font-size: 30px;
+        }
+    }
+
 </style>
