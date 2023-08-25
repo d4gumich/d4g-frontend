@@ -63,6 +63,10 @@
     }
 </script>
 
+<svelte:head>
+  <title>Hangul</title>
+</svelte:head>
+
 {#if hidden}
 <div class="container">
     <div class="content-container">

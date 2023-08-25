@@ -28,10 +28,14 @@
     .text-container {
         width: 70%;
         margin: 2%;
-        font-family: Lato;
+        font-family: Work Sans;
     }
     a {
         color: #000;
+    }
+
+    h4{
+        font-weight: 400;
     }
 
     @media (max-width: 850px) {
@@ -41,6 +45,9 @@
         }
         h1{
             font-size: 1.5em;
+        }
+        img{
+            padding-top: 5%;
         }
     }
 

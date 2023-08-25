@@ -141,6 +141,10 @@
     ];
 </script>
 
+<svelte:head>
+  <title>Team</title>
+</svelte:head>
+
 <div class="cards-container">
     <div class="cards">
         <SectionTitle title="Executive Team" />

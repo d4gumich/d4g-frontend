@@ -36,24 +36,28 @@
         {
             name: 'Think Paper on Digital Identification',
             detail: 'Digital identification and biometric data has become increasingly popular in the private sector and have slowly been introduced and piloted in governmental and non-governmental organizations in the emerging world.',
-            researchLink: base,
+            researchLink: 'https://drive.google.com/file/d/17sz0ih_1RQ91IcyMTRn3Tmb4LUgw65wt/view',
             type: 'Research'
         },
         {
             name: 'Refugee Demographic & Connectivity Trends in Greece and Serbia',
             detail: "What can we learn about refugees' access to the internet and mobile device ownership from a high level perspective?",
-            researchLink: base,
+            researchLink: 'https://drive.google.com/file/d/1k5KTfw5x5wjicFecdyaE0qWkXwsbbNgY/view',
             type: 'Research'
         },
         {
             name: 'Topic Extraction from Unstructured NGO Documents',
             detail: 'Insights about the different reports produced by NGOs.',
-            researchLink: base,
+            researchLink: 'https://drive.google.com/file/d/1e3EYJDc6IuXzD7b16Q4lkxmTo0zcW-dW/view',
             type: 'Research'
         }
     ]
 
   </script>
+
+<svelte:head>
+  <title>Research</title>
+</svelte:head>
 
   <style>
     .a{

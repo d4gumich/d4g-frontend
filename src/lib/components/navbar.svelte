@@ -8,10 +8,15 @@
     console.log('showMenu:', showMenu);
   }
 
+  function resetMenu() {
+    showMenu = false;
+  }
+
 </script>
 
 <style>
-    * {
+
+* {
   box-sizing: border-box;
 }
 
@@ -154,7 +159,7 @@
        transform-origin:center center; 
        transform : rotate(-45deg);
        position:relative; 
-       top :-8px
+       top :-17px
      }
   }
 </style>
@@ -163,7 +168,7 @@
 <div class="nav" class:show-menu={showMenu}>
   <div class="nav-header">
      <div class="nav-title">
-        <a href='{base}/'><img class='logo' alt='Data4Good logo' src={logo} /></a>
+        <a href='{base}/' on:click={resetMenu}><img class='logo' alt='Data4Good logo' src={logo} /></a>
      </div>
   </div>
 
@@ -185,11 +190,12 @@
 
   <!-- Add the mobile navigation menu -->
   <nav class="nav-links-mobile">
-     <a href="{base}/about">About</a>
-     <a href="{base}/news">News</a>
-     <a href="{base}/projects">Projects</a>
-     <a href="{base}/research">Research</a>
-     <a href="{base}/team">Team</a>
-     <a href="{base}/faq">FAQ</a>
-  </nav>
+    <a href="{base}/about" on:click={resetMenu}>About</a>
+    <a href="{base}/news" on:click={resetMenu}>News</a>
+    <a href="{base}/projects" on:click={resetMenu}>Projects</a>
+    <a href="{base}/research" on:click={resetMenu}>Research</a>
+    <a href="{base}/team" on:click={resetMenu}>Team</a>
+    <a href="{base}/faq" on:click={resetMenu}>FAQ</a>
+ </nav>
+
 </div>

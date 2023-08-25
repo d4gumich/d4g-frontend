@@ -36,6 +36,10 @@
 
 </script>
 
+<svelte:head>
+  <title>D4G: Home</title>
+</svelte:head>
+
 <style>
   .a{
     display: flex;

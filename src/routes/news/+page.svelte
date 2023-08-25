@@ -15,14 +15,18 @@
             date: 'April 17th 2023'
         }
         // {
-        //     image: '',
+        //     image: Poster,
         //     category: 'Artificial Intelligence',
-        //     title: "UMSI Data4Good center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis.",
+        //     title: "UMSI Exposition by Sidra and Prithvi on Hangul",
         //     date: 'July 25th 2023'
         // }
     ]
   
 </script>
+
+<svelte:head>
+  <title>News</title>
+</svelte:head>
   
 <style>
     .a{

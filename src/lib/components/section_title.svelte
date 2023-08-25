@@ -25,6 +25,7 @@
         display: flex;
         justify-content: center;
         padding: 20px;
+        padding-bottom: 10px;
     }
 
     @media (max-width: 600px) {

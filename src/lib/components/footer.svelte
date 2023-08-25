@@ -118,7 +118,7 @@
       <p>
         School of Information<br/>
         University of Michigan<br/>
-        4322 North Quad, 105 S State St.<br/>
+        105 S. State Street<br/>
         Ann Arbor, MI 48109-1285<br/>
         info@data4good.center
       </p>

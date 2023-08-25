@@ -2,6 +2,10 @@
     import { base } from "$app/paths";
 </script>
 
+<svelte:head>
+  <title>FAQ</title>
+</svelte:head>
+
 <div class="about-container">
     
     <div class="section odd-section">
@@ -69,9 +73,8 @@
             <p>Reach us at: <strong>info@data4good.center</strong>
                 <br/>
                     <address>
-                    Data4Good Center<br/>
                     School of Information<br/>
-                    4322 North Quad<br/>
+                    University of Michigan<br/>
                     105 S. State Street<br/>
                     Ann Arbor, MI 48109-1285<br/>
                 </address>

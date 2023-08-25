@@ -23,6 +23,10 @@
     }
 </script>
 
+<svelte:head>
+  <title>Chetah 2.0</title>
+</svelte:head>
+
 <style>
     .container {
         margin: auto;

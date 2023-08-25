@@ -83,6 +83,10 @@
 
 </script>
 
+<svelte:head>
+  <title>Chetah 1.0</title>
+</svelte:head>
+
 <div class="container">
     <div class="content-container {results ? 'flex-row' : ''}">
         <div class="logo-container">

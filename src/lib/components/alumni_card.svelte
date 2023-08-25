@@ -20,7 +20,7 @@
     .text-container {
         width: 100%;
         margin: 2%;
-        font-family: Lato;
+        font-family: Work Sans;
         font-size: 10 px;
         display: flex;
         flex-direction: column;

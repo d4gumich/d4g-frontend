@@ -49,6 +49,10 @@
     ]
   
   </script>
+
+<svelte:head>
+  <title>Projects</title>
+</svelte:head>
   
   <style>
     .a{

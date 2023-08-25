@@ -1,3 +1,7 @@
+<svelte:head>
+  <title>About</title>
+</svelte:head>
+
 <style>
   /* ... Add your global styles here ... */
 
@@ -124,8 +128,6 @@
       padding-right: 7%;
     }
   }
-
-
 </style>
 
 
