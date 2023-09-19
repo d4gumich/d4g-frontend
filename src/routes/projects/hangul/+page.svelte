@@ -49,7 +49,7 @@
         form.append("file", file);
         form.append("kw_num", kw_num);
         const response = await fetch(
-            "http://127.0.0.1:8000/api/v1/products/hangul",
+            "https://d4gumsi.pythonanywhere.com/api/v1/products/hangul",
             {
                 method: "POST",
                 body: form,

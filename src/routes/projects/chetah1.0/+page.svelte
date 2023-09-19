@@ -28,7 +28,7 @@
     }
 
     async function doFetch(searchQuery) {
-        const url = "http://127.0.0.1:8000/api/v1/products/chetah";
+        const url = "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah";
         const data = { query: searchQuery };
         const response = await fetch(url, {
             method: "POST",
