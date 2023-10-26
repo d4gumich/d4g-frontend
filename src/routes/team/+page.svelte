@@ -16,14 +16,6 @@
 
     const dataTeam = [
         {
-            name: "Sidra Effendi",
-            position: "Consultant and Data Scientist",
-            description:
-                "Sidra is a Master's student at the University of Michigan School of Information, specializing in Data Science. She has an undergraduate degree in Computer Engineering. She has previously worked as an Edge Hacker for Zenatix Solutions and also co-founded a company called Pixli, where she worked on Software Development, UX/UI and Marketing.",
-            image: "https://avatars.githubusercontent.com/u/5307694?v=4",
-            linkedin: "https://www.linkedin.com/in/sidraeffendi/",
-        },
-        {
             name: "Hina Joshua",
             position: "Data Scientist",
             description: "Hina is a master's student at the University of Michigan School of Information, Master of Applied Data Science Program. She has a Master of Public Health degree from Michigan State University and has previously worked in the public health domain in government and corporate settings where she analyzed health data including state disease surveillance system data and medical insurance claims data for ad hoc and routine report compilation. Hina is interested in the application of NLP in the NGO domain to improve decision-making in development and relief programs.",
@@ -52,12 +44,19 @@
             name: "Feng-Yu (Leo) Yeh",
             position: "Web Developer and UX Design",
             description: "Leo is currently a Master's student in the University of Michigan School of information specializing in User-Centered Agile Development. He has an undergraduate degree in Molecular Biology from University of Washington where he worked as a Research Assistant in aging lab. He also worked in a startup as a Assistant Project Manager.",
-            image: "https://media.licdn.com/dms/image/C5603AQEGEyFo3e21jQ/profile-displayphoto-shrink_200_200/0/1517068890724?e=1694044800&v=beta&t=n_FZHmTk_E9k_j3oFZLjYOzU7WF_33PuozZ5ZoBdlho",
+            image: "https://media.licdn.com/dms/image/C5603AQEGEyFo3e21jQ/profile-displayphoto-shrink_800_800/0/1517068890724?e=2147483647&v=beta&t=nchK4BJ_By58Gr9pARpOz4guLpj_ApVcodnL609vqfs",
             linkedin: "https://www.linkedin.com/in/leoyeh/",
         },
     ];
 
     const alumni = [
+        {
+            name: "Sidra Effendi",
+            position: "Consultant and Data Scientist",
+            startYear: 2021,
+            endYear: 2022,
+            linkedin: "https://www.linkedin.com/in/sidraeffendi/",
+        },
         {
             name: "Kensuke Suzuki",
             position: "Data Consultant",
@@ -105,7 +104,7 @@
         },
         {
             name: "Hojoon Kim",
-            position: "Project Manager and  Data Scientist",
+            position: "Project Manager and Data Scientist",
             startYear: 2020,
             endYear: 2021,
             linkedin: "https://www.linkedin.com/in/hojoon-kim-88ba17aa/"

@@ -13,6 +13,8 @@
     let result;
     let dropText = "Drag & choose single PDF file here";
     let showAnalyzeButton = false;
+    let analyzing = false;
+    let showResults = false; // Track whether to show results
 
     function handleFileSelect(event) {
         event.preventDefault();
@@ -44,6 +46,7 @@
 
     async function handleAnalyzeClick() {
         // Replace this URL with the URL of your analysis page
+        analyzing = true;
         const time = Date.now();
         const form = new FormData();
         form.append("file", file);
@@ -60,14 +63,22 @@
         result.verbose = verbose;
         result.hangul_time = (Date.now() - time) / 1000;
         hidden = false
+        analyzing = false;
+        showResults = true;
     }
+
+    function goBack() {
+        showResults = false; // Hide results and go back
+        hidden = true; // Show the main page
+    }
+
 </script>
 
 <svelte:head>
   <title>Hangul</title>
 </svelte:head>
 
-{#if hidden}
+{#if !showResults && hidden}
 <div class="container">
     <div class="content-container">
         <img
@@ -89,27 +100,36 @@
         </div>
     </div>
     <div>
-        <div
-            class="rectangle"
-            on:drop|preventDefault={handleFileSelect}
-            on:dragover|preventDefault={handleDragOver}
-        >
-            <img
-                src={PDFLogo}
-                class="pdf-icon"
-                alt="PDF icon"
-            />
-            <p class="drop-text">{dropText}</p>
-            <input
-                type="file"
-                accept="application/pdf"
-                id="file-input"
-                on:change={handleFileSelect}
-            />
-            {#if showAnalyzeButton}
-                <Button text="Analyze PDF" click={handleAnalyzeClick} style="margin-top: 10px;" />
-            {/if}
-        </div>
+        {#if analyzing}
+            <!-- Show loading icon when analyzing is true -->
+            <div class="loading-icon">
+                <div class="spinner"></div>
+                <p>Analyzing...</p>
+            </div>
+        {:else}
+            <div
+                class="rectangle"
+                on:drop|preventDefault={handleFileSelect}
+                on:dragover|preventDefault={handleDragOver}
+            >
+                <img
+                    src={PDFLogo}
+                    class="pdf-icon"
+                    alt="PDF icon"
+                />
+                <p class="drop-text">{dropText}</p>
+                <input
+                    type="file"
+                    accept="application/pdf"
+                    id="file-input"
+                    on:change={handleFileSelect}
+                />
+                {#if showAnalyzeButton}
+                    <Button text="Analyze PDF" click={handleAnalyzeClick} style="margin-top: 10px;" />
+                {/if}
+            </div>
+        {/if}
+
         <div class="filter">
             <!-- Verbose checkbox -->
             <label for="verbose">Verbose:</label>
@@ -182,13 +202,14 @@
 </div>
 {/if}
 
-{#if !hidden}
-    {#if result}
+
+{#if showResults}
+    <!-- Show results when result is available -->
     <div class="container">
-        <HangulResult {...result} />
-        <Button text='Go back' click={()=>{hidden=true}}/>
+    <HangulResult {...result} />
+    <!-- <Button text='Go back' click={goBack}/> -->
+    <Button text='Go back' click={goBack}/>
     </div>
-    {/if}
 {/if}
 
 <style>
@@ -320,4 +341,27 @@
         right: 10px;
         cursor: pointer;
     }
+
+    /* loading icon */
+    .loading-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+  .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+    }
+
+  @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+  }
 </style>
