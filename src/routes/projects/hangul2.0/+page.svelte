@@ -8,7 +8,7 @@
     let aboutHangul = false;
     let verbose = false;
     let hidden = true;
-    let version = "Hangul 1.0";
+    let version = "Hangul 2.0";
     let file;
     let kw_num;
     let result;
@@ -17,11 +17,11 @@
     let analyzing = false;
     let showResults = false; // Track whether to show results
     const versions = ["Hangul 1.0", "Hangul 2.0"];
-    
+
     const handleVersionChange = (event) => {
         version = event.target.value;
-        if (version === "Hangul 2.0") {
-            window.location.href = `${base}/projects/hangul2.0`;
+        if (version === "Hangul 1.0") {
+            window.location.href = `${base}/projects/hangul`;
         }
     };
 
@@ -84,7 +84,7 @@
 </script>
 
 <svelte:head>
-  <title>Hangul 1.0</title>
+  <title>Hangul 2.0</title>
 </svelte:head>
 
 {#if !showResults && hidden}
@@ -97,14 +97,15 @@
         />
         <div class="text-container">
             <div class="text">
-                <h1>Analyze a PDF to find relevant meta and content details</h1>
+                <h1>Currently Under Development. Check Back soon!</h1>
+                <!-- <h1>Analyze a PDF to find relevant meta and content details</h1>
                 <p class="text">
-                    Welcome to Hangul 1.0.
+                    This product is currently in its beta release (v2.0).
                 </p>
                 <p class="text">
                     For best performance, please test with a PDF less than 25
                     pages
-                </p>
+                </p> -->
             </div>
             <select
                 class="version-select"
@@ -118,8 +119,7 @@
         </div>
     </div>
     <div>
-        {#if analyzing}
-            <!-- Show loading icon when analyzing is true -->
+        <!-- {#if analyzing}
             <div class="loading-icon">
                 <div class="spinner"></div>
                 <p>Analyzing...</p>
@@ -149,7 +149,6 @@
         {/if}
 
         <div class="filter">
-            <!-- Verbose checkbox -->
             <label for="verbose">Verbose:</label>
             <input
                 type="checkbox"
@@ -158,14 +157,13 @@
                 bind:checked={verbose}
             />
 
-            <!-- Keyphrase selection -->
             <label for="keyphrases">Number of keyphrases:</label>
             <select bind:value={kw_num} name="keyphrases" id="keyphrases">
                 <option value="5">5</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
             </select>
-        </div>
+        </div> -->
     </div>
 
     <div class="button-container">
@@ -298,23 +296,6 @@
         line-height: 30.857px; /* 154.285% */
     }
 
-    .version-select {
-        margin-top: 5px;
-        width: 200px;
-        height: 35px;
-        color: #000;
-        border-radius: 10px;
-        padding-left: 1%;
-        font-family: Open Sans;
-
-        /* Body 2 */
-        font-family: Roboto;
-        font-size: 17px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 24px; /* 120% */
-    }
-
     #file-input {
         width: 30%;
     }
@@ -338,6 +319,23 @@
         font-style: normal;
         font-weight: 600;
         line-height: 30px; /* 150% */
+    }
+
+    .version-select {
+        margin-top: 5px;
+        width: 200px;
+        height: 35px;
+        color: #000;
+        border-radius: 10px;
+        padding-left: 1%;
+        font-family: Open Sans;
+
+        /* Body 2 */
+        font-family: Roboto;
+        font-size: 17px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 24px; /* 120% */
     }
 
     .button-container {

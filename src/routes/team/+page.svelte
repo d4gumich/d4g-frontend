@@ -16,6 +16,14 @@
 
     const dataTeam = [
         {
+            name: "Sidra Effendi",
+            position: "Consultant and Data Scientist",
+            description:
+                "Sidra is a Master's student at the University of Michigan School of Information, specializing in Data Science. She has an undergraduate degree in Computer Engineering. She has previously worked as an Edge Hacker for Zenatix Solutions and also co-founded a company called Pixli, where she worked on Software Development, UX/UI and Marketing.",
+            image: "https://avatars.githubusercontent.com/u/5307694?v=4",
+            linkedin: "https://www.linkedin.com/in/sidraeffendi/",
+        },
+        {
             name: "Hina Joshua",
             position: "Data Scientist",
             description: "Hina is a master's student at the University of Michigan School of Information, Master of Applied Data Science Program. She has a Master of Public Health degree from Michigan State University and has previously worked in the public health domain in government and corporate settings where she analyzed health data including state disease surveillance system data and medical insurance claims data for ad hoc and routine report compilation. Hina is interested in the application of NLP in the NGO domain to improve decision-making in development and relief programs.",
@@ -50,13 +58,13 @@
     ];
 
     const alumni = [
-        {
-            name: "Sidra Effendi",
-            position: "Consultant and Data Scientist",
-            startYear: 2021,
-            endYear: 2022,
-            linkedin: "https://www.linkedin.com/in/sidraeffendi/",
-        },
+        // {
+        //     name: "Sidra Effendi",
+        //     position: "Consultant and Data Scientist",
+        //     startYear: 2021,
+        //     endYear: 2022,
+        //     linkedin: "https://www.linkedin.com/in/sidraeffendi/",
+        // },
         {
             name: "Kensuke Suzuki",
             position: "Data Consultant",

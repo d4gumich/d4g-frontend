@@ -465,6 +465,7 @@
         padding: 20px;
         border-radius: 10px;
         width: auto;
+        height: auto;
     }
 
     .modal-header {
