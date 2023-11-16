@@ -121,7 +121,7 @@
         <div id="meta-content">
             <h3 class="heading"><u>VERBOSE OUTPUT </u></h3>
             <pre class="prettyprint">
-              {JSON.stringify({metadata, document_language, document_summary, document_title,content, report_type, locations, disasters, full_content, keywords}, null, 2)}
+              {JSON.stringify({metadata, document_language, document_summary,document_theme, document_title,content, report_type, locations, disasters, full_content, keywords}, null, 2)}
             </pre>
         </div>
     </div>
