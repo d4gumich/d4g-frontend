@@ -14,7 +14,10 @@
 <div class="modal-overlay">
   <div class="modal">
     <p class="text-prompt">
-      The file is <b>{pages} pages</b> long. Do you want to proceed?
+      The file is <b>{pages} page{pages > 1 ? 's' : ''}</b> long and may take some time to analyze.
+    </p>
+    <p class="text-prompt">
+      Do you want to proceed?
     </p>
     <div class="button-section">
       <button class="small-button" on:click={() => handleConfirmation(true)}
@@ -60,15 +63,19 @@
     background: #1b3350;
     color: #faefef;
     margin: 0 0.1rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 
   .small-button:hover {
     background: #30598b;
   }
 
+  .button-section {
+    margin-top: 1.2rem;
+  }
+
   .text-prompt {
-    font-size: 0.9rem;
-    margin-bottom: 1.25rem;
+    font-size: 1rem;
+    margin: 0.1rem;
   }
 </style>
