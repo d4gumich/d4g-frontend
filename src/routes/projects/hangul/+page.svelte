@@ -1,86 +1,196 @@
 <script>
+    import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+    import { onMount } from 'svelte';
+
     import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
     import HangulResult from "../../../lib/components/hangul_result.svelte";
     import PDFLogo from '$lib/assets/icons8-pdf-90.png';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
+    import LoadingBar from '../../../lib/components/loading_bar.svelte';
+    import ConfirmationModal from '../../../lib/components/confirmation_modal.svelte';
+    import ErrorModal from '../../../lib/components/error_modal.svelte';  
 
+    // Specify the URL to the worker script
+    GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+
+    const defaultDropText = "Drag & choose single PDF file here";
+    const versions = ["Hangul 1.0", "Hangul 2.0"];
+    const formUrl = "https://forms.gle/n51U4g2K9cafpZUu5";
+
+    let showPopUp = false;
+    let confirmResult;
+    let showModal = false;
+    let loadingProgress = 0;
+    let numberOfPages = 0;
+    let numberOfPagesLatched = 0;
     let aboutHangul = false;
-    let verbose = false;
+    let verbose = true;
     let hidden = true;
     let version = "Hangul 1.0";
     let file;
     let kw_num;
     let result;
-    let dropText = "Drag & choose single PDF file here";
+    let dropText = defaultDropText;
+    let showError = false;
     let showAnalyzeButton = false;
     let analyzing = false;
-    let showResults = false; // Track whether to show results
-    const versions = ["Hangul 1.0", "Hangul 2.0"];
+    let showResults = false;
+
+    const updateShowError = (value) => {
+        showError = value;
+        dropText = defaultDropText;
+    }
+
+    async function getNumberOfPages(pdfFile) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = async function(event) {
+          const loadingTask = getDocument(new Uint8Array(event.target.result));
+          const pdfDocument = await loadingTask.promise;
+          resolve(pdfDocument.numPages);
+        };
+
+        reader.onerror = function(event) {
+          reject(event.target.error);
+        };
+
+        reader.readAsArrayBuffer(pdfFile);
+      });
+    }
+
+    const updatePageCount = (value) => {
+        numberOfPagesLatched = value;
+        console.log("Latched Number of Pages :", numberOfPagesLatched);
+    }
+
+    // Simulate asynchronous tasks
+    const simulateLoading = () => {
+      const interval = setInterval(() => {
+        console.log("mounting is at", loadingProgress);
+        loadingProgress += 10;
+        if ((loadingProgress > 100) || !analyzing) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+
+    $: {
+      if (analyzing) {
+        onMount(simulateLoading());
+      }
+    };
+
+    $: console.log("progress bar is ", loadingProgress);
+
+    async function handleButtonClick() {
+      showPopUp = true;
+      confirmResult = await new Promise((resolve) => {
+        const modalInstance = new ConfirmationModal({
+          target: document.body,
+          props: {
+            pages: numberOfPagesLatched
+          }
+        });
+        modalInstance.$on('confirm', (event) => {
+          resolve(event.detail);
+          showPopUp = false;
+          modalInstance.$destroy(); // Destroy the modal instance when closing
+        });
+      });
+      return confirmResult;
+    }
     
     const handleVersionChange = (event) => {
+        event.preventDefault()
         version = event.target.value;
         if (version === "Hangul 2.0") {
             window.location.href = `${base}/projects/hangul2.0`;
         }
     };
 
-    function handleFileSelect(event) {
+    async function handleFileSelect(event) {
         event.preventDefault();
+
+        dropText = defaultDropText;
+
         if (event.dataTransfer) {
             file = event.dataTransfer.files[0];
         } else {
             file = event.target.files[0];
-            showAnalyzeButton = true;
         }
-        dropText = file.name;
+
+        if (file) {
+          if (file.type === 'application/pdf') {
+              showAnalyzeButton = true;
+              dropText = file.name;
+              
+              try {
+                numberOfPages = await getNumberOfPages(file);
+                updatePageCount(numberOfPages)
+                console.log('Number of pages:', numberOfPages);
+              } catch (error) {
+                console.error('Error loading PDF:', error);
+              }
+          } else {
+              console.log("Error: file is NOT a PDF");
+              dropText = "Please submit a PDF";
+              showError = true;
+          }
+        }
     }
 
     function handleDragOver(event) {
         event.preventDefault();
     }
 
-    let showModal = false;
-    let formUrl = "https://forms.gle/n51U4g2K9cafpZUu5";
-
-    function handleFeedbackClick() {
+    const handleFeedbackClick = () => {
         showModal = true;
     }
 
-    function handleModalKeydown(event) {
+    const handleModalKeydown = (event) => {
         if (event.key === "Escape") {
             showModal = false;
         }
     }
 
     async function handleAnalyzeClick() {
-        // Replace this URL with the URL of your analysis page
-        analyzing = true;
-        const time = Date.now();
-        const form = new FormData();
-        form.append("file", file);
-        form.append("kw_num", kw_num);
-        const response = await fetch(
-            "https://d4gumsi.pythonanywhere.com/api/v1/products/hangul",
-            {
-                method: "POST",
-                body: form,
-                cors: "cors",
-            }
-        );
-        result = await response.json();
-        result.verbose = verbose;
-        result.hangul_time = (Date.now() - time) / 1000;
-        hidden = false
-        analyzing = false;
-        showResults = true;
+        let userProceedSelection;
+        userProceedSelection = await handleButtonClick();
+        
+        if (userProceedSelection) {
+          analyzing = true;
+          const time = Date.now();
+          const form = new FormData();
+          form.append("file", file);
+          form.append("kw_num", kw_num);
+          const response = await fetch(
+              "https://d4gumsi.pythonanywhere.com/api/v1/products/hangul",
+              {
+                  method: "POST",
+                  body: form,
+                  cors: "cors",
+              }
+          );
+          result = await response.json();
+          console.log(result)
+          result.verbose = verbose;
+          result.hangul_time = (Date.now() - time) / 1000;
+          hidden = false
+          analyzing = false;
+          showResults = true;
+        } else {
+          goBack();
+        }
     }
 
-    function goBack() {
-        showResults = false; // Hide results and go back
-        hidden = true; // Show the main page
+    const goBack = () => {
+        showResults = false;
+        hidden = true;
+        dropText = defaultDropText;
+        showAnalyzeButton = false;
     }
-
 </script>
 
 <svelte:head>
@@ -118,11 +228,17 @@
         </div>
     </div>
     <div>
+        {#if showPopUp}
+          <ConfirmationModal pages={numberOfPagesLatched}/>
+        {/if}
         {#if analyzing}
             <!-- Show loading icon when analyzing is true -->
             <div class="loading-icon">
                 <div class="spinner"></div>
                 <p>Analyzing...</p>
+                <!-- <p>{2 * loadingProgress} seconds remaing</p> -->
+                <!-- Display the LoadingBar component and pass the loadingProgress as a prop -->
+                <!-- <LoadingBar progress={loadingProgress} /> -->
             </div>
         {:else}
             <div
@@ -145,18 +261,21 @@
                 {#if showAnalyzeButton}
                     <Button text="Analyze PDF" click={handleAnalyzeClick} style="margin-top: 10px;" />
                 {/if}
+                {#if showError}
+                    <ErrorModal updateShowErrorFromParent={updateShowError}/>
+                {/if}
             </div>
         {/if}
 
         <div class="filter">
             <!-- Verbose checkbox -->
-            <label for="verbose">Verbose:</label>
+            <!-- <label for="verbose">Verbose:</label>
             <input
                 type="checkbox"
                 id="verbose"
                 name="verbose"
                 bind:checked={verbose}
-            />
+            /> -->
 
             <!-- Keyphrase selection -->
             <label for="keyphrases">Number of keyphrases:</label>
@@ -225,7 +344,6 @@
     <!-- Show results when result is available -->
     <div class="container">
     <HangulResult {...result} />
-    <!-- <Button text='Go back' click={goBack}/> -->
     <Button text='Go back' click={goBack}/>
     </div>
 {/if}
@@ -306,13 +424,7 @@
         border-radius: 10px;
         padding-left: 1%;
         font-family: Open Sans;
-
-        /* Body 2 */
-        font-family: Roboto;
-        font-size: 17px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 24px; /* 120% */
+        font-size: 14px;
     }
 
     #file-input {
