@@ -30,19 +30,19 @@
        {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
-        researchLink: 'https://prithvidasgupta.github.io/d4g-reimagined/projects/chetah', //`${base}/projects/chetah1.0`,
+        researchLink: `${base}/projects/chetah1.0`,
         type: 'Project'
       },
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
         detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
-        researchLink: 'https://prithvidasgupta.github.io/d4g-reimagined/projects/cio4good',
+        researchLink: base,
         type: 'Project'
       },
       {
         name: 'Digital Crisis Simulation Exercise (SimEx)',
         detail: 'The digital Crisis Simulation Exercise (SimEx) is the latest iteration of a multi-year training lab designed to simulate disaster response strategies and actions within a realistic crisis setting.',
-        researchLink: 'https://prithvidasgupta.github.io/d4g-reimagined/projects/simex',
+        researchLink: base,
         type: 'Project'
       }
 

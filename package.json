@@ -24,7 +24,6 @@
 	"type": "module",
 	"dependencies": {
 		"@sveltejs/adapter-auto": "^2.1.0",
-		"@sveltejs/adapter-static": "^2.0.3",
-		"pdfjs-dist": "^4.0.379"
+		"@sveltejs/adapter-static": "^2.0.3"
 	}
 }
