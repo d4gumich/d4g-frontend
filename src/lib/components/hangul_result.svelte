@@ -11,7 +11,6 @@
     export let keywords;
     export let verbose;
     export let hangul_time;
-    export let markdown_text; // currently unused
     console.log(verbose)
 </script>
 
@@ -117,11 +116,10 @@
             <p style="white-space: pre-line">{keywords.join('\n')}</p>
         </div>
     </div>
-    <!-- delete verbose -->
-    {#if verbose} 
+    {#if verbose}
     <div class="row-field">
-        <h3 class="heading"><u>VERBOSE OUTPUT</u></h3>
-        <div class="scrollable-box">
+        <div id="meta-content">
+            <h3 class="heading"><u>VERBOSE OUTPUT </u></h3>
             <pre class="prettyprint">
               {JSON.stringify({metadata, document_language, document_summary,document_title,content, report_type, locations, disasters, full_content, keywords}, null, 2)}
             </pre>
@@ -143,7 +141,8 @@
     }
 
     .heading{
-        margin: 1.5rem 0 0;
+        margin-top: 7%;
+        margin-bottom: -1.5%;
     }
 
     p {
@@ -163,7 +162,7 @@
 
     .selectable-content {
         border: 1px solid;
-        border-radius: 0.2rem;
+        border-radius: 5px;
         padding: 5px;
         padding-left: 10px;
         height: fit-content;
@@ -177,14 +176,5 @@
 
     .row-field {
         margin-top: 0.5rem;
-    }
-
-    .scrollable-box {
-      height: 30rem;
-      overflow-y: auto;
-      margin-top: 1.25rem;
-      padding: 10px;
-      border: 1px solid;
-      border-radius: 0.2rem;
     }
 </style>
