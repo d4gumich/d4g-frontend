@@ -1,8 +1,8 @@
 <script>
+  import { base } from "$app/paths";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
-
-  import { base } from "$app/paths";
+  
   import Button from "$lib/components/button.svelte";
   import HangulResult from "../../../lib/components/hangul_result.svelte";
   import PDFLogo from "$lib/assets/icons8-pdf-90.png";
@@ -15,16 +15,16 @@
   GlobalWorkerOptions.workerSrc =
     "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs";
 
-  const defaultDropText = "Drag & choose single PDF file here";
-  const versions = ["Hangul 1.0", "Hangul 2.0"];
-  const formUrl = "https://forms.gle/n51U4g2K9cafpZUu5";
+  const DEFAULT_DROP_TEXT = "Drag & choose single PDF file here";
+  const VERSIONS = ["Hangul 1.0", "Hangul 2.0"];
+  const FORM_URL = "https://forms.gle/n51U4g2K9cafpZUu5";
+  const PAGES_TO_TIME_RATIO = 0.9;
 
   let showPopUp = false;
   let confirmResult;
   let showModal = false;
   let loadingProgress = 0;
   let numberOfPages = 0;
-  let numberOfPagesLatched = 0;
   let aboutHangul = false;
   let verbose = true;
   let hidden = true;
@@ -32,15 +32,25 @@
   let file;
   let kw_num;
   let result;
-  let dropText = defaultDropText;
+  let errorType;
+  let dropText = DEFAULT_DROP_TEXT;
   let showError = false;
   let showAnalyzeButton = false;
   let analyzing = false;
   let showResults = false;
+  let loadingFastPass = false;
+
+  $: estimatedTimeToAnalyze = Math.round(PAGES_TO_TIME_RATIO * numberOfPages);
+  $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
+  $: loadingTimeRemaining = Math.round(estimatedTimeToAnalyze - loadingProgress);
+
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   const updateShowError = (value) => {
     showError = value;
-    dropText = defaultDropText;
+    dropText = DEFAULT_DROP_TEXT;
   };
 
   async function getNumberOfPages(pdfFile) {
@@ -61,20 +71,16 @@
     });
   }
 
-  const updatePageCount = (value) => {
-    numberOfPagesLatched = value;
-    console.log("Latched Number of Pages :", numberOfPagesLatched);
-  };
-
   // Simulate asynchronous tasks
   const simulateLoading = () => {
     const interval = setInterval(() => {
-      console.log("mounting is at", loadingProgress);
-      loadingProgress += 10;
-      if (loadingProgress > 100 || !analyzing) {
+      loadingProgress += 0.25;
+
+      if (loadingProgress >= estimatedTimeToAnalyze || !analyzing) {
+        console.log("interval cleared")
         clearInterval(interval);
       }
-    }, 1000);
+    }, 250);
   };
 
   $: {
@@ -83,15 +89,13 @@
     }
   }
 
-  $: console.log("progress bar is ", loadingProgress);
-
   async function handleButtonClick() {
     showPopUp = true;
     confirmResult = await new Promise((resolve) => {
       const modalInstance = new ConfirmationModal({
         target: document.body,
         props: {
-          pages: numberOfPagesLatched,
+          estimatedTime: estimatedTimeToAnalyze,
         },
       });
       modalInstance.$on("confirm", (event) => {
@@ -114,7 +118,7 @@
   async function handleFileSelect(event) {
     event.preventDefault();
 
-    dropText = defaultDropText;
+    dropText = DEFAULT_DROP_TEXT;
 
     if (event.dataTransfer) {
       file = event.dataTransfer.files[0];
@@ -129,15 +133,15 @@
 
         try {
           numberOfPages = await getNumberOfPages(file);
-          updatePageCount(numberOfPages);
-          console.log("Number of pages:", numberOfPages);
         } catch (error) {
           console.error("Error loading PDF:", error);
         }
       } else {
         console.log("Error: file is NOT a PDF");
         dropText = "Please submit a PDF";
+        errorType = 0;
         showError = true;
+        showAnalyzeButton = false;
       }
     }
   }
@@ -179,12 +183,20 @@
         console.log(result);
         result.verbose = verbose;
         result.hangul_time = (Date.now() - time) / 1000;
+        if (loadingProgress < estimatedTimeToAnalyze) {
+          loadingProgress = estimatedTimeToAnalyze;
+          loadingFastPass = true;
+          console.log("completing loading bar animation")
+          await sleep(500);
+        }
         hidden = false;
         showResults = true;
+        loadingFastPass = false;
       } catch(error) {
         console.log("Could not fetch from d4gumsi.pythonanywhere.com");
         errorType = 1;
         showError = true;
+        showAnalyzeButton = false;
       }
       analyzing = false;
       
@@ -196,7 +208,7 @@
   const goBack = (onHandleAnalyzeClickEnbl) => {
     showResults = false;
     hidden = true;
-    dropText = onHandleAnalyzeClickEnbl ? dropText : defaultDropText;
+    dropText = onHandleAnalyzeClickEnbl ? dropText : DEFAULT_DROP_TEXT;
     showAnalyzeButton = onHandleAnalyzeClickEnbl;
   };
 </script>
@@ -222,7 +234,7 @@
           bind:value={version}
           on:change={handleVersionChange}
         >
-          {#each versions as version}
+          {#each VERSIONS as version}
             <option value={version}>{version}</option>
           {/each}
         </select>
@@ -230,16 +242,17 @@
     </div>
     <div>
       {#if showPopUp}
-        <ConfirmationModal pages={numberOfPagesLatched} />
+        <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} />
       {/if}
       {#if analyzing}
         <!-- Show loading icon when analyzing is true -->
         <div class="loading-icon">
-          <div class="spinner" />
-          <p class="analyzing-text">Analyzing...</p>
-          <!-- <p>{2 * loadingProgress} seconds remaing</p> -->
-          <!-- Display the LoadingBar component and pass the loadingProgress as a prop -->
-          <!-- <LoadingBar progress={loadingProgress} /> -->
+          {#if loadingTimeRemaining > 0 || loadingFastPass}
+            <p class="analyzing-text">estimated {loadingTimeRemaining} seconds remaining</p>
+          {:else}
+            <p class="analyzing-text">taking longer than expected, waiting...</p>
+          {/if}
+          <LoadingBar progress={(loadingProgress/estimatedTimeToAnalyze)*100} />
         </div>
       {:else}
         <div
@@ -259,33 +272,25 @@
             <Button
               text="Analyze PDF"
               click={handleAnalyzeClick}
-              style="margin-top: 10px;"
+              styleAdjustment="margin-top: 1rem;"
             />
           {/if}
           {#if showError}
-            <ErrorModal updateShowErrorFromParent={updateShowError} />
+            <ErrorModal updateShowErrorFromParent={updateShowError} errorType={errorType}/>
           {/if}
         </div>
       {/if}
-
-      <div class="filter">
-        <!-- Verbose checkbox -->
-        <!-- <label for="verbose">Verbose:</label>
-          <input
-              type="checkbox"
-              id="verbose"
-              name="verbose"
-              bind:checked={verbose}
-          /> -->
-
-        <!-- Keyphrase selection -->
-        <label for="keyphrases">Number of keyphrases:</label>
-        <select bind:value={kw_num} name="keyphrases" id="keyphrases">
-          <option value="5">5</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-        </select>
-      </div>
+      
+      {#if !analyzing}
+        <div class="filter">
+          <label for="keyphrases">Number of keyphrases:</label>
+          <select bind:value={kw_num} name="keyphrases" id="keyphrases">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+          </select>
+        </div>
+      {/if}
     </div>
 
     <div class="button-container">
@@ -328,7 +333,7 @@
             tabindex="0">&times;</span
           >
           <iframe
-            src={formUrl}
+            src={FORM_URL}
             width="100%"
             height="100%"
             title="Feedback form"
@@ -401,9 +406,11 @@
     align-items: center;
     justify-content: center;
   }
+
   .pdf-icon {
     font-size: 48px;
   }
+
   .drop-text {
     margin-top: 10px;
     color: rgba(0, 0, 0, 0.5);
@@ -475,12 +482,14 @@
     justify-content: center;
     align-items: center;
   }
+
   .modal-content {
     width: 80%;
     height: 80%;
     background-color: white;
     padding: 20px;
   }
+
   .modal-close {
     position: absolute;
     top: 10px;
@@ -507,7 +516,8 @@
   }
 
   .analyzing-text {
-    font-family: Open Sans;
+    font-family: "Open Sans";
+    margin: 0 0 1.5rem 0;
   }
 
   @keyframes spin {

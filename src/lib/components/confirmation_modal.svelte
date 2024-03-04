@@ -1,6 +1,6 @@
 <!-- ConfirmationModal.svelte -->
 <script>
-  export let pages;
+  export let estimatedTime;
 
   import { createEventDispatcher } from "svelte";
 
@@ -14,11 +14,11 @@
 <div class="modal-overlay">
   <div class="modal">
     <p class="text-prompt">
-      The file is <b>{pages} page{pages > 1 ? 's' : ''}</b> long and may take some time to analyze.
+      The file will take an estimated <b
+        >{estimatedTime} second{estimatedTime !== 1 ? "s" : ""}</b
+      > to analyze.
     </p>
-    <p class="text-prompt">
-      Do you want to proceed?
-    </p>
+    <p class="text-prompt">Do you want to proceed?</p>
     <div class="button-section">
       <button class="small-button" on:click={() => handleConfirmation(true)}
         >Yes</button

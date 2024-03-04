@@ -3,7 +3,7 @@
   export let progress = 0;
 
   // Style the progress bar based on the progress value
-  $: barStyle = `width: ${progress}%;`;
+  $: barStyle = `width: ${progress}%; border-radius: 1rem;`;
 </script>
 
 <div class="loading-bar">
@@ -12,14 +12,17 @@
 
 <style>
   .loading-bar {
-    width: 100%;
-    height: 4px;
+    width: 20rem;
     background-color: #f0f0f0;
+    border-radius: 1rem;
+    overflow: hidden;
   }
 
   .progress {
-    height: 100%;
-    background-color: #007bff;
+    width: 0%;
+    height: 0.5rem;
+    background-color: #1b3350;
     transition: width 0.3s ease;
+    border-radius: 1rem;
   }
 </style>

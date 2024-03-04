@@ -2,9 +2,10 @@
   export let text;
   export let link = null;
   export let click = null;
+  export let styleAdjustment = null;
 </script>
 
-<a href={link} class="button" on:click={click}>
+<a href={link} class="button" on:click={click} style={styleAdjustment}>
   <div class="text">
     <h3>{text}</h3>
   </div>
