@@ -582,8 +582,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: whitesmoke;
-    box-shadow: -0.2rem -0rem 0.1rem #e5e5e5;
+    background-color: rgb(237, 236, 236);
+    box-shadow: -0.2rem 0.05rem 0.1rem #d7d7d7;
     -webkit-transition: 0.4s;
     transition: 0.4s;
   }
@@ -594,7 +594,7 @@
     height: 1.3rem;
     width: 1.3rem;
     left: -0.1rem;
-    bottom: 0.1rem;
+    bottom: 0.05rem;
     background-color: #1b3350;
     -webkit-transition: 0.4s;
     transition: 0.4s;
@@ -641,7 +641,8 @@
 
   @media (max-width: 700px) {
     .text-container-heading {
-      font-size: 1rem;
+      font-size: 0.9rem;
+      width: 90%;
     }
 
     .drop-text {
@@ -650,7 +651,22 @@
 
     #file-input {
       font-size: 0.8rem;
-      width: 13rem;
+      width: 11rem;
+    }
+
+    input[type="file"]::file-selector-button {
+      border-radius: 4px;
+      padding: 0 0.5rem;
+      height: 2rem;
+      margin-right: 0.5rem;
+    }
+
+    .text {
+      font-size: 0.8rem;
+    }
+
+    .rectangle {
+      width: 80%;
     }
   }
 </style>

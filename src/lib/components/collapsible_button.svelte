@@ -107,12 +107,16 @@
 
   @media (max-width: 700px) {
     .collapsible-button-container {
-      width: 19.5rem;
+      width: 16.5rem;
     }
 
     .toggle {
       padding: 0.5rem 1rem;
       margin: 0.3rem 0 0 0;
+    }
+
+    .title {
+      font-size: 0.8rem;
     }
   }
 </style>

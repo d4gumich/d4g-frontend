@@ -57,5 +57,9 @@
       margin: 0 0.5rem;
       padding: 0.5rem 1rem;
     }
+
+    .text {
+      font-size: 0.8rem;
+    }
   }
 </style>

@@ -87,6 +87,7 @@
         display: flex;
         flex-direction: row;
         align-items: flex-start;
+        margin-bottom: 2rem;
     }
 
     h3 {
