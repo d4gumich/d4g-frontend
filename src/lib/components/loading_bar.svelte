@@ -16,6 +16,7 @@
     background-color: #f0f0f0;
     border-radius: 1rem;
     overflow: hidden;
+    margin-bottom: 3rem;
   }
 
   .progress {

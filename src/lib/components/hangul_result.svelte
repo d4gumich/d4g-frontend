@@ -66,6 +66,11 @@
 	</Collapsible>
 
 	<h3 class="header-content">CONTENT-BASED INFORMATION</h3>
+	{#if document_summary}
+		<Collapsible heading="DOCUMENT SUMMARY">
+			<div slot="text" class="text-content">{document_summary}</div>
+		</Collapsible>
+	{/if}
 	{#if metadata.Author}
 		<Collapsible heading="AUTHOR">
 			<div slot="text" class="text-content">{metadata.Author}</div>
@@ -184,7 +189,7 @@
 		display: flex;
 		flex-direction: column;
 		overflow-wrap: break-word;
-		font-family: Open Sans;
+		font-family: "Open Sans";
 	}
 
 	.header-content {

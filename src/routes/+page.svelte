@@ -178,7 +178,7 @@
       <h1>Data4Good: Empowering 
        <br> Nonprofits with Data</h1>
       <h2>Connecting data, research and implementation to help create stronger nonprofit organizations</h2>
-    <Button text="Learn More" link="{base}/projects"/>
+    <Button text="Learn More" link="{base}/projects" styleAdjustment={`margin:0;`}/>
     </div>
   </div>
 

@@ -128,6 +128,6 @@
     <div class="footer-divider"></div>
   
     <!-- Bottom Text -->
-    <div class="footer-bottom-text">&copy; 2023 Data4Good All rights reserved.</div>
+    <div class="footer-bottom-text">&copy; 2024 Data4Good All rights reserved.</div>
   </div>
   

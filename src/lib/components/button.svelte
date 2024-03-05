@@ -52,13 +52,10 @@
     padding: 0;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .global-button {
       margin: 0 0.5rem;
-    }
-
-    .text {
-      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
     }
   }
 </style>
