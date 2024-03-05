@@ -2,7 +2,7 @@
   import { base } from "$app/paths";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
-  
+
   import Button from "$lib/components/button.svelte";
   import HangulResult from "../../../lib/components/hangul_result.svelte";
   import PDFLogo from "$lib/assets/icons8-pdf-90.png";
@@ -10,29 +10,29 @@
   import LoadingBar from "../../../lib/components/loading_bar.svelte";
   import ConfirmationModal from "../../../lib/components/confirmation_modal.svelte";
   import ErrorModal from "../../../lib/components/error_modal.svelte";
+  import Collapsible from "../../../lib/components/collapsible.svelte";
 
   // Specify the URL to the worker script
   GlobalWorkerOptions.workerSrc =
     "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs";
 
   const DEFAULT_DROP_TEXT = "Drag & choose single PDF file here";
-  const VERSIONS = ["Hangul 1.0", "Hangul 2.0"];
+  const VERSIONS = [1, 2];
   const FORM_URL = "https://forms.gle/n51U4g2K9cafpZUu5";
   const PAGES_TO_TIME_RATIO = 0.9;
 
+  let file;
+  let kw_num;
+  let result;
+  let errorType;
   let showPopUp = false;
   let confirmResult;
   let showModal = false;
   let loadingProgress = 0;
   let numberOfPages = 0;
-  let aboutHangul = false;
   let verbose = true;
   let hidden = true;
-  let version = "Hangul 1.0";
-  let file;
-  let kw_num;
-  let result;
-  let errorType;
+  let version = 2;
   let dropText = DEFAULT_DROP_TEXT;
   let showError = false;
   let showAnalyzeButton = false;
@@ -42,11 +42,16 @@
 
   $: estimatedTimeToAnalyze = Math.round(PAGES_TO_TIME_RATIO * numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
-  $: loadingTimeRemaining = Math.round(estimatedTimeToAnalyze - loadingProgress);
+  $: loadingTimeRemaining = Math.round(
+    estimatedTimeToAnalyze - loadingProgress
+  );
+
+  $: console.log("showResults:", showResults);
+  $: console.log("version:", version);
 
   const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  };
 
   const updateShowError = (value) => {
     showError = value;
@@ -77,7 +82,7 @@
       loadingProgress += 0.25;
 
       if (loadingProgress >= estimatedTimeToAnalyze || !analyzing) {
-        console.log("interval cleared")
+        console.log("interval cleared");
         clearInterval(interval);
       }
     }, 250);
@@ -107,11 +112,11 @@
     return confirmResult;
   }
 
-  const handleVersionChange = (event) => {
-    event.preventDefault();
-    version = event.target.value;
-    if (version === "Hangul 2.0") {
-      window.location.href = `${base}/projects/hangul2.0`;
+  const toggleVersion = () => {
+    if (version === 1) {
+      version = 2;
+    } else {
+      version = 1;
     }
   };
 
@@ -171,7 +176,7 @@
       form.append("file", file);
       form.append("kw_num", kw_num);
       const response = await fetch(
-        "https://d4gumsi.pythonanywhere.com/api/v1/products/hangul",
+        `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
         {
           method: "POST",
           body: form,
@@ -186,20 +191,20 @@
         if (loadingProgress < estimatedTimeToAnalyze) {
           loadingProgress = estimatedTimeToAnalyze;
           loadingFastPass = true;
-          console.log("completing loading bar animation")
+          console.log("completing loading bar animation");
           await sleep(500);
         }
         hidden = false;
         showResults = true;
         loadingFastPass = false;
-      } catch(error) {
+        loadingProgress = 0;
+      } catch (error) {
         console.log("Could not fetch from d4gumsi.pythonanywhere.com");
         errorType = 1;
         showError = true;
         showAnalyzeButton = false;
       }
       analyzing = false;
-      
     } else {
       goBack(true);
     }
@@ -214,108 +219,113 @@
 </script>
 
 <svelte:head>
-  <title>Hangul 1.0</title>
+  <title>Hangul {version}.0</title>
 </svelte:head>
 
-{#if !showResults && hidden}
-  <div class="container">
+<div class="container">
+{#if !showResults}
     <div class="content-container">
-      <img src={HangulLogo} alt="Hangul logo" height="150px" />
+      <img src={HangulLogo} alt="Hangul logo" class="hangul-logo" />
       <div class="text-container">
-        <div class="text">
-          <h1>Analyze a PDF to find relevant meta and content details</h1>
-          <p class="text">Welcome to Hangul 1.0.</p>
-          <p class="text">
-            For best performance, please test with a PDF less than 25 pages
-          </p>
-        </div>
-        <select
-          class="version-select"
-          bind:value={version}
-          on:change={handleVersionChange}
-        >
-          {#each VERSIONS as version}
-            <option value={version}>{version}</option>
-          {/each}
-        </select>
+        <h1 class="text-container-heading">
+          Analyze a PDF to find relevant meta and content details
+        </h1>
+        <p class="text">Welcome to Hangul</p>
+        <div class="toggle-container">
+        <p class="text">Hangul {VERSIONS[0]}.0</p>
+        <label class="switch">
+          <input type="checkbox" on:change={toggleVersion} checked={version === 2}>
+          <span class="slider round"></span>
+        </label>
+        <p class="text">Hangul {VERSIONS[1]}.0</p>
+      </div>
       </div>
     </div>
-    <div>
-      {#if showPopUp}
-        <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} />
-      {/if}
-      {#if analyzing}
-        <!-- Show loading icon when analyzing is true -->
-        <div class="loading-icon">
-          {#if loadingTimeRemaining > 0 || loadingFastPass}
-            <p class="analyzing-text">estimated {loadingTimeRemaining} seconds remaining</p>
-          {:else}
-            <p class="analyzing-text">taking longer than expected, waiting...</p>
-          {/if}
-          <LoadingBar progress={(loadingProgress/estimatedTimeToAnalyze)*100} />
-        </div>
-      {:else}
-        <div
-          class="rectangle"
-          on:drop|preventDefault={handleFileSelect}
-          on:dragover|preventDefault={handleDragOver}
-        >
-          <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
-          <p class="drop-text">{dropText}</p>
-          <input
-            type="file"
-            accept="application/pdf"
-            id="file-input"
-            on:change={handleFileSelect}
-          />
-          {#if showAnalyzeButton}
-            <Button
-              text="Analyze PDF"
-              click={handleAnalyzeClick}
-              styleAdjustment="margin-top: 1rem;"
-            />
-          {/if}
-          {#if showError}
-            <ErrorModal updateShowErrorFromParent={updateShowError} errorType={errorType}/>
-          {/if}
-        </div>
-      {/if}
-      
-      {#if !analyzing}
-        <div class="filter">
-          <label for="keyphrases">Number of keyphrases:</label>
-          <select bind:value={kw_num} name="keyphrases" id="keyphrases">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-          </select>
-        </div>
-      {/if}
-    </div>
 
+    <!-- START -->
+
+    {#if showPopUp}
+      <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} />
+    {/if}
+    {#if analyzing}
+      <!-- Show loading icon when analyzing is true -->
+      <div class="loading-icon">
+        {#if loadingTimeRemaining > 0 || loadingFastPass}
+          <p class="analyzing-text">
+            estimated {loadingTimeRemaining} seconds remaining
+          </p>
+        {:else}
+          <p class="analyzing-text">taking longer than expected, waiting...</p>
+        {/if}
+        <LoadingBar
+          progress={(loadingProgress / estimatedTimeToAnalyze) * 100}
+        />
+      </div>
+    {:else}
+      <div
+        class="rectangle"
+        on:drop|preventDefault={handleFileSelect}
+        on:dragover|preventDefault={handleDragOver}
+      >
+        <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
+        <p class="drop-text">{dropText}</p>
+        <input
+          type="file"
+          accept="application/pdf"
+          id="file-input"
+          on:change={handleFileSelect}
+        />
+        {#if showAnalyzeButton}
+          <Button
+            text="Analyze PDF"
+            click={handleAnalyzeClick}
+            styleAdjustment="margin-top: 1rem;"
+          />
+        {/if}
+        {#if showError}
+          <ErrorModal updateShowErrorFromParent={updateShowError} {errorType} />
+        {/if}
+      </div>
+    {/if}
+
+    {#if !analyzing}
+      <div class="filter">
+        <label for="keyphrases">Number of keyphrases: </label>
+        <select bind:value={kw_num} 
+                name="keyphrases" 
+                id="keyphrases"
+                class="filter-selection"
+                >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
+      </div>
+    {/if}
+    
+    <div style={`width: 40%;`}>
+    <Collapsible heading="About Hangul">
+			<div slot="text" class="about-hangul-text">
+        Hangul is an NLP-based assistant for digital curators at ReliefWeb
+        envisioned to enable curators to handle three times, four times the
+        number of documents that they're processing. Once a text PDF is
+        uploaded to the platform, relevant metadata is extracted from it.
+        Current metadata includes the Document Title, the date the document is
+        published, the number of pages in the document, the word length of the
+        document, the language of the document, and the entities in the
+        document. More complex features like extraction of abstract,
+        conclusion, executive summary, and recognizing the theme(cluster) of
+        the document are also in scope.
+      </div>
+		</Collapsible>
+  </div>
     <div class="button-container">
-      <Button text="About Hangul" click={() => (aboutHangul = !aboutHangul)} />
+      <!-- <Button text="About Hangul" click={() => (aboutHangul = !aboutHangul)} /> -->
       <Button
         text="View Research"
         link="https://drive.google.com/file/d/1U_wHtC6DtPsfIBXHCeESfQXlDsXe5lHv/view"
       />
       <Button text="Provide Feedback" click={handleFeedbackClick} />
-    </div>
-    <div class="about-hangul-text">
-      {#if aboutHangul}
-        <p>
-          Hangul is an NLP-based assistant for digital curators at ReliefWeb
-          envisioned to enable curators to handle three times, four times the
-          number of documents that they're processing. Once a text PDF is
-          uploaded to the platform, relevant metadata is extracted from it.
-          Current metadata includes the Document Title, the date the document is
-          published, the number of pages in the document, the word length of the
-          document, the language of the document, and the entities in the
-          document. More complex features like extraction of abstract,
-          conclusion, executive summary, and recognizing the theme(cluster) of
-          the document are also in scope.
-        </p>
-      {/if}
     </div>
 
     {#if showModal}
@@ -341,70 +351,76 @@
         </div>
       </div>
     {/if}
-  </div>
-{/if}
 
-{#if showResults}
-  <!-- Show results when result is available -->
-  <div class="container">
-    <HangulResult {...result} />
-    <Button text="Go back" click={() => goBack(false)} />
-  </div>
+    <!-- END -->
+{:else}
+  <HangulResult {...result} />
+  <Button text="Go back" click={() => goBack(false)} styleAdjustment={`margin: 2rem 0;`}/>
 {/if}
+</div>
 
 <style>
   .container {
-    margin: auto;
     display: flex;
-    padding: 5% 0;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 45px;
+    width: 100%;
   }
 
   .content-container {
     display: flex;
-    width: auto;
-    justify-content: center;
+    flex-direction: row;
     align-items: center;
-    align-content: center;
-    gap: 0px 25px;
-    flex-wrap: wrap;
+    margin: 2rem auto;
+    width: auto;
+  }
+
+  .hangul-logo {
+    width: auto;
+    height: 7rem;
+    margin: 0;
+    padding: 0;
   }
 
   .text-container {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 10px;
-    padding-top: 5%;
-    margin: auto;
+    text-align: left;
+    margin-left: 2rem;
   }
 
   .text {
-    margin: auto;
-    color: rgba(0, 0, 0, 0.87);
-    font-family: Open Sans;
+    margin: 0;
+    color: black;
+    font-family: "Open Sans";
     font-size: 15px;
-    font-style: normal;
     font-weight: 400;
     line-height: 25px;
   }
 
+  .text-container-heading {
+    color: black;
+    font-family: Open Sans;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin: 0 0 0.2rem 0;
+  }
+
+  /* CUT */
   .rectangle {
-    width: 596px;
-    height: 343.892px;
-    flex-shrink: 0;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.15);
+    width: 50%;
+    height: 20rem;
+    border: 0.3rem dashed rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0px 0px 10px 5px rgba(0, 0, 0, 0.15); */
     border-radius: 15px;
     fill: var(--white, #fff);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin: 0 0 2rem 0;
+    /* padding: 2rem 10rem; */
   }
 
   .pdf-icon {
@@ -416,57 +432,41 @@
     color: rgba(0, 0, 0, 0.5);
     text-align: center;
     font-family: Open Sans;
-    font-size: 20px;
+    font-size: 1.2rem;
     font-style: normal;
     font-weight: 700;
     line-height: 30.857px; /* 154.285% */
   }
 
-  .version-select {
-    margin-top: 5px;
-    width: 200px;
-    height: 35px;
-    color: #000;
-    border-radius: 10px;
-    padding-left: 1%;
-    font-family: Open Sans;
-    font-size: 14px;
-  }
-
   #file-input {
-    width: 30%;
-  }
-
-  h1 {
-    color: rgba(0, 0, 0, 0.87);
-    font-family: Open Sans;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 25px; /* 125% */
+    font-size: 0.9rem;
+    width: 14rem;
   }
 
   .about-hangul-text {
-    width: 50%;
-    text-align: left;
-    margin-top: -3%;
-    color: #000;
-    font-family: Open Sans;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 30px; /* 150% */
+    font-family: "Open Sans";
+    font-size: 0.9rem;
   }
 
   .button-container {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    width: max-content;
+    margin: 3rem 0;
   }
 
   .filter {
-    padding-top: 3%;
     text-align: center;
+    font-size: 1rem;
+    font-family: Open Sans;
+    margin: 0 0 2rem 0;
+  }
+
+  .filter-selection {
+    margin: 0 0 0 0.5rem;
+    padding: 0.1rem 0.3rem 0.1rem 0.2rem;
+    font-size: 1rem;
     font-family: Open Sans;
   }
 
@@ -506,26 +506,102 @@
     padding: 20px;
   }
 
-  .spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 2s linear infinite;
-  }
-
   .analyzing-text {
     font-family: "Open Sans";
     margin: 0 0 1.5rem 0;
   }
 
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+  /* switch */
+
+  .toggle-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 0.5rem 0 0 0;
+    border: dashed 0.2rem whitesmoke;
+    border-radius: 0.2rem;
+    width: max-content;
+    padding: 0.5rem 0.7rem;
+    /* box-shadow: 0.1rem 0.1rem 0.2rem 0.1rem rgba(0, 0, 0, 0.15); */
   }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 2.7rem;
+  height: 1.5rem;
+  margin: 0 0.5rem;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: whitesmoke;
+  box-shadow: -0.2rem -0rem 0.1rem #e5e5e5;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.3rem;
+  width: 1.3rem;
+  left: -0.1rem;
+  bottom: 0.1rem;
+  background-color: #1b3350;
+  -webkit-transition: .4s;
+  transition: .4s;
+  box-shadow: 0.1rem 0rem 0.1rem #1b3350;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(1.25rem);
+  -ms-transform: translateX(1.25rem);
+  transform: translateX(1.25rem);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 1rem;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* file upload button */
+input[type="file"]::file-selector-button {
+  border-radius: 4px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+/* file upload button hover state */
+input[type="file"]::file-selector-button:hover {
+  background-color: #f3f4f6;
+}
+
+/* file upload button active state */
+input[type="file"]::file-selector-button:active {
+  background-color: #e5e7eb;
+}
 </style>

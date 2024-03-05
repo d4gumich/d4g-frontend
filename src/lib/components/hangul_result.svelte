@@ -42,7 +42,7 @@
 
 <div class="hangul-result">
 	<div id="notification" class="notification">text copied to clipboard</div>
-	<p><b>Time taken: </b>{hangul_time} seconds</p>
+	<p style={`margin-top: 3rem;`}><b>Time taken: </b>{hangul_time} seconds</p>
 	<h3 class="header-content">METADATA</h3>
 
 	<Collapsible heading="FILE NAME">
@@ -93,7 +93,9 @@
 	{#if document_theme}
 		<Collapsible heading="DOCUMENT THEME">
 			<div slot="text" class="text-content">
-				{document_theme.join("\n")}
+				{#each document_theme as theme}
+          <p>{theme}</p>
+        {/each}
 			</div>
 		</Collapsible>
 	{/if}
@@ -122,7 +124,13 @@
 	{/if}
 	<Collapsible heading="IDENTIFIED KEY PHRASE SEQUENCES">
 		<div slot="text" class="text-content">
-			{keywords.length > 0 ? keywords.join("\n") : DEFAULT_TEXT}
+			{#if keywords.length > 0}
+				{#each keywords as keyword}
+					<p>{keyword}</p>
+				{/each}
+			{:else}
+				{DEFAULT_TEXT}
+			{/if}
 		</div>
 	</Collapsible>
 
@@ -204,7 +212,7 @@
 	}
 
 	.text-content {
-		margin: 0.5rem 0 0.5rem 1rem;
+		margin: 0.5rem 0 1.5rem 1rem;
 	}
 
 	.notification {

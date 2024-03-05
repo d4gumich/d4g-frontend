@@ -93,6 +93,7 @@
     flex-direction: row;
     text-align: left;
     width: 100%;
+    font-family: "Open Sans";
   }
 
   .dropdown-arrow {

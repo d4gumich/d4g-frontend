@@ -5,45 +5,60 @@
   export let styleAdjustment = null;
 </script>
 
-<a href={link} class="button" on:click={click} style={styleAdjustment}>
-  <div class="text">
-    <h3>{text}</h3>
-  </div>
+<a href={link} class="global-button" on:click={click} style={styleAdjustment}>
+  <div class="text">{text}</div>
 </a>
 
 <style>
-  .button {
-    display: inline-flex;
-    padding: 0 25px;
-    justify-content: center;
-    align-items: center;
-    border-radius: 10px;
-    background: #1b3350;
-    margin: 5px;
-    margin-top: 2%;
+  .global-button {
+    text-decoration: none;
+    background-color: #1b3350;
+    border-radius: 1rem;
+    color: #000;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 1rem 1.5rem;
+    text-align: center;
+    transition: 200ms;
+    width: max-content;
+    margin: 0 1rem;
+    box-sizing: border-box;
+    border: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
   }
 
-  .button:hover {
-    background: #30598b;
+  .global-button:not(:disabled):hover,
+  .global-button:not(:disabled):focus {
+    outline: 0;
+    background: #1b3350;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .global-button:disabled {
+    filter: saturate(0.2) opacity(0.5);
+    -webkit-filter: saturate(0.2) opacity(0.5);
+    cursor: not-allowed;
   }
 
   .text {
-    color: #faefef;
-    font-family: Open Sans;
-    font-size: 15px;
+    color: white;
+    font-family: "Open Sans";
+    font-size: 1rem;
     font-style: normal;
     font-weight: 700;
-    line-height: 20px; /* 154.285% */
     margin: 0;
+    padding: 0;
   }
 
   @media (max-width: 600px) {
-    .button {
-      padding: 0 15px;
+    .global-button {
+      margin: 0 0.5rem;
     }
 
     .text {
-      font-size: 10px;
+      font-size: 0.9rem;
     }
   }
 </style>

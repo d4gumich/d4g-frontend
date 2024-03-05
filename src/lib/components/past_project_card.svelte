@@ -5,13 +5,29 @@
     export let researchLink;
     export let type;
     import Button from "./button.svelte";
-
 </script>
-  
-  <style>
+
+<div class="card">
+    <div class="content">
+        <div class="text">
+            <h1>{name}</h1>
+            <h3>{detail}</h3>
+            <!-- two buttons from button component -->
+        </div>
+        <div class="button-container">
+            <Button
+                text="View {type}"
+                link={researchLink}
+                styleAdjustment={`margin: 0;`}
+            />
+        </div>
+    </div>
+</div>
+
+<style>
     /* Add any styles specific to the card component */
 
-    .card{
+    .card {
         display: flex;
         /* padding: 0px 86px; */
         flex-direction: column;
@@ -26,8 +42,7 @@
         flex-shrink: 0;
     }
 
-
-    h1{
+    h1 {
         display: flex;
         width: 300px;
         height: auto;
@@ -43,8 +58,7 @@
         margin: auto;
     }
 
-
-    h3{
+    h3 {
         display: flex;
         width: 304px;
         height: 153px;
@@ -59,17 +73,9 @@
         line-height: 25px; /* 147.059% */
     }
 
-  </style>
-
-<div class="card">
-    <div class="content">
-        <div class="text">
-            <h1>{name}</h1>
-            <h3>{detail}</h3>
-            <!-- two buttons from button component -->
-        </div>
-        <div class="buttons">
-            <Button text="View {type}" link="{researchLink}"/>
-        </div>
-    </div>
-</div>
+    .button-container {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+</style>

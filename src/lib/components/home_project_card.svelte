@@ -10,12 +10,32 @@
     import Button from "./button.svelte";
 
     export let index;
-
 </script>
-  
-  <style>
+
+<div class="card-container">
+    <div class="card">
+        <img src={logo} alt="logo" height="80%" />
+        <div class="content">
+            <div class="text">
+                <h1>{name}</h1>
+                <h3>{detail}</h3>
+                <!-- two buttons from button component -->
+            </div>
+            <div class="button-container">
+                <Button
+                    text="View Research"
+                    link="{researchLink}}"
+                    styleAdjustment={`margin: 0;`}
+                />
+                <Button text="Try {name}" link={tryLink} />
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
     /* Add any styles specific to the card component */
-    .card-container{
+    .card-container {
         width: 1120px;
         height: 450px;
         margin-top: 55px;
@@ -25,13 +45,13 @@
         gap: 55px;
     }
 
-    .card{
+    .card {
         width: 1120px;
         height: 450px;
         flex-shrink: 0;
         border-radius: 20px;
         border: 1px solid #000;
-        background: var(--white, #FFF);
+        background: var(--white, #fff);
         display: inline-flex;
         justify-content: center;
         align-items: center;
@@ -40,26 +60,26 @@
         flex-wrap: wrap;
     }
 
-    .card:nth-child(even){
+    .card:nth-child(even) {
         display: flex;
         flex-direction: row-reverse;
     }
 
-    .content{
+    .content {
         display: inline-flex;
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
 
-    .text{
+    .text {
         display: inline-flex;
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
 
-    h1{
+    h1 {
         width: auto;
         color: rgba(0, 0, 0, 0.87);
         text-align: center;
@@ -73,8 +93,7 @@
         text-underline-offset: 15px;
     }
 
-
-    h3{
+    h3 {
         width: 451px;
         color: rgba(0, 0, 0, 0.87);
         font-family: Open Sans;
@@ -84,21 +103,9 @@
         line-height: 25px; /* 125% */
     }
 
-  </style>
-
-<div class="card-container">
-    <div class="card">
-        <img src={logo} alt="logo" height="80%"/>
-        <div class="content">
-            <div class="text">
-                <h1>{name}</h1>
-                <h3>{detail}</h3>
-                <!-- two buttons from button component -->
-            </div>
-            <div class="buttons">
-                <Button text="View Research" link="{researchLink}}"/>
-                <Button text="Try {name}" link="{tryLink}" />
-            </div>
-        </div>
-    </div>
-</div>
+    .button-container {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+</style>
