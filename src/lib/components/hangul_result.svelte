@@ -42,7 +42,7 @@
 
 <div class="hangul-result">
 	<div id="notification" class="notification">text copied to clipboard</div>
-	<p style={`margin-top: 3rem;`}><b>Time taken: </b>{hangul_time} seconds</p>
+	<p class="time-taken-text"><b>Time taken: </b>{hangul_time} seconds</p>
 	<h3 class="header-content">METADATA</h3>
 
 	<Collapsible heading="FILE NAME">
@@ -192,6 +192,10 @@
 		font-family: "Open Sans";
 	}
 
+	.time-taken-text {
+		margin-top: 3rem;
+	}
+
 	.header-content {
 		margin: 2rem 0 0.5rem 0;
 		font-size: 1.3rem;
@@ -235,5 +239,27 @@
 		opacity: 0; /* start fully transparent */
 		visibility: hidden; /* start hidden */
 		transition: opacity 0.5s, visibility 0.5s;
+	}
+
+	@media (max-width: 700px) {
+		.hangul-result {
+			width: 90%;
+		}
+
+		.header-content {
+			font-size: 1.1rem;
+		}
+
+		.text-content {
+			font-size: 0.9rem;
+		}
+
+		.time-taken-text {
+			font-size: 0.9rem;
+		}
+
+		.prettyprint {
+			font-size: 0.8rem;
+		}
 	}
 </style>

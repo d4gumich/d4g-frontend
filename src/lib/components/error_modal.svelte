@@ -52,19 +52,47 @@
     justify-content: center;
     align-items: center;
     border-radius: 0.5rem;
-    border: none;
     background: #1b3350;
-    color: #faefef;
+    color: white;
     margin: 0 0.1rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    transition: 200ms;
+    box-sizing: border-box;
+    border: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
   }
 
-  .small-button:hover {
-    background: #30598b;
+  .small-button:not(:disabled):hover,
+  .small-button:not(:disabled):focus {
+    outline: 0;
+    background: #1b3350;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .small-button:disabled {
+    filter: saturate(0.2) opacity(0.5);
+    -webkit-filter: saturate(0.2) opacity(0.5);
+    cursor: not-allowed;
   }
 
   .text-prompt {
     font-size: 0.9rem;
     margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 700px) {
+    .modal {
+      padding: 1rem;
+    }
+    
+    .text-prompt {
+      font-size: 0.8rem;
+    }
+
+    .small-button {
+      font-size: 0.8rem;
+    }
   }
 </style>

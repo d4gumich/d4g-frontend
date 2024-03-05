@@ -97,7 +97,7 @@
 
   $: {
     if (analyzing) {
-      blockSliderStyle = `background-color: #1b3350; box-shadow: -0.2rem -0rem 0.1rem #1b3350;`;
+      blockSliderStyle = `background-color: white; box-shadow: 0 0 0 white;`;
     } else {
       blockSliderStyle = ``;
     }
@@ -266,7 +266,7 @@
         <div class="toggle-container">
           <p
             class="text"
-            style={version === VERSIONS[0] ? `font-weight:800;` : ``}
+            style={(version === VERSIONS[0] && width > 700) ? `font-weight:800;` : ``}
           >
             Hangul {VERSIONS[0]}.0
           </p>
@@ -275,12 +275,13 @@
               type="checkbox"
               on:change={toggleVersion}
               checked={version === 2}
+              disabled={analyzing}
             />
             <span class="slider round" style={blockSliderStyle} />
           </label>
           <p
             class="text"
-            style={version === VERSIONS[1] ? `font-weight:800;` : ``}
+            style={(version === VERSIONS[1] && width > 700) ? `font-weight:800;` : ``}
           >
             Hangul {VERSIONS[1]}.0
           </p>
@@ -585,7 +586,7 @@
     background-color: rgb(237, 236, 236);
     box-shadow: -0.2rem 0.05rem 0.1rem #d7d7d7;
     -webkit-transition: 0.4s;
-    transition: 0.4s;
+    transition: 1s;
   }
 
   .slider:before {
@@ -662,6 +663,10 @@
     }
 
     .text {
+      font-size: 0.8rem;
+    }
+
+    .analyzing-text {
       font-size: 0.8rem;
     }
 

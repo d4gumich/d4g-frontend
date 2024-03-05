@@ -137,4 +137,10 @@
     width: 0.75rem;
     margin-right: 0.25rem;
   }
+
+  @media (max-width: 700px) {
+    .title {
+      font-size: 0.9rem;
+    }
+  }
 </style>
