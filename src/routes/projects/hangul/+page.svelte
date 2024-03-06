@@ -1,25 +1,27 @@
 <script>
+  import {
+    PDF_WORKER_SRC_URL,
+    DEFAULT_DROP_TEXT,
+    PAGES_TO_TIME_RATIO,
+    KEYWORD_COUNT,
+    INTERVAL,
+  } from "$lib/assets/constants/constants.js";
+  import { sleep } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
 
   import Button from "$lib/components/button.svelte";
-  import HangulResult from "../../../lib/components/hangul_result.svelte";
+  import HangulResult from "$lib/components/hangul_result.svelte";
   import PDFLogo from "$lib/assets/icons8-pdf-90.png";
   import HangulLogo from "$lib/assets/hangul2 copy 2.png";
-  import LoadingBar from "../../../lib/components/loading_bar.svelte";
-  import ConfirmationModal from "../../../lib/components/confirmation_modal.svelte";
-  import ErrorModal from "../../../lib/components/error_modal.svelte";
-  import CollapsibleButton from "../../../lib/components/collapsible_button.svelte";
+  import LoadingBar from "$lib/components/loading_bar.svelte";
+  import ConfirmationModal from "$lib/components/confirmation_modal.svelte";
+  import ErrorModal from "$lib/components/error_modal.svelte";
+  import Toggle from "$lib/components/toggle.svelte";
+  import FeedbackModal from "$lib/components/feedback_modal.svelte";
+  import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
 
-  // Specify the URL to the worker script
-  GlobalWorkerOptions.workerSrc =
-    "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs";
-
-  const DEFAULT_DROP_TEXT = "Drag & choose single PDF file here";
-  const VERSIONS = [1, 2];
-  const FORM_URL = "https://forms.gle/n51U4g2K9cafpZUu5";
-  const PAGES_TO_TIME_RATIO = 0.9;
-  const KEYWORD_NUM = 5;
+  GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
 
   let width;
   let file;
@@ -39,8 +41,6 @@
   let analyzing = false;
   let showResults = false;
   let loadingFastPass = false;
-  let buttonSytleAdjustment = `padding: 1rem 4.2rem; margin: 0 0.2rem;`;
-  let blockSliderStyle = ``;
 
   $: estimatedTimeToAnalyze = Math.round(PAGES_TO_TIME_RATIO * numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
@@ -50,14 +50,10 @@
 
   $: console.log("version:", version);
 
-  const sleep = (ms) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  };
-
   const updateShowError = (value) => {
     showError = value;
     dropText = DEFAULT_DROP_TEXT;
-  };
+  }
 
   async function getNumberOfPages(pdfFile) {
     return new Promise((resolve, reject) => {
@@ -77,16 +73,15 @@
     });
   }
 
-  // Simulate asynchronous tasks
   const simulateLoading = () => {
     const interval = setInterval(() => {
-      loadingProgress += 0.25;
+      loadingProgress += (INTERVAL / 1000);
 
       if (loadingProgress >= estimatedTimeToAnalyze || !analyzing) {
         console.log("interval cleared");
         clearInterval(interval);
       }
-    }, 250);
+    }, INTERVAL);
   };
 
   $: {
@@ -95,21 +90,9 @@
     }
   }
 
-  $: {
-    if (analyzing) {
-      blockSliderStyle = `background-color: white; box-shadow: 0 0 0 white;`;
-    } else {
-      blockSliderStyle = ``;
-    }
-  }
-
-  $: {
-    if (width < 700) {
-      buttonSytleAdjustment = `padding: .5rem 1rem; margin: 0 0.2rem;`;
-    } else {
-      buttonSytleAdjustment = `padding: 1rem 4.2rem; margin: 0 0.2rem;`;
-    }
-  }
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
 
   onMount(() => {
     width = window.innerWidth;
@@ -136,19 +119,6 @@
     });
     return confirmResult;
   }
-
-  const toggleVersion = (event) => {
-    if (analyzing) {
-      event.preventDefault();
-      console.log("Click blocked because analyzing is true");
-    } else {
-      if (version === 1) {
-        version = 2;
-      } else {
-        version = 1;
-      }
-    }
-  };
 
   async function handleFileSelect(event) {
     event.preventDefault();
@@ -181,20 +151,6 @@
     }
   }
 
-  function handleDragOver(event) {
-    event.preventDefault();
-  }
-
-  const handleFeedbackClick = () => {
-    showModal = true;
-  };
-
-  const handleModalKeydown = (event) => {
-    if (event.key === "Escape") {
-      showModal = false;
-    }
-  };
-
   async function handleAnalyzeClick() {
     let userProceedSelection;
     userProceedSelection = await handleButtonClick();
@@ -204,7 +160,7 @@
       const time = Date.now();
       const form = new FormData();
       form.append("file", file);
-      form.append("kw_num", KEYWORD_NUM);
+      form.append("kw_num", KEYWORD_COUNT);
       const response = await fetch(
         `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
         {
@@ -257,45 +213,25 @@
 <div class="container">
   {#if !showResults}
     <div class="content-container">
-      <img src={HangulLogo} alt="Hangul logo" class="hangul-logo" />
+      <img src={HangulLogo} alt="Hangul Logo" class="hangul-logo" />
       <div class="text-container">
         <h1 class="text-container-heading">
           Analyze a PDF to find relevant meta and content details
         </h1>
         <p class="text">Welcome to Hangul</p>
-        <div class="toggle-container">
-          <p
-            class="text"
-            style={(version === VERSIONS[0] && width > 700) ? `font-weight:800;` : ``}
-          >
-            Hangul {VERSIONS[0]}.0
-          </p>
-          <label class="switch">
-            <input
-              type="checkbox"
-              on:change={toggleVersion}
-              checked={version === 2}
-              disabled={analyzing}
-            />
-            <span class="slider round" style={blockSliderStyle} />
-          </label>
-          <p
-            class="text"
-            style={(version === VERSIONS[1] && width > 700) ? `font-weight:800;` : ``}
-          >
-            Hangul {VERSIONS[1]}.0
-          </p>
-        </div>
+        <Toggle bind:version {analyzing} {width} />
       </div>
     </div>
-
-    <!-- START -->
 
     {#if showPopUp}
       <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} />
     {/if}
+
+    {#if showError}
+      <ErrorModal updateShowErrorFromParent={updateShowError} {errorType} />
+    {/if}
+
     {#if analyzing}
-      <!-- Show loading icon when analyzing is true -->
       <div class="loading-icon">
         {#if loadingTimeRemaining > 0 || loadingFastPass}
           <p class="analyzing-text">
@@ -329,71 +265,16 @@
             styleAdjustment="margin-top: 1rem;"
           />
         {/if}
-        {#if showError}
-          <ErrorModal updateShowErrorFromParent={updateShowError} {errorType} />
-        {/if}
       </div>
     {/if}
+
     {#if !analyzing}
-      <div class="button-container-col">
-        <div class="button-container-row">
-          <Button
-            text="View Research"
-            link="https://drive.google.com/file/d/1U_wHtC6DtPsfIBXHCeESfQXlDsXe5lHv/view"
-            styleAdjustment={buttonSytleAdjustment}
-          />
-          <Button
-            text="Provide Feedback"
-            click={handleFeedbackClick}
-            styleAdjustment={buttonSytleAdjustment}
-          />
-        </div>
-        <CollapsibleButton heading="About Hangul">
-          <div slot="text" class="about-hangul-text">
-            <p style={`margin:0;`}>
-            Hangul is an NLP-based assistant for digital curators at ReliefWeb
-            envisioned to enable them to handle three to four times the
-            number of documents currently being processed. Once a text PDF is
-            uploaded to the platform, relevant metadata is extracted from it.
-            </p>
-            <p>
-            Current metadata includes the document title, the date the document
-            was published and modified, the number of pages in the document, the word length
-            of the document, the language of the document, and the entities in
-            the document. More complex features like extraction of abstract,
-            conclusion, executive summary, and recognizing the theme (cluster) of
-            the document are also in scope.
-            </p>
-          </div>
-        </CollapsibleButton>
-      </div>
+      <HangulButtonContainer bind:showModal {width} />
     {/if}
 
     {#if showModal}
-      <div
-        class="modal"
-        on:click|self={() => (showModal = false)}
-        on:keydown={handleModalKeydown}
-        tabindex="-1"
-      >
-        <div class="modal-content">
-          <span
-            class="modal-close"
-            on:click|stopPropagation={() => (showModal = false)}
-            on:keydown|stopPropagation={handleModalKeydown}
-            tabindex="0">&times;</span
-          >
-          <iframe
-            src={FORM_URL}
-            width="100%"
-            height="100%"
-            title="Feedback form"
-          />
-        </div>
-      </div>
+      <FeedbackModal bind:showModal />
     {/if}
-
-    <!-- END -->
   {:else}
     <HangulResult {...result} />
     <Button
@@ -487,52 +368,6 @@
     width: 14rem;
   }
 
-  .about-hangul-text {
-    font-family: "Open Sans";
-    font-size: 0.9rem;
-    padding: 1rem 0.9rem 0 1.2rem;
-  }
-
-  .button-container-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .button-container-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 3rem;
-  }
-
-  /* modal */
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-content {
-    width: 80%;
-    height: 80%;
-    background-color: white;
-    padding: 20px;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-  }
-
   /* loading icon */
   .loading-icon {
     display: flex;
@@ -545,76 +380,6 @@
   .analyzing-text {
     font-family: "Open Sans";
     margin: 0 0 1.5rem 0;
-  }
-
-  /* switch */
-
-  .toggle-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 0.5rem 0 0 0;
-    border: dashed 0.2rem whitesmoke;
-    border-radius: 0.2rem;
-    width: max-content;
-    padding: 0.5rem 0.7rem;
-  }
-
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 2.7rem;
-    height: 1.5rem;
-    margin: 0 0.5rem;
-  }
-
-  /* Hide default HTML checkbox */
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  /* The slider */
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgb(237, 236, 236);
-    box-shadow: -0.2rem 0.05rem 0.1rem #d7d7d7;
-    -webkit-transition: 0.4s;
-    transition: 1s;
-  }
-
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 1.3rem;
-    width: 1.3rem;
-    left: -0.1rem;
-    bottom: 0.05rem;
-    background-color: #1b3350;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
-    box-shadow: 0.1rem 0rem 0.1rem #1b3350;
-  }
-
-  input:checked + .slider:before {
-    -webkit-transform: translateX(1.25rem);
-    -ms-transform: translateX(1.25rem);
-    transform: translateX(1.25rem);
-  }
-
-  /* Rounded sliders */
-  .slider.round {
-    border-radius: 1rem;
-  }
-
-  .slider.round:before {
-    border-radius: 50%;
   }
 
   /* file upload button */

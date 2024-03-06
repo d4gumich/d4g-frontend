@@ -14,11 +14,9 @@
 	export let hangul_time;
 	export let markdown_text;
 
+	import { NO_TITLE_FOUND, DEFAULT_TEXT } from "$lib/assets/constants/constants.js";
 	import { marked } from "marked";
 	import Collapsible from "./collapsible.svelte";
-
-	const NO_TITLE_FOUND = "Title not Found";
-	const DEFAULT_TEXT = "N/A";
 
 	let MDasHTML = marked(markdown_text);
 

@@ -1,2 +1,0 @@
-<!-- HangulDisplay.svelte -->
-<!-- TBD -->
