@@ -1,7 +1,4 @@
 <script>
-  // Import the components from the components folder
-  // import Card from '$lib/components/card.svelte';
-  // import ProjCard from '$lib/components/home_project_card.svelte';
   import Card from '$lib/components/new_home_project_card.svelte';
   import NewsCard from '$lib/components/news_card.svelte';
   import Button from "$lib/components/button.svelte";
@@ -37,16 +34,16 @@
 </script>
 
 <svelte:head>
-  <title>D4G: Home</title>
+  <title>Data4Good</title>
 </svelte:head>
 
 <style>
-  .a{
+  .home {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: var(--background, #F5F5F5);
     padding-bottom: 4%;
+    background: whitesmoke;
   }
 
   .hero {
@@ -61,7 +58,7 @@
     background-position: 30% 0;
   }
 
-  .contain-text{
+  .contain-text {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
@@ -69,7 +66,6 @@
     padding-left: 12%;
     padding-top: 15%;
     padding-bottom: 15%;
-
   }
 
   .hero h1 {
@@ -88,7 +84,7 @@
     letter-spacing: -0.7px;
   }
 
-  .hero h2{
+  .hero h2 {
     font-size: 1.5rem;
     font-family: Open Sans;
     line-height: 1.28571429em;
@@ -96,7 +92,6 @@
     font-weight: 900;
     padding: 0;
     display: block;
-    /* text-align: center; */
     width: 600px;
     overflow: hidden;  /* prevents extra lines from being visible */
   }
@@ -112,7 +107,7 @@
   }
 
   .odd-section {
-    background: rgba(221, 208, 200, 0.50);
+    border-bottom: #DDD0C8 3px dashed;
   }
 
   .section-title {
@@ -143,7 +138,6 @@
     gap: 0%;
   }
 
-
   @media (max-width: 600px) {
       .hero h1 {
         font-size: 2em;
@@ -169,10 +163,9 @@
         background-position: 20% 0;
       }
   }
-
 </style>
 
-<div class="a">
+<div class="home">
   <div class="hero">
     <div class="contain-text">
       <h1>Data4Good: Empowering 

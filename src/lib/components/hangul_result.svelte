@@ -225,7 +225,7 @@
 	.notification {
 		display: block;
 		position: fixed;
-		top: 1rem;
+		bottom: 1rem;
 		left: 50%;
 		transform: translateX(-50%);
 		background-color: rgba(0, 0, 0, 0.65);
