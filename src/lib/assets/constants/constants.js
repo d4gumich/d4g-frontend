@@ -12,3 +12,6 @@ export const HANGUL_PROJECT_NAME = "Hangul";
 export const NO_TITLE_FOUND = "Title not Found";
 export const DEFAULT_TEXT = "N/A";
 export const GRID_TEMPLATE_ROWS_SHOW_CONTENT = `grid-template-rows: 1fr;`;
+export const TIMEOUT_BUFFER = 90000; //ms // 60000 ms = 1 minute
+export const SECONDS_TO_MILLISECONDS = 1000;
+export const MILLISECONDS_TO_SECONDS = 0.001;

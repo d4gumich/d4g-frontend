@@ -5,10 +5,14 @@
     PAGES_TO_TIME_RATIO,
     KEYWORD_COUNT,
     INTERVAL,
+    SECONDS_TO_MILLISECONDS,
+    MILLISECONDS_TO_SECONDS,
+    TIMEOUT_BUFFER
   } from "$lib/assets/constants/constants.js";
   import { sleep } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
+  import { fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
 
   import Button from "$lib/components/button.svelte";
   import HangulResult from "$lib/components/hangul_result.svelte";
@@ -151,6 +155,42 @@
     }
   }
 
+  // async function fetchData() {
+  //   const form = new FormData();
+  //   form.append("file", file);
+  //   form.append("kw_num", KEYWORD_COUNT);
+
+  //   const response = await fetch(
+  //     `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
+  //     {
+  //       method: "POST",
+  //       body: form,
+  //       cors: "cors",
+  //     }
+  //   );
+  //   if (!response.ok) {
+  //     console.log("Network response was not ok");
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   return response.json();
+  // }
+
+  // async function fetchDataWithTimeout(timeout=(estimatedTimeToAnalyze*1000) + 5000) {
+  //   // Use Promise.race() to await the first promise to settle (either success or timeout)
+  //   try {
+  //       const result = await Promise.race([fetchData(), new Promise((resolve, reject) => {
+  //           setTimeout(() => {
+  //               reject(new Error('Request timed out'));
+  //           }, timeout);
+  //       })]);
+        
+  //       return result;
+  //   } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //       throw error; // Propagate the error
+  //   }
+  // }
+
   async function handleAnalyzeClick() {
     let userProceedSelection;
     userProceedSelection = await handleButtonClick();
@@ -158,22 +198,29 @@
     if (userProceedSelection) {
       analyzing = true;
       const time = Date.now();
-      const form = new FormData();
-      form.append("file", file);
-      form.append("kw_num", KEYWORD_COUNT);
-      const response = await fetch(
-        `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
-        {
-          method: "POST",
-          body: form,
-          cors: "cors",
-        }
-      );
+      // const form = new FormData();
+      // form.append("file", file);
+      // form.append("kw_num", KEYWORD_COUNT);
       try {
-        result = await response.json();
-        console.log(result);
+        // const response = await fetch(
+        //   `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
+        //   {
+        //     method: "POST",
+        //     body: form,
+        //     cors: "cors",
+        //   }
+        // );
+        // if (!response.ok) {
+        //   console.log("Network response was not ok");
+        //   throw new Error('Network response was not ok');
+        // }
+        // result = await response.json();
+        result = await fetchDataWithTimeout(file, version, (estimatedTimeToAnalyze*SECONDS_TO_MILLISECONDS + TIMEOUT_BUFFER));
+        if (result !== null) {
+          console.log('Result:',result);
+        }
         result.verbose = verbose;
-        result.hangul_time = (Date.now() - time) / 1000;
+        result.hangul_time = (Date.now() - time) * MILLISECONDS_TO_SECONDS;
         if (loadingProgress < estimatedTimeToAnalyze) {
           loadingProgress = estimatedTimeToAnalyze;
           loadingFastPass = true;
@@ -183,13 +230,13 @@
         hidden = false;
         showResults = true;
         loadingFastPass = false;
-        loadingProgress = 0;
       } catch (error) {
-        console.log("Could not fetch from d4gumsi.pythonanywhere.com");
+        console.error("Could not fetch from d4gumsi.pythonanywhere.com", error);
         errorType = 1;
         showError = true;
         showAnalyzeButton = false;
       }
+      loadingProgress = 0;
       analyzing = false;
     } else {
       goBack(true);

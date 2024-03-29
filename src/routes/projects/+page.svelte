@@ -36,13 +36,13 @@
       {
         name: 'Trends in the IT Sector of Non-Profit Organizations',
         detail: 'What do NPO IT leaders say about IT investment over the past 17 years? Visualize CIO4Good survey trends.',
-        researchLink: base,
+        researchLink: `${base}/projects/cio4good`,
         type: 'Project'
       },
       {
         name: 'Digital Crisis Simulation Exercise (SimEx)',
         detail: 'The digital Crisis Simulation Exercise (SimEx) is the latest iteration of a multi-year training lab designed to simulate disaster response strategies and actions within a realistic crisis setting.',
-        researchLink: base,
+        researchLink: `${base}/projects/simex`,
         type: 'Project'
       }
 

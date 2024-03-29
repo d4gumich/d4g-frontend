@@ -16,6 +16,7 @@
       progressClass = 'completed';
     } else {
       slept = false;
+      progressClass = ``;
     }
   }
 
