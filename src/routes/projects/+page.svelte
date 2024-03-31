@@ -116,11 +116,6 @@
       font-family: 'Roboto', sans-serif;
       font-size: 1rem;
     }
-
-    @media (max-width: 600px) {
-
-    }
-
   </style>
   
   <div class="a">

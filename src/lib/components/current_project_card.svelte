@@ -103,7 +103,8 @@
 
     @media (max-width: 600px) {
         .card {
-            max-width: 50%;
+            /* max-width: 50%; */
+            max-width: 250px;
             height: auto;
             padding: 0px 60px;
         }
@@ -119,10 +120,18 @@
 
         h1 {
             font-size: 25px;
+            margin: 0;
+            padding: 0;
         }
 
         h3 {
-            font-size: 10px;
+            font-size: 0.9rem;
+            padding: 0.2rem 0 0.5rem 0;
+            margin: 0;
+        }
+
+        .text {
+            gap: 0;
         }
     }
 </style>

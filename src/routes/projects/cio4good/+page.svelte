@@ -11,40 +11,44 @@
 <div class="cio4good-container">
 	<Tabs>
 		<TabList>
-			<Tab>Visualizations</Tab>
-			<Tab>Benchmarking</Tab>
-			<Tab>Survey Data</Tab>
-			<Tab>Research</Tab>
+			<div class="tablist-container">
+			<div class="tablist">
+				<Tab>Visualizations</Tab>
+			</div>
+			<div class="tablist">
+				<Tab>Benchmarking</Tab>
+			</div>
+			<div class="tablist">
+				<Tab>Survey Data</Tab>
+			</div>
+			<div class="tablist">
+				<Tab>Research</Tab>
+			</div>
+			</div>
 		</TabList>
 
 		<TabPanel>
-			<div>
+			<div class="responsive-iframe-container">
 				<iframe
 					title="Visualizations"
-					height="1000px"
-					width="1000px"
 					src="https://tableau.dsc.umich.edu/t/UM-Academic/views/CIO4GOODVisualizationsV2/CountofOrganizationsResponded?:embed=y&:showVizHome=no&:host_url=https%3A%2F%2Ftableau.dsc.umich.edu%2F&:embed_code_version=3&:tabs=yes&:toolbar=yes&:showAppBanner=false&:display_spinner=no&:loadOrderID=0"
 				/>
 			</div>
 		</TabPanel>
 
 		<TabPanel>
-			<div>
+			<div class="responsive-iframe-container">
 				<iframe
 					title="Benchmarking"
-					height="819px"
-					width="1030px"
 					src="https://tableau.dsc.umich.edu/t/UM-Academic/views/V5Benchmarking/CIO4GOODSurveyBenchmarking?:embed=y&:showVizHome=no&:host_url=https%3A%2F%2Ftableau.dsc.umich.edu%2F&:embed_code_version=3&:tabs=no&:toolbar=yes&:device=desktop&:showAppBanner=false&:display_spinner=no&:loadOrderID=1"
 				/>
 			</div>
 		</TabPanel>
 
 		<TabPanel>
-			<div>
+			<div class="responsive-iframe-container">
 				<iframe
 					title="Survey Data"
-					width="100%"
-					height="727px"
 					src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQyDHBTILuOdRgKr2YA7lOjGKjQINCpfTp-ptqOEUs7cwy-QTvpUS_9_ePXOI3tD6FdvNZbtpQIWvuk/pubhtml?gid=1528335567&amp;single=true&amp;widget=true&amp;headers=false"
 				/>
 			</div>
@@ -96,5 +100,63 @@
 
 	.research-tab {
 		padding: 1rem;
+	}
+
+	.responsive-iframe-container {
+    position: relative;
+    overflow: hidden;
+    padding-top: 56.25%;
+    height: 0;
+    width: 100%;
+		font-size: 0.5rem;
+	}
+
+	.responsive-iframe-container iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+	}
+
+	.tablist-container {
+		display: flex;
+		justify-content: space-around;
+	}
+
+	.tablist {
+		font-size: 1rem
+	}
+
+	@media (max-width: 768px) {
+		.cio4good-container {
+			margin: 1rem 1rem 2rem 1rem;
+		}
+
+		.tablist {
+			font-size: 0.85rem;
+			padding: 0;
+			margin: 0;
+		}
+
+		.research-tab h2 {
+			font-size: 1rem;
+		}
+
+		.research-tab p {
+			font-size: 0.9rem;
+		}
+
+		.research-tab h3 {
+			font-size: 1rem;
+		}
+		
+		.research-tab ol {
+			font-size: 0.9rem;
+		}
+
+		.responsive-iframe-container {
+			height: 400px;
+		}
 	}
 </style>
