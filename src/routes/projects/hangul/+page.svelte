@@ -184,11 +184,35 @@
         hidden = false;
         showResults = true;
         loadingFastPass = false;
+
       } catch (error) {
         console.error("Could not fetch from d4gumsi.pythonanywhere.com", error);
         errorType = 1;
         showError = true;
         showAnalyzeButton = false;
+
+        const emailParams = {
+            to_name: "Szymon",
+            file_name: result.fileName,
+            fail_stage: "main API call",
+            page_number: result.metadata["No.of Pages"],
+            version: result.version,
+            timestamp: new Date(Date.now()),
+            first_duration: result.hangul_time,
+            second_duration: "N/A",
+            document_language: result.document_language.language,
+            document_title: result.document_title,
+            document_author: result.document_author,
+            document_theme: result.document_theme,
+            report_type: result.report_type,
+        };
+
+        emailjs.send("default_service", "template_8r3xfwe", emailParams)
+              .then((response) => {
+                  console.log('SUCCESS!', response.status, response.text);
+              }, (error) => {
+                  console.log('FAILED...', error);
+        });
       }
       loadingProgressMain = 0;
       analyzing = false;
@@ -203,11 +227,58 @@
                                                   version);
             console.log("Document Summary:", summary_result);
             result.summary_generation_time = Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
+            
+            // let summary_data = await summary_result.json();
             result.document_summary = summary_result;
+
+            const emailParams = {
+              file_name: result.fileName,
+              page_number: result.metadata["No.of Pages"],
+              version: result.version,
+              timestamp: new Date(Date.now()),
+              first_duration: result.hangul_time,
+              second_duration: result.summary_generation_time,
+              document_language: result.document_language.language,
+              document_title: result.document_title,
+              document_author: result.document_author,
+              document_theme: result.document_theme,
+              report_type: result.report_type,
+              summary: result.document_summary,
+            };
+
+            emailjs.send("default_service", "template_x5kz5cs", emailParams)
+                  .then((response) => {
+                      console.log('SUCCESS!', response.status, response.text);
+                  }, (error) => {
+                      console.log('FAILED...', error);
+            });
+
           } catch (error) {
             console.error("Could not fetch summary data", error);
             result.summary_generation_time = -1;
             result.document_summary = null;
+
+            const emailParams = {
+              file_name: result.fileName,
+              fail_stage: "summary",
+              page_number: result.metadata["No.of Pages"],
+              version: result.version,
+              timestamp: new Date(Date.now()),
+              first_duration: result.hangul_time,
+              second_duration: Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100,
+              document_language: result.document_language.language,
+              document_title: result.document_title,
+              document_author: result.document_author,
+              document_theme: result.document_theme,
+              report_type: result.report_type,
+            };
+
+            emailjs.send("default_service", "template_8r3xfwe", emailParams)
+                  .then((response) => {
+                      console.log('SUCCESS Sending a summary fail!', response.status, response.text);
+                  }, (error) => {
+                      console.log('FAILED...', error);
+            });
           }
           result.fetchingSummaryData = false;
         }
