@@ -1,7 +1,7 @@
 <script>
     import { base } from '$app/paths';
     import Button from '$lib/components/button.svelte';
-    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
+    import ChetahLogo from '$lib/assets/chetah_logo.png';
     import SearchLogo from '$lib/assets/icons8-search-100.png';
 
     let searchQuery = '';

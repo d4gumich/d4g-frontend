@@ -306,14 +306,6 @@
       flex-direction: row;
     }
 
-    .text-containe r{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
     .search-container {
         display: flex;
         align-items: center;
@@ -383,11 +375,6 @@
         line-height: 24px; /* 120% */
     }
 
-    .about-chetah-container {
-        display: flex;
-        flex-direction: column;
-    }
-
     .about-chetah-text {
         width: 50%;
         text-align: left;
@@ -405,23 +392,6 @@
         justify-content: center;
         align-items: flex-start;
         text-align: center;
-    }
-    .button {
-        background-color: #1b3350;
-        color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 10px 20px;
-        cursor: pointer;
-    }
-
-    h3{
-        color: #faefef;
-        font-family: Open Sans;
-        font-size: 20px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: 30.857px; /* 154.285% */
     }
 
     .res-container{
