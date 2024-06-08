@@ -6,7 +6,7 @@
   export let linkedin;
   export let image;
 
-  import LinkedIn from "svelte-material-icons/linkedin.svelte";
+  import LinkedIn from "svelte-material-icons/LinkBox.svelte";
 </script>
 
 <div class="card">

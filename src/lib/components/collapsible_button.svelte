@@ -3,8 +3,6 @@
   export let heading;
 
   import { GRID_TEMPLATE_ROWS_SHOW_CONTENT } from "$lib/assets/constants/constants.js"; 
-  // import ChevronDown from "../assets/icons/chevron-down-solid.svelte";
-  // import ChevronUp from "../assets/icons/angle-up-solid.svelte";
   import ChevronDown from "svelte-material-icons/ChevronDown.svelte"
   import ChevronUp from "svelte-material-icons/ChevronUp.svelte"
 

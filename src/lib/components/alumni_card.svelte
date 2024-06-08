@@ -6,7 +6,7 @@
     export let startYear;
     export let endYear;
 
-    import LinkedIn from "svelte-material-icons/linkedin.svelte"
+    import LinkedIn from "svelte-material-icons/LinkBox.svelte"
 </script>
 
 <style>
