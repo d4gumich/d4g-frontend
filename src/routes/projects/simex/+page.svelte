@@ -27,6 +27,7 @@
   .simex-container {
     font-family: "Open Sans", sans-serif;
     margin: 1rem 12rem 2rem 12rem;
+    background-color: var(--background-color-light);
   }
 
   .responsive-iframe-container {
@@ -46,7 +47,7 @@
 			height: 100%;
 	}
 
-  @media (max-width: 768px) {
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .simex-container {
       margin: 1rem 2rem 2rem 2rem;
     }

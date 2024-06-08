@@ -43,7 +43,7 @@
   .modal-content {
     width: 80%;
     height: 80%;
-    background-color: white;
+    background-color: var(--text-color-light);
     padding: 20px;
   }
 

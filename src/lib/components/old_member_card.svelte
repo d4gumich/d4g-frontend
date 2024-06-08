@@ -13,13 +13,11 @@
       position: relative;
       display: flex;
       min-height: 0;
-      background: #fff;
       padding: 0;
       border: none;
       border-radius: .28571429rem;
-      box-shadow: 0 1px 3px 0 #d4d4d5, 0 0 0 1px #d4d4d5;
       margin: .875em .5em;
-      font-family: 'Roboto', sans-serif;
+      font-family: "Open Sans", sans-serif;
     }
     
     .cards{

@@ -36,6 +36,7 @@
         justify-content: center;
         align-items: center;
         gap: 45px;
+        background-color: var(--background-color-light);
     }
 
     .content-container{
@@ -59,7 +60,7 @@
     .search-container {
         display: flex;
         align-items: center;
-        width: 914.311px;
+        width: 60%;
         height: 66px;
         flex-shrink: 0;
         fill: var(--white, #FFF);
@@ -146,7 +147,7 @@
         justify-content: center;
         align-items: flex-start;
         /* width: 100%;
-        max-width: 600px; */
+        max-width: 912px; */
         /* margin-top: 20px; */
     }
     .button {

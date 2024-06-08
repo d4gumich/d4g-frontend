@@ -3,7 +3,6 @@
     PDF_WORKER_SRC_URL,
     DEFAULT_DROP_TEXT,
     PAGES_TO_TIME_RATIO,
-    KEYWORD_COUNT,
     INTERVAL,
     SECONDS_TO_MILLISECONDS,
     MILLISECONDS_TO_SECONDS,
@@ -12,7 +11,7 @@
   import { sleep } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
-  import { fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
+  import { fetchSummaryData, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
 
   import Button from "$lib/components/button.svelte";
   import HangulResult from "$lib/components/hangul_result.svelte";
@@ -24,22 +23,25 @@
   import Toggle from "$lib/components/toggle.svelte";
   import FeedbackModal from "$lib/components/feedback_modal.svelte";
   import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
+  import TextCarousel from "$lib/components/text_carousel.svelte";
 
   GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
 
   let width;
   let file;
   let result;
+  let summary_result;
   let errorType;
   let showPopUp = false;
   let confirmResult;
   let showModal = false;
-  let loadingProgress = 0;
+  let loadingProgressMain = 0;
   let numberOfPages = 0;
   let verbose = true;
   let hidden = true;
   let version = 2;
   let dropText = DEFAULT_DROP_TEXT;
+  let fileName = "N/A";
   let showError = false;
   let showAnalyzeButton = false;
   let analyzing = false;
@@ -49,7 +51,7 @@
   $: estimatedTimeToAnalyze = Math.round(PAGES_TO_TIME_RATIO * numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
   $: loadingTimeRemaining = Math.round(
-    estimatedTimeToAnalyze - loadingProgress
+    estimatedTimeToAnalyze - loadingProgressMain
   );
 
   $: console.log("version:", version);
@@ -77,12 +79,12 @@
     });
   }
 
-  const simulateLoading = () => {
+  const simulateLoadingMainBar = () => {
     const interval = setInterval(() => {
-      loadingProgress += (INTERVAL / 1000);
+      loadingProgressMain += (INTERVAL * MILLISECONDS_TO_SECONDS);
 
-      if (loadingProgress >= estimatedTimeToAnalyze || !analyzing) {
-        console.log("interval cleared");
+      if (loadingProgressMain >= estimatedTimeToAnalyze || !analyzing) {
+        console.log("main interval cleared");
         clearInterval(interval);
       }
     }, INTERVAL);
@@ -90,7 +92,7 @@
 
   $: {
     if (analyzing) {
-      onMount(simulateLoading());
+      onMount(simulateLoadingMainBar());
     }
   }
 
@@ -142,6 +144,7 @@
 
         try {
           numberOfPages = await getNumberOfPages(file);
+          fileName = dropText.replace(/\.pdf$/, '');
         } catch (error) {
           console.error("Error loading PDF:", error);
         }
@@ -155,74 +158,25 @@
     }
   }
 
-  // async function fetchData() {
-  //   const form = new FormData();
-  //   form.append("file", file);
-  //   form.append("kw_num", KEYWORD_COUNT);
-
-  //   const response = await fetch(
-  //     `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
-  //     {
-  //       method: "POST",
-  //       body: form,
-  //       cors: "cors",
-  //     }
-  //   );
-  //   if (!response.ok) {
-  //     console.log("Network response was not ok");
-  //     throw new Error('Network response was not ok');
-  //   }
-  //   return response.json();
-  // }
-
-  // async function fetchDataWithTimeout(timeout=(estimatedTimeToAnalyze*1000) + 5000) {
-  //   // Use Promise.race() to await the first promise to settle (either success or timeout)
-  //   try {
-  //       const result = await Promise.race([fetchData(), new Promise((resolve, reject) => {
-  //           setTimeout(() => {
-  //               reject(new Error('Request timed out'));
-  //           }, timeout);
-  //       })]);
-        
-  //       return result;
-  //   } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //       throw error; // Propagate the error
-  //   }
-  // }
-
   async function handleAnalyzeClick() {
     let userProceedSelection;
     userProceedSelection = await handleButtonClick();
 
     if (userProceedSelection) {
       analyzing = true;
-      const time = Date.now();
-      // const form = new FormData();
-      // form.append("file", file);
-      // form.append("kw_num", KEYWORD_COUNT);
+      const main_start_time = Date.now();
+
       try {
-        // const response = await fetch(
-        //   `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
-        //   {
-        //     method: "POST",
-        //     body: form,
-        //     cors: "cors",
-        //   }
-        // );
-        // if (!response.ok) {
-        //   console.log("Network response was not ok");
-        //   throw new Error('Network response was not ok');
-        // }
-        // result = await response.json();
         result = await fetchDataWithTimeout(file, version, (estimatedTimeToAnalyze*SECONDS_TO_MILLISECONDS + TIMEOUT_BUFFER));
         if (result !== null) {
           console.log('Result:',result);
         }
         result.verbose = verbose;
-        result.hangul_time = (Date.now() - time) * MILLISECONDS_TO_SECONDS;
-        if (loadingProgress < estimatedTimeToAnalyze) {
-          loadingProgress = estimatedTimeToAnalyze;
+        result.hangul_time = Math.round((Date.now() - main_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
+        result.fileName = fileName;
+        result.version = version;
+        if (loadingProgressMain < estimatedTimeToAnalyze) {
+          loadingProgressMain = estimatedTimeToAnalyze;
           loadingFastPass = true;
           console.log("completing loading bar animation");
           await sleep(500);
@@ -236,8 +190,27 @@
         showError = true;
         showAnalyzeButton = false;
       }
-      loadingProgress = 0;
+      loadingProgressMain = 0;
       analyzing = false;
+
+      if (result !== null && version === 2) {
+          console.log("fetching summary data");
+          result.fetchingSummaryData = true;
+          result.estimatedTimeToAnalyzeSummary = result.hangul_time * 1.5;
+          const summary_start_time = Date.now();
+          try {
+            summary_result = await fetchSummaryData(result.document_summary_parameters,
+                                                  version);
+            console.log("Document Summary:", summary_result);
+            result.summary_generation_time = Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
+            result.document_summary = summary_result;
+          } catch (error) {
+            console.error("Could not fetch summary data", error);
+            result.summary_generation_time = -1;
+            result.document_summary = null;
+          }
+          result.fetchingSummaryData = false;
+        }
     } else {
       goBack(true);
     }
@@ -247,7 +220,7 @@
     analyzing = false;
     showResults = false;
     hidden = true;
-    loadingProgress = 0;
+    loadingProgressMain = 0;
     dropText = onHandleAnalyzeClickEnbl ? dropText : DEFAULT_DROP_TEXT;
     showAnalyzeButton = onHandleAnalyzeClickEnbl;
   };
@@ -285,11 +258,12 @@
             estimated {loadingTimeRemaining} seconds remaining
           </p>
         {:else}
-          <p class="analyzing-text">taking longer than expected, waiting...</p>
+          <TextCarousel />
         {/if}
         <LoadingBar
-          progress={(loadingProgress / estimatedTimeToAnalyze) * 100}
+          progress={(loadingProgressMain / estimatedTimeToAnalyze) * 100}
         />
+        <div style={'margin: 0 0 3rem 0;'}></div>
       </div>
     {:else}
       <div
@@ -339,6 +313,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    background-color: var(--background-color-light);
   }
 
   .content-container {
@@ -365,7 +340,7 @@
 
   .text {
     margin: 0;
-    color: black;
+    color: var(--text-color-main);
     font-family: "Open Sans";
     font-size: 0.9rem;
     font-weight: 400;
@@ -374,7 +349,7 @@
   }
 
   .text-container-heading {
-    color: black;
+    color: var(--text-color-main);
     font-family: "Open Sans";
     font-size: 1.1rem;
     font-weight: 800;
@@ -435,7 +410,7 @@
     padding: 0 16px;
     height: 40px;
     cursor: pointer;
-    background-color: white;
+    background-color: var(--background-color-light);
     border: 1px solid rgba(0, 0, 0, 0.16);
     box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
     margin-right: 16px;
@@ -452,7 +427,7 @@
     background-color: #e5e7eb;
   }
 
-  @media (max-width: 700px) {
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .text-container-heading {
       font-size: 0.9rem;
       width: 90%;

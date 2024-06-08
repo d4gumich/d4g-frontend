@@ -3,8 +3,10 @@
   export let heading;
 
   import { GRID_TEMPLATE_ROWS_SHOW_CONTENT } from "$lib/assets/constants/constants.js"; 
-  import ChevronDown from "../assets/icons/chevron-down-solid.svelte";
-  import ChevronUp from "../assets/icons/angle-up-solid.svelte";
+  // import ChevronDown from "../assets/icons/chevron-down-solid.svelte";
+  // import ChevronUp from "../assets/icons/angle-up-solid.svelte";
+  import ChevronDown from "svelte-material-icons/ChevronDown.svelte"
+  import ChevronUp from "svelte-material-icons/ChevronUp.svelte"
 
   let open = false;
   let copyButtonClicked = false;
@@ -23,9 +25,9 @@
     <div class="title">{heading}</div>
     <div class="dropdown-arrow">
       {#if open}
-        <ChevronUp />
+        <ChevronUp size="2rem"/>
       {:else}
-        <ChevronDown />
+        <ChevronDown size="2rem"/>
       {/if}
     </div>
   </button>
@@ -45,38 +47,43 @@
   }
 
   .toggle {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    text-decoration: none;
-    width: 100%;
-    background-color: #1b3350;
-    border-radius: 1rem;
-    color: white;
+    appearance: none;
+    background-color: var(--button-color);
+    border: 1px solid var(--text-color-main);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    color: var(--text-color-main);
     cursor: pointer;
-    font-weight: bold;
+    line-height: normal;
+    outline: none;
     padding: 1rem 1.5rem;
     text-align: center;
-    transition: 200ms;
-    margin: 1rem 0 0 0;
-    box-sizing: border-box;
-    border: 0;
+    text-decoration: none;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    width: 100%;
+    will-change: transform;
+    margin: 0.8rem 0 0 0;
+    display: flex;
+    justify-content: center;
   }
 
-  .toggle:not(:disabled):hover,
-  .toggle:not(:disabled):focus {
-    outline: 0;
-    background: #1b3350;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
+  .toggle:not(:disabled):hover {
+    color: var(--text-color-main);
+    background-color: var(--button-color);
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(-2px);
+  }
+
+  .toggle:active {
+    box-shadow: none;
+    transform: translateY(0);
   }
 
   .toggle:disabled {
-    filter: saturate(0.2) opacity(0.5);
-    -webkit-filter: saturate(0.2) opacity(0.5);
-    cursor: not-allowed;
+    pointer-events: none;
   }
 
   .title {
@@ -85,13 +92,14 @@
     font-family: "Open Sans";
     font-size: 1rem;
     width: 100%;
+    padding: 0.5rem 0;
   }
 
   .dropdown-arrow {
-    height: 1.1rem;
-    width: 1.1rem;
-    margin-left: 0.5rem;
-    fill: white;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: 1px;
   }
 
   .collapsible {
@@ -104,9 +112,9 @@
     overflow: hidden;
   }
 
-  @media (max-width: 700px) {
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .collapsible-button-container {
-      width: 16.5rem;
+      width: 22.5rem;
     }
 
     .toggle {
@@ -115,7 +123,7 @@
     }
 
     .title {
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
   }
 </style>

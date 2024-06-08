@@ -6,7 +6,7 @@
 
 <style>
     .footer {
-      background-color: #DDD0C8;
+      background-color: var(--background-color-dark);
       padding: 10%;
       display: flex;
       align-items: flex-start; /* Align items at the top of the footer */
@@ -14,6 +14,7 @@
       flex-wrap: wrap;
       padding-top: 5%;
       padding-bottom: 3%;
+      border-top: var(--text-color-main) 1px solid;
     }
 
     .footer-logo {
@@ -26,23 +27,25 @@
   
     .footer-title {
       font-weight: bold;
-      font-family: 'Roboto', sans-serif;
+      font-family: "Open Sans", sans-serif;
+      color: var(--text-color-light);
     }
 
     .footer-column a {
       text-decoration: none; /* Remove link underline */
-      font-family: 'Roboto', sans-serif; /* Set Roboto font */
+      font-family: "Open Sans", sans-serif; /* Set Roboto font */
       font-size: 14px; /* Set font size to 14px */
       font-weight: 400; /* Set regular font weight */
       line-height: 150%; /* Set line height to 150% */
-      color: #000; /* Set link color */
+      color: var(--text-color-light);
     }
     p {
-      font-family: 'Roboto', sans-serif;
+      font-family: "Open Sans", sans-serif;
       font-size: 14px; /* Set font size to 14px */
       font-weight: 400;
       line-height: 150%;
-      margin: 0px;
+      margin: 0;
+      color: var(--text-color-light);
     }
 
     .footer-column {
@@ -55,7 +58,6 @@
     .footer-divider {
       width: 100%;
       height: 1px;
-      background-color: #ccc;
       margin: 20px 0; /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the divider spans the full width */
     }
@@ -63,12 +65,12 @@
     .footer-bottom-text {
       font-size: 12px;
       text-align: center;
-      font-family: 'Roboto', sans-serif;
-      /* Add a gap between rows */
-      flex-basis: 100%; /* Ensure the bottom text spans the full width */
+      font-family: "Open Sans", sans-serif;
+      flex-basis: 100%;
+      color: var(--text-color-light);
     }
 
-    @media (max-width: 670px) {
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
       img{
         height: 50px;
       }

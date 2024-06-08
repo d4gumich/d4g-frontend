@@ -1,5 +1,34 @@
 import { KEYWORD_COUNT, MILLISECONDS_TO_SECONDS } from "$lib/assets/constants/constants.js";
 
+export async function fetchSummaryData(summary_parameters,
+                                       version) {
+
+  // console.log(JSON.stringify(
+  //   summary_parameters
+  // ))
+
+  const response = await fetch(
+    `https://d4gumsi.pythonanywhere.com/api/v${version}/products/summary`,
+    {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(summary_parameters),
+      cors: "no-cors",
+    }
+  );
+  if (!response.ok) {
+    console.log("Network response was not ok");
+    
+    throw new Error('Network response was not ok');
+  }
+
+  // console.log("Summary:", response.text());
+
+  return response.text();
+}
+
 async function fetchData(file, version) {
   const form = new FormData();
   form.append("file", file);

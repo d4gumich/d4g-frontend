@@ -5,61 +5,61 @@
   export let styleAdjustment = null;
 </script>
 
-<a href={link} class="global-button" on:click={click} style={styleAdjustment}>
+<a href={link} class="global-button" role="button" on:click={click} style={styleAdjustment}>
   <div class="text">{text}</div>
 </a>
 
 <style>
-  .global-button {
-    text-decoration: none;
-    background-color: #1b3350;
-    border-radius: 1rem;
-    color: #000;
-    cursor: pointer;
-    font-weight: bold;
-    padding: 1rem 1.5rem;
-    text-align: center;
-    transition: 200ms;
-    width: max-content;
-    margin: 0 1rem;
-    box-sizing: border-box;
-    border: 0;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-  }
+.global-button {
+  appearance: none;
+  background-color: var(--button-color);
+  border: 1px solid var(--text-color-main);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  color: var(--text-color-main);
+  cursor: pointer;
+  display: inline-block;
+  line-height: normal;
+  outline: none;
+  padding: 1rem 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 11rem;
+  will-change: transform;
+  margin: 0 1rem;
+}
 
-  .global-button:not(:disabled):hover,
-  .global-button:not(:disabled):focus {
-    outline: 0;
-    background: #1b3350;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
-  }
+.global-button:disabled {
+  pointer-events: none;
+}
 
-  .global-button:disabled {
-    filter: saturate(0.2) opacity(0.5);
-    -webkit-filter: saturate(0.2) opacity(0.5);
-    cursor: not-allowed;
-  }
+.global-button:hover {
+  color: var(--text-color-main);
+  background-color: var(--button-color);
+  box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+  transform: translateY(-2px);
+}
+
+.global-button:active {
+  box-shadow: none;
+  transform: translateY(0);
+}
 
   .text {
-    color: white;
     font-family: "Open Sans";
     font-size: 1rem;
     font-style: normal;
     font-weight: 700;
-    margin: 0;
-    padding: 0;
   }
 
-  @media (max-width: 700px) {
-    .global-button {
-      margin: 0 0.5rem;
-      padding: 0.5rem 1rem;
-    }
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
 
     .text {
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
   }
 </style>

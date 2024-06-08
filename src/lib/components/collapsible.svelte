@@ -1,19 +1,35 @@
 <!-- Collapsible.svelte -->
 <script>
   export let heading;
-  export let showCopyButton = false;
-  export let markdownText = "";
-  export let showNotification = null;
+  export let showCopyButton = false
+  export let textToCopy = ""
+  export let showNotification = null
+  export let styleAdjustment = ``
+  export let headingFontSize = `font-size: 1rem;`
+  export let runOpenSequence = false;
+  export let isValid = false;
+  export let useCheckMark = false;
 
   import ChevronDown from "../assets/icons/chevron-down-solid.svelte";
   import ChevronUp from "../assets/icons/angle-up-solid.svelte";
   import CopyIcon from "../assets/icons/copy-solid.svelte";
+  import { sleep } from "$lib/components/utils/helper_functions.js";
+  import { onMount } from "svelte";
+  import CheckMark from "svelte-material-icons/CheckCircle.svelte";
+  import FailAlert from "svelte-material-icons/MessageAlert.svelte";
 
-  let open = false;
   let copyButtonClicked = false;
+  let open = false;
 
   $: showContent = `grid-template-rows: 1fr;`;
   $: hideBorder = `border-bottom: .1rem solid white;`;
+
+  onMount(async () => {
+    if (runOpenSequence) {
+      await sleep(1000);
+      open = true;
+    }
+  });
 
   const handleOpen = () => {
     if (copyButtonClicked === false) {
@@ -26,7 +42,7 @@
   async function copyTextToClipboard() {
     copyButtonClicked = true;
     try {
-      await navigator.clipboard.writeText(markdownText);
+      await navigator.clipboard.writeText(textToCopy);
       showNotification();
       // alert("markdown text copied");
     } catch (error) {
@@ -36,10 +52,19 @@
   };
 </script>
 
-<div>
+<div style={styleAdjustment}>
   <button class="toggle" style={open ? hideBorder : ``} on:click={handleOpen}>
     <div class="title">
-      <div>{heading}</div>
+      <div style={headingFontSize}>{heading}</div>
+      {#if useCheckMark}
+        <div class="check-mark-spacer"></div>
+      {/if}
+      {#if isValid && useCheckMark}
+        <CheckMark size={"0.95rem"} color="#34b233" />
+      {/if}
+      {#if !isValid && useCheckMark}
+        <FailAlert size={"0.95rem"} color="tomato" />
+      {/if}
       {#if showCopyButton}
         <button class="copy-button" on:click={copyTextToClipboard}>
           <div class="copy-icon"><CopyIcon /></div>
@@ -71,7 +96,7 @@
     width: 100%;
     border: none;
     border-bottom: 0.1rem solid black;
-    background-color: white;
+    background-color: var(--text-color-light);
     border-radius: 0;
     font-family: inherit;
     font-size: 1rem;
@@ -85,13 +110,14 @@
   }
 
   .toggle:hover {
-    border-color: #ddd0c8;
+    border-color: var(--background-color-dark);
   }
 
   .title {
     display: flex;
     flex-direction: row;
     text-align: left;
+    align-items: center;
     width: 100%;
     font-family: "Open Sans";
   }
@@ -100,7 +126,7 @@
     text-align: right;
     height: 1rem;
     width: 1rem;
-    color: black;
+    color: var(--text-color-main);
   }
 
   .collapsible {
@@ -116,20 +142,19 @@
   .copy-button {
     display: flex;
     flex-direction: row;
-    background-color: white;
-    border: 0.1rem solid black;
-    border-radius: 0.75rem;
+    background-color: var(--text-color-light);
+    border: 0.1rem solid  var(--background-color-dark);
+    border-radius: 0.5rem;
     text-align: left;
     align-items: left;
     margin-left: 0.8rem;
     padding: 0.2rem 0.5rem;
     cursor: pointer;
-    transition: background-color 500ms;
+    transition: all 300ms ease;
   }
 
   .copy-button:hover {
-    border-color: #ddd0c8;
-    background-color: #ddd0c8;
+    background-color: var(--button-color);
   }
 
   .copy-icon {
@@ -138,7 +163,12 @@
     margin-right: 0.25rem;
   }
 
-  @media (max-width: 700px) {
+  .check-mark-spacer {
+    width: 0.25rem;
+    height: auto;
+  }
+
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .title {
       font-size: 0.9rem;
     }

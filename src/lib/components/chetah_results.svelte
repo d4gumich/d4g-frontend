@@ -43,8 +43,6 @@
     .result {
         width: 70%;
         word-wrap: normal;
-        /* background-color: #ddd0c8; */
-        /* padding: 2%; */
         margin: auto;
         margin-left: 0;
         margin-bottom: 1%;
@@ -88,7 +86,7 @@
     .modal-content {
         width: 80%;
         height: 80%;
-        background-color: white;
+        background-color: var(--text-color-light);
         padding: 20px;
         overflow-y: auto;
         padding: 2%;
@@ -106,7 +104,7 @@
         border-radius: 20px;
         background: #1B3350;
         margin: 5px;
-        color: white;
+        color: var(--text-color-light);
         font-family: Open Sans;
     }
 </style>

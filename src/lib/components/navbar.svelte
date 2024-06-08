@@ -1,61 +1,131 @@
 <script>
-  import logo from "$lib/assets/D4G-Logo-2.png";
-  import { base } from "$app/paths";
-  let showMenu = false;
+  import logo from "$lib/assets/D4G-Logo-2.png"
+  import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
+  import { base } from "$app/paths"
+  import { onMount } from "svelte"
 
-  function toggleMenu() {
-    showMenu = !showMenu;
-    console.log("showMenu:", showMenu);
+  let isMobile = false
+  let isHambugerChecked = false
+  let enableNavBarBackground = false
+  let navBarTransparency = 0;
+  let navBarBorder = `border-bottom: none;`
+  let screenWidth
+
+  $: navBarColor = `background-color: rgba(255, 252, 243, ${navBarTransparency});`
+
+  onMount(() => {
+    
+    if (typeof window !== 'undefined') {
+      screenWidth = window.screen.width
+    }
+
+    if (screenWidth <= PHONE_SCREEN_WIDTH) {
+      isMobile = true
+    }
+    else {
+      isMobile = false
+    }
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 30) {
+        navBarTransparency = 1
+      } else {
+        if (!isHambugerChecked && !enableNavBarBackground) {
+          navBarTransparency = 0
+        }
+        
+      }
+    });
+    
+  })
+
+  const fadeOutNavBar = () => {
+    setTimeout(() => {
+      navBarTransparency = 0
+      enableNavBarBackground = false
+    }, 300)
   }
 
-  function resetMenu() {
-    showMenu = false;
+  const handleHambugerItemClick = () => {
+    fadeOutNavBar()
+    isHambugerChecked = false;
   }
+
+  const handleHamburgerClick = () => {
+    if (!enableNavBarBackground) {
+      navBarTransparency = 1
+
+      setTimeout(() => {
+        enableNavBarBackground = true
+      }, 300)
+    }
+    else {
+      fadeOutNavBar()
+    }
+  }
+
+  $: {
+    if (navBarTransparency > 0 || isHambugerChecked) {
+      navBarBorder = `border-bottom: var(--text-color-main) 0.1rem solid;`
+    }
+    else {
+      navBarBorder = `border-bottom: none;`
+    }
+  }
+
 </script>
 
-<div class="nav" class:show-menu={showMenu}>
+<div class="nav" style={navBarColor + navBarBorder}>
   <div class="nav-header">
-    <a href="{base}/" on:click={resetMenu} style={`margin:0; padding:0;`}>
+    <a href="{base}/" style={`margin:0; padding:0;`} on:click={handleHambugerItemClick}>
       <img class="logo" alt="Data4Good Logo" src={logo} />
     </a>
   </div>
 
-  <nav class="nav-links">
-    <a href="{base}/about">About</a>
-    <a href="{base}/news">News</a>
-    <a href="{base}/projects">Projects</a>
-    <a href="{base}/research">Research</a>
-    <a href="{base}/team">Team</a>
-    <a href="{base}/faq">FAQ</a>
-    <div class="dot" />
-  </nav>
+  {#if !isMobile}
+    <nav class="nav-links">
+      <a href="{base}/about">About</a>
+      <a href="{base}/news">News</a>
+      <a href="{base}/projects">Projects</a>
+      <a href="{base}/research">Research</a>
+      <a href="{base}/team">Team</a>
+      <a href="{base}/faq">FAQ</a>
+      <div class="dot" />
+    </nav>
+  {/if}
 
-  <!-- Add the hamburger menu -->
-  <div class="hamburger" on:click|preventDefault={toggleMenu}>
-    <div class="hamburger-line" />
-    <div class="hamburger-line" />
-    <div class="hamburger-line" />
-  </div>
+  {#if isMobile}
+    <section class="p-menu1">
+      <nav id="navbar" class="navigation">
+        <input id="toggle1" type="checkbox" bind:checked={isHambugerChecked} on:click={handleHamburgerClick}/>
+        <label class="hamburger1" for="toggle1">
+          <div class="top" />
+          <div class="meat" />
+          <div class="bottom" />
+        </label>
 
-  <!-- Add the mobile navigation menu -->
-  <nav class="nav-links-mobile">
-    <a href="{base}/about" on:click={resetMenu}>About</a>
-    <a href="{base}/news" on:click={resetMenu}>News</a>
-    <a href="{base}/projects" on:click={resetMenu}>Projects</a>
-    <a href="{base}/research" on:click={resetMenu}>Research</a>
-    <a href="{base}/team" on:click={resetMenu}>Team</a>
-    <a href="{base}/faq" on:click={resetMenu}>FAQ</a>
-  </nav>
+        <nav class="menu1">
+          <a class="link1" href="{base}/about" on:click={handleHambugerItemClick}>About</a>
+          <a class="link1" href="{base}/news" on:click={handleHambugerItemClick}>News</a>
+          <a class="link1" href="{base}/projects" on:click={handleHambugerItemClick}>Projects</a>
+          <a class="link1" href="{base}/research" on:click={handleHambugerItemClick}>Research</a>
+          <a class="link1" href="{base}/team" on:click={handleHambugerItemClick}>Team</a>
+          <a class="link1" href="{base}/faq" on:click={handleHambugerItemClick}>FAQ</a>
+        </nav>
+      </nav>
+    </section>
+  {/if}
 </div>
 
 <style>
   * {
     box-sizing: border-box;
     font-family: "Open Sans";
-    color: black;
+    color: var(--text-color-main);
   }
 
   .logo {
+    margin: 5px 0 0 0;
     width: 3.5rem;
     height: auto;
   }
@@ -66,10 +136,9 @@
     z-index: 900;
     width: 100%;
     padding: 0.5rem 0 0.5rem 10rem;
-    background: #DDD0C8;
     display: flex;
     align-items: center;
-    box-shadow: 0.1rem 0.1rem 0.5rem rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
   }
 
   .nav .nav-header {
@@ -79,19 +148,19 @@
   .nav-links {
     display: flex;
     height: 17px;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .nav-links a {
     text-decoration: none;
     font-size: 1.1rem;
-    text-transform: uppercase;
     font-weight: 500;
     display: inline-block;
     position: relative;
     bottom: 0.05rem;
-    margin-right: 1.5rem;
+    margin: 0 1.25rem;
     /* width: 80px; */
     -webkit-transition: all 0.2s ease-in-out;
     transition: all 0.1s ease-in-out;
@@ -117,84 +186,118 @@
     transform: scaleX(1);
   }
 
-  /* Add styles for the hamburger menu */
-  .hamburger {
-    display: none;
-    flex-direction: column;
-    cursor: pointer;
-  }
-
-  .hamburger-line {
-    width: 25px;
-    height: 3px;
-    background-color: black;
-    margin: 5px;
-  }
-
-  /* Add styles for the mobile navigation menu */
-  .nav-links-mobile {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background-color: #ddd0c8;
-    padding: 1.5rem;
-  }
-
-  .nav-links-mobile > a {
-    display: block;
-    padding: 10px;
+  a {
+    color: var(--text-color-main);
     text-decoration: none;
-    color: black;
-    font-family: "Roboto", sans-serif;
-    font-weight: 400;
   }
 
-  .nav-links-mobile > a:hover {
-    font-weight: 800;
+  .p-menu1 {
+    width: 100%;
+    height: 100%;
   }
 
-  /* Use a media query to change the styles for smaller screens */
-  @media (max-width: 780px) {
+  .hamburger1 {
+    height: 45px;
+    margin: 10px;
+    display: -ms-grid;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    justify-items: right;
+    z-index: 120;
+  }
+
+  .hamburger1 div {
+    background-color: var(--text-color-main);
+    position: relative;
+    width: 40px;
+    height: 5px;
+    margin-top: 7px;
+    -webkit-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+  }
+
+  #toggle1 {
+    display: none;
+  }
+
+  #toggle1:checked + .hamburger1 .top {
+    -webkit-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+    margin-top: 22.5px;
+  }
+
+  #toggle1:checked + .hamburger1 .meat {
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    margin-top: -5px;
+  }
+
+  #toggle1:checked + .hamburger1 .bottom {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  }
+
+  #toggle1:checked ~ .menu1 {
+    height: 350px;
+  }
+
+  .menu1 {
+    width: 100%;
+    background-color: var(--background-color-light);
+    margin: 0;
+    display: -ms-grid;
+    display: grid;
+    grid-template-rows: 1fr repeat(4, 0.5fr);
+    grid-row-gap: 25px;
+    padding: 0;
+    list-style: none;
+    clear: both;
+    width: auto;
+    text-align: right;
+    height: 0px;
+    overflow: hidden;
+    transition: height 0.4s ease;
+    z-index: 120;
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+  }
+
+  .menu1 a:first-child {
+    margin-top: 40px;
+  }
+
+  .menu1 a:last-child {
+    margin-bottom: 40px;
+  }
+
+  .link1 {
+    width: 100%;
+    margin: 0;
+    padding: 0 1rem 0 0;
+    font-size: 1.25rem;
+  }
+
+  .link1:hover {
+    background-color: none;
+    color: var(--text-color-main);
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-device-width: 912px) {
     .nav {
       padding: 15px;
       justify-content: space-between;
       gap: initial;
+      transition: background-color 0.2s ease;
     }
 
     .nav-links {
       display: none !important;
     }
 
-    .hamburger {
-      display: flex;
-    }
-
-    /* Show the mobile navigation menu when showMenu is true */
-    :global(.show-menu) .nav-links-mobile {
-      display: flex;
-    }
-
-    :global(.show-menu) .hamburger-line:nth-child(2) {
-      opacity: 0;
-    }
-
-    :global(.show-menu) .hamburger-line:nth-child(1) {
-      transform-origin: center center;
-      transform: rotate(45deg);
-      position: relative;
-      top: 8px;
-    }
-
-    :global(.show-menu) .hamburger-line:nth-child(3) {
-      transform-origin: center center;
-      transform: rotate(-45deg);
-      position: relative;
-      top: -17px;
+    .nav-header {
+      margin: 0;
     }
   }
 </style>

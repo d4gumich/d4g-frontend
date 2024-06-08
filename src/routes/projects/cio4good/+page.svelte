@@ -8,6 +8,7 @@
 		src="https://tableau.dsc.umich.edu/javascripts/api/viz_v1.js"
 	></script>
 </svelte:head>
+
 <div class="cio4good-container">
 	<Tabs>
 		<TabList>
@@ -96,6 +97,7 @@
 	.cio4good-container {
 		font-family: "Open Sans", sans-serif;
 		margin: 1rem 12rem 2rem 12rem;
+		background-color: var(--background-color-light);
 	}
 
 	.research-tab {
@@ -128,7 +130,7 @@
 		font-size: 1rem
 	}
 
-	@media (max-width: 768px) {
+	@media (max-device-width: 912px) and (min-resolution: 2dppx) {
 		.cio4good-container {
 			margin: 1rem 1rem 2rem 1rem;
 		}

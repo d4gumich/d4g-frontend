@@ -11,7 +11,7 @@
         width: auto;
         color: rgba(0, 0, 0, 0.87);
         text-align: center;
-        font-family: Lato;
+        font-family: "Open Sans", sans-serif;
         font-size: 40px;
         font-style: normal;
         font-weight: 700;
@@ -28,7 +28,7 @@
         padding-bottom: 10px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
         h1{
             font-size: 30px;
         }

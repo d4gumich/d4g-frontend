@@ -65,7 +65,7 @@
     flex-direction: row;
     align-items: center;
     margin: 0.5rem 0 0 0;
-    border: dashed 0.2rem whitesmoke;
+    border: dashed 0.2rem #d7d7d7;
     border-radius: 0.2rem;
     width: max-content;
     padding: 0.5rem 0.7rem;
@@ -92,7 +92,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgb(237, 236, 236);
+    background-color: var(--background-color-light);
     box-shadow: -0.2rem 0.05rem 0.1rem #d7d7d7;
     -webkit-transition: 0.4s;
     transition: 1s;
@@ -105,10 +105,10 @@
     width: 1.3rem;
     left: -0.1rem;
     bottom: 0.05rem;
-    background-color: #1b3350;
+    background-color: var(--button-color);
     -webkit-transition: 0.4s;
     transition: 0.4s;
-    box-shadow: 0.1rem 0rem 0.1rem #1b3350;
+    box-shadow: 0.1rem 0rem 0.1rem rgb(177, 125, 47);
   }
 
   input:checked + .slider:before {
@@ -127,7 +127,7 @@
 
   .text {
     margin: 0;
-    color: black;
+    color: var(--text-color-main);
     font-family: "Open Sans";
     font-size: 0.9rem;
     font-weight: 400;
@@ -135,7 +135,7 @@
     transition: font-weight 300ms ease-in-out;
   }
 
-  @media (max-width: 700px) {
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .text {
       font-size: 0.8rem;
     }

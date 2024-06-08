@@ -1,25 +1,40 @@
 <script>
-    // Define the props for the card component
-    export let name;
-    export let position;
-    export let description;
-    export let linkedin;
-    export let image;
+  // Define the props for the card component
+  export let name;
+  export let position;
+  export let description;
+  export let linkedin;
+  export let image;
+
+  import LinkedIn from "svelte-material-icons/linkedin.svelte";
 </script>
 
+<div class="card">
+  <div class="logo-container">
+    <img src={image} alt={name} />
+  </div>
+  <div class="text-container">
+    <a href={linkedin} target="_blank"><h1>{name}</h1><LinkedIn size="1.8rem" color="#0077B5"/></a>
+    <h4>{position}</h4>
+    <p>{description}</p>
+  </div>
+</div>
+
 <style>
+  h1 {
+    margin: 0 0.5rem 0 0; 
+  }
     .card {
         display: flex;
         flex-direction: row;
-        gap: 2%;
         border-radius: 20px;
-        border: 2px solid #000;
-        margin-bottom: 2%;
+        border: 2px solid var(--text-color-main);
+        margin: 1rem 0;
+        padding: 3rem 3rem;
     }
     .logo-container {
         display: flex;
         align-items: center;
-        padding: 2%;
     }
     img {
         width: 200px;
@@ -27,40 +42,49 @@
     }
     .text-container {
         width: 70%;
-        margin: 2%;
-        font-family: Work Sans;
+        margin: 0 0 0 2rem;
+        font-family: "Work Sans";
     }
     a {
-        color: #000;
+        color: var(--text-color-main);
+        text-decoration: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
     }
 
     h4{
         font-weight: 400;
     }
 
-    @media (max-width: 850px) {
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
         .card {
             flex-direction: column;
             align-items: center;
+            padding: 3rem 0.1rem;
         }
+
         h1{
             font-size: 1.5em;
+            margin: 0 0 1rem 0;
         }
-        img{
-            padding-top: 5%;
+
+        .text-container {
+            width: 80%;
+            margin: 3rem 0 0 0;
+            align-items: center;
+            text-align: center;
+        }
+
+        a {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        h4 {
+          font-size: 1.2rem;
         }
     }
 
 </style>
-
-<div class="card">
-    <div class="logo-container">
-        <img src={image} alt="{name}"/>
-    </div>
-    <div class="text-container">
-        <a href={linkedin} target="_blank"><h1>{name}</h1></a>
-        <h4>{position}</h4>
-        <p>{description}</p>
-    </div>
-</div>
-

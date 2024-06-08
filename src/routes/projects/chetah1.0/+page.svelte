@@ -4,7 +4,7 @@
     import Button from "$lib/components/button.svelte";
     import ChetahResults from "../../../lib/components/chetah_results.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
-    import ChetahLogo from '$lib/assets/Updated_LOGO.png';
+    import ChetahLogo from '$lib/assets/chetah_logo.png';
 
     let searchQuery = "";
     let aboutChetah = false;
@@ -288,6 +288,7 @@
         justify-content: center;
         align-items: center;
         gap: 45px;
+        background-color: var(--background-color-light);
     }
 
     .content-container {
@@ -316,8 +317,8 @@
     .search-container {
         display: flex;
         align-items: center;
-        width: 900px;
-        height: 66px;
+        width: 50rem;
+        height: 60px;
         flex-shrink: 0;
         fill: var(--white, #fff);
         stroke-width: 0.5px;

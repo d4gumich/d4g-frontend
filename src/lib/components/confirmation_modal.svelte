@@ -45,10 +45,10 @@
   }
 
   .modal {
-    background-color: white;
+    background-color: var(--text-color-light);
     padding: 2rem;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -60,8 +60,8 @@
     justify-content: center;
     align-items: center;
     border-radius: 0.5rem;
-    background: #1b3350;
-    color: white;
+    background: var(--button-color);
+    color: var(--text-color-main);
     margin: 0 0.1rem;
     font-size: 1rem;
     transition: 200ms;
@@ -75,8 +75,8 @@
   .small-button:not(:disabled):hover,
   .small-button:not(:disabled):focus {
     outline: 0;
-    background: #1b3350;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2), 0 3px 8px 0 rgba(0, 0, 0, 0.15);
+    background: var(--button-color);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.8), 0 3px 8px 0 rgba(0, 0, 0, 0.8);
   }
 
   .small-button:disabled {
@@ -94,7 +94,7 @@
     margin: 0.1rem;
   }
 
-  @media (max-width: 700px) {
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .modal {
       padding: 1rem;
     }

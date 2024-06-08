@@ -1,0 +1,13 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Outfit:wght@100..900&family=Poiret+One&display=swap");
+
+:root {
+  --line-height: 200px;
+  --text-color-main: #232323;
+  --blue-color-main: #1b3350;
+  --text-color-light: rgb(255, 252, 243);
+  --background-color-dark: #232323;
+  --background-color-light: rgb(255, 252, 243);
+  --button-color: rgb(227, 184, 120);
+  --button-color-green: rgb(175, 182, 166);
+}

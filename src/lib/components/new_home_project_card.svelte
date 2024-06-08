@@ -54,7 +54,7 @@
         text-decoration: none;
     }
 
-    @media (max-width: 600px) {
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
         .card{
             width: 130px;
             height: 200px;

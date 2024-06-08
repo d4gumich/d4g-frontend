@@ -30,18 +30,14 @@
   
 <style>
     .a{
-        /* margin-top: 0px; */
         display: flex;
         flex-direction: column;
         align-items: center;
-        /* align-content: center; */
-        /* gap: 55px; */
-        background: var(--background, #F5F5F5);
+        background-color: var(--background-color-light);
         padding-bottom: 4%;
         padding-top: 1.5%;
         flex-direction: column;
         align-items: center;
-        gap: 40px;
     }
 
     .horizontal-segment {
@@ -94,9 +90,10 @@
         font-size: 1rem;
     }
 
-    @media (max-width: 600px) {
-        .a{
-            gap: 20px;
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+        .horizontal-segment {
+            margin: 1rem 0 5rem 0;
+            padding: 0;
         }
     }
 

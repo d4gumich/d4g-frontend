@@ -89,7 +89,7 @@
         padding: 3.5rem 0;
     }
 
-    @media (max-width: 768px) {
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
         .content {
             padding: 1.5rem 0;
         }

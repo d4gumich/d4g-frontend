@@ -1,7 +1,9 @@
 <!-- LoadingBar.svelte -->
 <script>
-  import { sleep } from "$lib/components/utils/helper_functions.js";
   export let progress = 0;
+  export let barWidth = `20rem`;
+  import { sleep } from "$lib/components/utils/helper_functions.js";
+  
 
   let barStyle = ``;
   let progressClass = ``;
@@ -26,23 +28,23 @@
   }
 </script>
 
-<div class="loading-bar">
+<div class="loading-bar" style={`width: ${barWidth};`}>
   <div class={`progress ${progressClass}`} style={barStyle}></div>
 </div>
 
 <style>
   .loading-bar {
-    width: 20rem;
+    width: 0;
     background-color: #f0f0f0;
     border-radius: 1rem;
     overflow: hidden;
-    margin-bottom: 3rem;
+    margin: 0;
   }
 
   .progress {
     width: 0%;
     height: 0.5rem;
-    background-color: #1b3350;
+    background-color: var(--button-color);
     transition: width 0.3s ease;
     border-radius: 1rem;
   }

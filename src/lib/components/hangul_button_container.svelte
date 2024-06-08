@@ -11,9 +11,9 @@
 
   $: {
     if (width < MIN_SCREEN_WIDTH) {
-      buttonSytleAdjustment = `padding: .5rem 1rem; margin: 0 0.2rem;`;
+      buttonSytleAdjustment = `padding: .5rem 0; margin: 0 0.2rem;`;
     } else {
-      buttonSytleAdjustment = `padding: 1rem 4.2rem; margin: 0 0.2rem;`;
+      buttonSytleAdjustment = `padding: 1rem 0; margin: 0 0.2rem; width: 15.7rem;`;
     }
   }
 
