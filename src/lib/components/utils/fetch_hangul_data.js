@@ -3,19 +3,17 @@ import { KEYWORD_COUNT, MILLISECONDS_TO_SECONDS } from "$lib/assets/constants/co
 export async function fetchSummaryData(summary_parameters,
                                        version) {
 
-  // console.log(JSON.stringify(
-  //   summary_parameters
-  // ))
+  let headers_ = new Headers();
+
+  headers_.append('Content-Type', 'application/json');
+  headers_.append('Accept', 'application/json');
 
   const response = await fetch(
     `https://d4gumsi.pythonanywhere.com/api/v${version}/products/summary`,
     {
       method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: headers_,
       body: JSON.stringify(summary_parameters),
-      cors: "no-cors",
     }
   );
   if (!response.ok) {
@@ -23,8 +21,6 @@ export async function fetchSummaryData(summary_parameters,
     
     throw new Error('Network response was not ok');
   }
-
-  // console.log("Summary:", response.text());
 
   return response.text();
 }
@@ -39,7 +35,6 @@ async function fetchData(file, version) {
     {
       method: "POST",
       body: form,
-      cors: "cors",
     }
   );
   if (!response.ok) {

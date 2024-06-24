@@ -8,7 +8,7 @@
 	export let content;
 	export let report_type;
 	export let locations;
-	export let disasters;
+	export let disasters = null; // default value when not present
 	export let new_detected_disasters = null; // default value when not present
 	export let full_content;
 	export let keywords;

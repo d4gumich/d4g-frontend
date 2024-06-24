@@ -16,3 +16,4 @@ export const TIMEOUT_BUFFER = 60000; //ms // 60000 ms = 1 minute
 export const SECONDS_TO_MILLISECONDS = 1000;
 export const MILLISECONDS_TO_SECONDS = 0.001;
 export const PHONE_SCREEN_WIDTH = 912; //px
+export const SUMMARY_API_CALL_DELAY = 2000; //ms

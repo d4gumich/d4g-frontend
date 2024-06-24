@@ -6,7 +6,8 @@
     INTERVAL,
     SECONDS_TO_MILLISECONDS,
     MILLISECONDS_TO_SECONDS,
-    TIMEOUT_BUFFER
+    TIMEOUT_BUFFER,
+    SUMMARY_API_CALL_DELAY
   } from "$lib/assets/constants/constants.js";
   import { sleep } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
@@ -223,12 +224,14 @@
           result.estimatedTimeToAnalyzeSummary = result.hangul_time * 1.5;
           const summary_start_time = Date.now();
           try {
+            console.log(`waiting ${SUMMARY_API_CALL_DELAY * MILLISECONDS_TO_SECONDS} seconds to call summary data`);
+            await sleep(SUMMARY_API_CALL_DELAY);
+            console.log("fetching summary data");
             summary_result = await fetchSummaryData(result.document_summary_parameters,
                                                   version);
             console.log("Document Summary:", summary_result);
             result.summary_generation_time = Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
             
-            // let summary_data = await summary_result.json();
             result.document_summary = summary_result;
 
             const emailParams = {
