@@ -9,6 +9,7 @@
   let enableNavBarBackground = false
   let navBarTransparency = 0;
   let navBarBorder = `border-bottom: none;`
+  let hamburgerColor = `background-color: var(--text-color-light);`
   let screenWidth
 
   $: navBarColor = `background-color: rgba(255, 252, 243, ${navBarTransparency});`
@@ -67,9 +68,11 @@
   $: {
     if (navBarTransparency > 0 || isHambugerChecked) {
       navBarBorder = `border-bottom: var(--text-color-main) 0.1rem solid;`
+      hamburgerColor = `background-color: var(--text-color-main);`
     }
     else {
       navBarBorder = `border-bottom: none;`
+      hamburgerColor = `background-color: var(--text-color-light);`
     }
   }
 
@@ -99,9 +102,9 @@
       <nav id="navbar" class="navigation">
         <input id="toggle1" type="checkbox" bind:checked={isHambugerChecked} on:click={handleHamburgerClick}/>
         <label class="hamburger1" for="toggle1">
-          <div class="top" />
-          <div class="meat" />
-          <div class="bottom" />
+          <div class="top" style={hamburgerColor}/>
+          <div class="meat" style={hamburgerColor}/>
+          <div class="bottom" style={hamburgerColor}/>
         </label>
 
         <nav class="menu1">
@@ -197,8 +200,8 @@
   }
 
   .hamburger1 {
-    height: 45px;
-    margin: 10px;
+    height: 5rem;
+    margin: 30px;
     display: -ms-grid;
     display: grid;
     grid-template-rows: repeat(3, 1fr);
@@ -207,17 +210,21 @@
   }
 
   .hamburger1 div {
-    background-color: var(--text-color-main);
+    background-color: var(--text-color-light);
     position: relative;
-    width: 40px;
-    height: 5px;
-    margin-top: 7px;
+    width: 5rem;
+    height: 8px;
+    margin-top: 10px;
     -webkit-transition: all 0.2s ease-in-out;
     transition: all 0.2s ease-in-out;
   }
 
   #toggle1 {
     display: none;
+  }
+
+  #toggle1:checked + .hamburger1 div {
+    background-color: var(--text-color-main);
   }
 
   #toggle1:checked + .hamburger1 .top {
@@ -238,13 +245,13 @@
   }
 
   #toggle1:checked ~ .menu1 {
-    height: 350px;
+    height: 600px;
   }
 
   .menu1 {
     width: 100%;
     background-color: var(--background-color-light);
-    margin: 0;
+    margin: 0 1rem 0 0;
     display: -ms-grid;
     display: grid;
     grid-template-rows: 1fr repeat(4, 0.5fr);
@@ -263,18 +270,18 @@
   }
 
   .menu1 a:first-child {
-    margin-top: 40px;
+    margin-top: 1rem;
   }
 
   .menu1 a:last-child {
-    margin-bottom: 40px;
+    margin-bottom: 100px;
   }
 
   .link1 {
     width: 100%;
     margin: 0;
     padding: 0 1rem 0 0;
-    font-size: 1.25rem;
+    font-size: 3rem;
   }
 
   .link1:hover {
@@ -298,6 +305,12 @@
 
     .nav-header {
       margin: 0;
+    }
+
+    .logo {
+      margin: 10px 0 0 1rem;
+      width: 8rem;
+      height: auto;
     }
   }
 </style>

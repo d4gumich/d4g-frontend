@@ -52,7 +52,11 @@
     <div class="hero-container">
       <div class="contain-text">
         <h3>Empowering nonprofits with data</h3>
-        <h1>Data4Good</h1>
+        {#if !isMobile}
+          <h1>Data4Good</h1>
+        {:else}
+          <h1>Data4Good</h1>
+        {/if}
       </div>
       <button class="main-title-button" on:click={scrollToBottom}>
         Learn More
@@ -309,11 +313,56 @@
 
     .hero {
       margin: 0;
+      transform: translateY(-180px);
+      background-position: 85%;
+      align-items: center;
+      text-align: center;
+    }
+
+    .contain-text {
+      margin: 30rem 0 0 0;
+      padding: 0;
+      height: min-content;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      width: 100vw;
+    }
+
+    .hero h1 {
+      font-size: 8rem;
+      margin: 4rem 0 0 0;
+      align-items: center;
+      text-align: center;
+      text-shadow: 1rem 0.7rem 0rem rgba(35,35,35,0.7);
+    }
+
+    .hero h3 {
+      font-size: 3rem;
+      color: var(--text-color-light);
+      margin: 0;
+      padding: 0;
+      text-transform: none;
+      align-items: center;
+      text-align: center;
     }
 
     .hero-container {
-      margin: 10rem;
+      margin: 0;
       padding: 0;
+      display: flex;
+      align-items: center;
+      text-align: center;
+      justify-content: flex-start;
+      background-color: rgba(0, 0, 0, 0.3);
+      height: calc(100vh);
+    }
+
+    .main-title-button {
+      margin: 4rem 0 0 0;
+      font-size: 3rem;
+      padding: 2rem 3rem;
+      text-transform: none;
     }
 
     .about-container {
