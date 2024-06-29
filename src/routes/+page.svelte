@@ -52,11 +52,7 @@
     <div class="hero-container">
       <div class="contain-text">
         <h3>Empowering nonprofits with data</h3>
-        {#if !isMobile}
-          <h1>Data4Good</h1>
-        {:else}
-          <h1>Data4Good</h1>
-        {/if}
+        <h1>Data4Good</h1>
       </div>
       <button class="main-title-button" on:click={scrollToBottom}>
         Learn More
