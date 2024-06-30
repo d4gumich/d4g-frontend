@@ -46,21 +46,21 @@
   .cheetah-logo-container::after {
     content: "";
     position: absolute;
-    width: 2px; /* Adjust as needed */
-    background: #232323; /* Adjust as needed */
+    width: 2px; 
+    background: #232323; 
     border-radius: 15%;
   }
 
   .cheetah-logo-container::before {
-    height: var(--line-height); /* Adjust as needed */
-    top: calc(-1*var(--line-height)); /* Adjust as needed */
+    height: var(--line-height); 
+    top: calc(-1*var(--line-height)); 
     left: 50%;
     transform: translateX(-50%);
   }
 
   .cheetah-logo-container::after {
-    height: var(--line-height); /* Adjust as needed */
-    bottom: calc(-1*calc(var(--line-height) + 10px)); /* Adjust as needed */
+    height: var(--line-height); 
+    bottom: calc(-1*calc(var(--line-height) + 10px)); 
     left: 50%;
     transform: translateX(-50%);
   }
@@ -113,17 +113,55 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     h1 {
-      font-size: 3rem;
+      font-size: 4rem;
     }
 
     .cheetah-logo {
-      width: 7rem;
+      width: 18rem;
     }
 
     .cheetah-short-description-container {
-      margin: -5rem 2rem 0 0;
+      margin: 5rem 3rem 0 0;
       width: 50%;
       text-align: right;
+    }
+
+    .cheetah-short-description {
+      font-size: 2rem;
+    }
+
+    .cheetah-logo-container {
+      margin: 500px 0 calc(var(--line-height-mobile) + 10px) 0;
+    }
+
+    .cheetah-logo-container::before,
+    .cheetah-logo-container::after {
+      width: 5px;
+      border-radius: 15%;
+    }
+
+    .cheetah-logo-container::before {
+      height: var(--line-height-mobile);
+      top: calc(-1*var(--line-height-mobile));
+    }
+
+    .cheetah-logo-container::after {
+      height: var(--line-height-mobile);
+      bottom: calc(-1*calc(var(--line-height-mobile) + 10px));
+    }
+
+    .cheetah-logo-dot:before {
+      border-top: 20px solid #232323;
+      width: 20px;
+      height: auto;
+      top: calc(-1*var(--line-height-mobile));
+    }
+
+    .cheetah-logo-dot::after {
+      border-top: 20px solid #232323;
+      width: 20px;
+      height: auto;
+      bottom: calc(-1*calc(var(--line-height-mobile) + 10px));
     }
   }
 

@@ -1,17 +1,17 @@
 <!-- HangulButtonContainer.svelte -->
 <script>
-  import { HANGUL_CURATION_ASSISTANT_PDF_LINK, MIN_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
+  import { HANGUL_CURATION_ASSISTANT_PDF_LINK, PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
   import CollapsibleButton from "./collapsible_button.svelte";
   import Button from "./button.svelte";
 
   export let showModal;
   export let width;
 
-  let buttonSytleAdjustment = `padding: 1rem 4.2rem; margin: 0 0.2rem;`;
+  let buttonSytleAdjustment = `padding: 1rem 0; margin: 0 0.2rem; width: 15.7rem;`;
 
   $: {
-    if (width < MIN_SCREEN_WIDTH) {
-      buttonSytleAdjustment = `padding: .5rem 0; margin: 0 0.2rem;`;
+    if (width < PHONE_SCREEN_WIDTH) {
+      buttonSytleAdjustment = `padding: 1.5rem 2rem; margin: 0 0.2rem; width: 23rem;`;
     } else {
       buttonSytleAdjustment = `padding: 1rem 0; margin: 0 0.2rem; width: 15.7rem;`;
     }
@@ -73,5 +73,20 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 3rem;
+    width: 100%;
+  }
+
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .about-hangul-text {
+      font-size: 2rem;
+    }
+
+    .button-container-row {
+
+    }
+
+    .button-container-col {
+      width: 100%;
+    }
   }
 </style>

@@ -122,31 +122,31 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .card {
-      /* max-width: 50%; */
-      max-width: 250px;
+      max-width: calc(80% - 6rem);
       height: auto;
-      padding: 0px 60px;
+      padding: 3rem;
     }
 
     .content {
-      width: 120%;
+      width: 100%;
     }
 
     img {
-      height: 10em;
+      height: 20rem;
       padding-top: 10%;
     }
 
     h1 {
-      font-size: 25px;
+      font-size: 3rem;
       margin: 0;
       padding: 0;
     }
 
     h3 {
-      font-size: 0.9rem;
-      padding: 0.2rem 0 0.5rem 0;
-      margin: 0;
+      font-size: 2rem;
+      line-height: 3rem;
+      padding: 0;
+      margin: 1rem 0;
     }
 
     .text {

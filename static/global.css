@@ -3,6 +3,7 @@
 
 :root {
   --line-height: 200px;
+  --line-height-mobile: 400px;
   --text-color-main: #232323;
   --blue-color-main: #1b3350;
   --text-color-light: rgb(255, 252, 243);

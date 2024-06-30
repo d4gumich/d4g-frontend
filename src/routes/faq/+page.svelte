@@ -13,13 +13,13 @@
   import PersonIcon from "svelte-material-icons/Account.svelte"
   import StartArrow from "svelte-material-icons/RayStartArrow.svelte"
 
-  const HeadingFontSize = `font-size: 1.1rem;`
-
+  let headingFontSize = `font-size: 1.1rem;`
   let isMobile = false
   let iconSize = "30px"
   let screenWidth
 
-  $: collapsibleStyle = isMobile ? `width:80%;` : `width:70%;`
+  $: collapsibleStyle = isMobile ? `width:90%;` : `width:70%;`
+  $: headingFontSize = isMobile ? `font-size: 2.5rem; max-width: 90%;` : `font-size: 1.1rem;`
 
   onMount(() => {
     if (typeof window !== 'undefined') {
@@ -43,7 +43,7 @@
   <Collapsible
     heading="What is Data4Good?"
     styleAdjustment={collapsibleStyle}
-    headingFontSize={HeadingFontSize}
+    headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
       UMSI Data4Good center brings together non-profit organizations' data into
@@ -54,7 +54,7 @@
   <Collapsible
     heading="What projects are we working on at Data4Good?"
     styleAdjustment={collapsibleStyle}
-    headingFontSize={HeadingFontSize}
+    headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
       Find our most recent work on the <a href="{base}/projects">Projects</a> page,
@@ -65,7 +65,7 @@
   <Collapsible
     heading="How can I provide feedback on Data4Good's website or projects?"
     styleAdjustment={collapsibleStyle}
-    headingFontSize={HeadingFontSize}
+    headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
       Fill out our <a href="https://forms.gle/n51U4g2K9cafpZUu5"
@@ -77,7 +77,7 @@
   <Collapsible
     heading="What's the benefit of joining Data4Good team?"
     styleAdjustment={collapsibleStyle}
-    headingFontSize={HeadingFontSize}
+    headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
       <p style={`margin: 0 0 1rem 0;`}>
@@ -170,7 +170,7 @@
   <Collapsible
     heading="How else can I get in touch with Data4Good?"
     styleAdjustment={collapsibleStyle}
-    headingFontSize={HeadingFontSize}
+    headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
       <p>
@@ -236,6 +236,7 @@
 
     .section-content {
       padding: 0;
+      font-size: 2.3rem;
     }
 
     .team-bullets {

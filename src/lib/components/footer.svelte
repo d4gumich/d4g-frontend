@@ -72,16 +72,30 @@
 
     @media (max-device-width: 912px) and (min-resolution: 2dppx) {
       img{
-        height: 50px;
+        height: 100px;
       }
 
       .footer-column:nth-child(4) {
         display:none;
       }
 
-      .footer{
-        padding: 5%;
-        padding-top: 10%;
+      .footer {
+        justify-content: flex-start;
+        padding: 5rem 0;
+        margin: 0;
+      }
+
+      .footer-column a {
+        font-size: 2rem;
+      }
+
+      .footer-column div {
+        font-size: 2rem;
+      }
+
+      .footer-bottom-text {
+        margin: 3rem 0 0 0;
+        font-size: 1.5rem;
       }
     }
 

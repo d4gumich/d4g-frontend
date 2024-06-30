@@ -120,6 +120,7 @@
     align-items: center;
     width: 100%;
     font-family: "Open Sans";
+    color: var(--text-color-main);
   }
 
   .dropdown-arrow {
@@ -169,8 +170,17 @@
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .toggle {
+      padding: 2rem 1rem 2rem 0.5rem;
+    }
+
     .title {
-      font-size: 0.9rem;
+      font-weight: 200;
+    }
+
+    .dropdown-arrow {
+      height: 2.5rem;
+      width: 2.5rem;
     }
   }
 </style>

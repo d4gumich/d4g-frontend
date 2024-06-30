@@ -11,6 +11,7 @@
   let navBarBorder = `border-bottom: none;`
   let hamburgerColor = `background-color: var(--text-color-light);`
   let screenWidth
+  let onHomePage = true
 
   $: navBarColor = `background-color: rgba(255, 252, 243, ${navBarTransparency});`
 
@@ -48,9 +49,18 @@
   }
 
   const handleHambugerItemClick = () => {
-    fadeOutNavBar()
+    fadeOutNavBar();
     isHambugerChecked = false;
+    onHomePage = false;
   }
+
+  const handleD4GLogoItemClick = () => {
+    fadeOutNavBar();
+    isHambugerChecked = false;
+    onHomePage = true;
+  }
+
+  $: console.log("onHomePage", onHomePage)
 
   const handleHamburgerClick = () => {
     if (!enableNavBarBackground) {
@@ -72,7 +82,13 @@
     }
     else {
       navBarBorder = `border-bottom: none;`
-      hamburgerColor = `background-color: var(--text-color-light);`
+      if (onHomePage) {
+        hamburgerColor = `background-color: var(--text-color-light);`
+      }
+    }
+
+    if (!onHomePage) {
+      hamburgerColor = `background-color: var(--text-color-main);`
     }
   }
 
@@ -80,7 +96,7 @@
 
 <div class="nav" style={navBarColor + navBarBorder}>
   <div class="nav-header">
-    <a href="{base}/" style={`margin:0; padding:0;`} on:click={handleHambugerItemClick}>
+    <a href="{base}/" style={`margin:0; padding:0;`} on:click={handleD4GLogoItemClick}>
       <img class="logo" alt="Data4Good Logo" src={logo} />
     </a>
   </div>
@@ -297,6 +313,7 @@
       justify-content: space-between;
       gap: initial;
       transition: background-color 0.2s ease;
+      margin-top: 2rem;
     }
 
     .nav-links {

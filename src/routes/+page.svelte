@@ -58,8 +58,8 @@
         Learn More
       </button>
     </div>
-
   </div>
+
   <div class="about-container">
     <h2>Connecting data, research and implementation to help create stronger nonprofit organizations</h2>
     <Button
@@ -303,13 +303,11 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
   /* Styles for small, high-resolution mobile devices in portrait mode */
-    .section-title {
-      margin: 0;
-    }
 
     .hero {
       margin: 0;
-      transform: translateY(-180px);
+      height: calc(100vh + 40px);
+      transform: translateY(-240px);
       background-position: 85%;
       align-items: center;
       text-align: center;
@@ -327,15 +325,17 @@
 
     .hero h1 {
       font-size: 8rem;
+      font-weight: 100;
       margin: 4rem 0 0 0;
       align-items: center;
       text-align: center;
-      text-shadow: 1rem 0.7rem 0rem rgba(35,35,35,0.7);
+      text-shadow: 0.2rem 0.2rem 0rem rgba(35,35,35,0.2);
     }
 
     .hero h3 {
       font-size: 3rem;
       color: var(--text-color-light);
+      text-shadow: 0.2rem 0.2rem 0rem rgba(35,35,35,0.2);
       margin: 0;
       padding: 0;
       text-transform: none;
@@ -355,10 +355,12 @@
     }
 
     .main-title-button {
-      margin: 4rem 0 0 0;
+      margin: 6rem 0 0 0;
       font-size: 3rem;
       padding: 2rem 3rem;
       text-transform: none;
+      font-weight: 400;
+      background-color: rgba(255, 255, 255, 0.3);
     }
 
     .about-container {
@@ -366,9 +368,15 @@
       margin: 0 0 3rem 0;
     }
 
-    .section-title {
+    .about-container h2 {
       font-size: 3rem;
-      margin: 2rem 0 2rem 0 ;
+      margin: 0 0 2rem 0;
+      padding: 0;
+    }
+
+    .section-title {
+      font-size: 5rem;
+      margin: 2rem 0 5rem 0 ;
     }
 
     .button-container {
@@ -378,6 +386,15 @@
       width: 95%;
       border-radius: 0.5rem;
       box-shadow: var(--text-color-main) 4px 4px 0px;
+    }
+
+    .section-content {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 0 0 10rem 0;
+      gap: 0;
     }
   }
 </style>

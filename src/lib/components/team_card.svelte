@@ -7,6 +7,22 @@
   export let image;
 
   import LinkedIn from "svelte-material-icons/LinkBox.svelte";
+  import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
+  import { onMount } from "svelte"
+
+  let isMobile = false
+  let linkedinIconSize = "1.8rem"
+
+  $: linkedinIconSize = isMobile ? "10rem" : "1.8rem"
+
+  onMount(() => {
+    if (screenWidth <= PHONE_SCREEN_WIDTH) {
+      isMobile = true
+    }
+    else {
+      isMobile = false
+    }
+  })
 </script>
 
 <div class="card">
@@ -14,7 +30,7 @@
     <img src={image} alt={name} />
   </div>
   <div class="text-container">
-    <a href={linkedin} target="_blank"><h1>{name}</h1><LinkedIn size="1.8rem" color="#0077B5"/></a>
+    <a href={linkedin} target="_blank"><h1>{name}</h1><LinkedIn size={linkedinIconSize} color="#0077B5"/></a>
     <h4>{position}</h4>
     <p>{description}</p>
   </div>
@@ -65,7 +81,7 @@
         }
 
         h1{
-            font-size: 1.5em;
+            font-size: 3rem;
             margin: 0 0 1rem 0;
         }
 
@@ -83,7 +99,11 @@
         }
 
         h4 {
-          font-size: 1.2rem;
+          font-size: 3rem;
+        }
+
+        .text-container p {
+          font-size: 4rem;
         }
     }
 

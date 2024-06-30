@@ -102,11 +102,9 @@
   };
 
   onMount(() => {
-    width = window.innerWidth;
-
-    window.addEventListener("resize", () => {
-      width = window.innerWidth;
-    });
+    if (typeof window !== 'undefined') {
+      width = window.screen.width
+    }
   });
 
   async function handleButtonClick() {
@@ -430,7 +428,6 @@
     margin: 0 0 0.2rem 0;
   }
 
-  /* CUT */
   .rectangle {
     width: 50%;
     height: 20rem;
@@ -502,13 +499,20 @@
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .hangul-logo {
+      width: auto;
+      height: 15rem;
+    }
+    
     .text-container-heading {
-      font-size: 0.9rem;
-      width: 90%;
+      font-size: 2rem;
+      width: 25rem;
+      margin: 0 0 1rem 0;
     }
 
     .drop-text {
-      font-size: 1rem;
+      font-size: 2rem;
+      font-weight: 200;
     }
 
     #file-input {
@@ -518,13 +522,15 @@
 
     input[type="file"]::file-selector-button {
       border-radius: 4px;
-      padding: 0 0.5rem;
-      height: 2rem;
+      padding: 0 1rem;
+      height: 4rem;
       margin-right: 0.5rem;
+      font-size: 2rem;
     }
 
     .text {
-      font-size: 0.8rem;
+      font-size: 2rem;
+      margin: 0 0 1rem 0;
     }
 
     .analyzing-text {
@@ -532,6 +538,7 @@
     }
 
     .rectangle {
+      height: 30rem;
       width: 80%;
     }
   }

@@ -20,6 +20,7 @@
         text-decoration: underline rgba(227, 184, 120, 1) 3px;
         text-underline-offset: 15px;
     }
+
     .container {
         height: 100%;
         display: flex;
@@ -30,7 +31,11 @@
 
     @media (max-device-width: 912px) and (min-resolution: 2dppx) {
         h1{
-            font-size: 30px;
+            font-size: 5rem;
+        }
+
+        .container {
+            margin: 2rem 0;
         }
     }
 

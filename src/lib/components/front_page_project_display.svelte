@@ -113,25 +113,56 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     h1 {
-      font-size: 3rem;
+      font-size: 4rem;
     }
 
     .hangul-logo {
-      width: 7rem;
+      width: 18rem;
     }
 
     .hangul-short-description-container {
-      margin: -5rem 0 0 2rem;
+      margin: -5rem 0 0 3rem;
       width: 50%;
       text-align: left;
     }
 
+    .hangul-short-description {
+      font-size: 2rem;
+    }
+
+    .hangul-logo-container {
+      margin: 250px 0 calc(var(--line-height-mobile) + 10px) 0;
+    }
+
+    .hangul-logo-container::before,
+    .hangul-logo-container::after {
+      width: 5px;
+    }
+
     .hangul-logo-container::before {
-      top: -155px;
+      height: var(--line-height-mobile);
+      top: -270px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .hangul-logo-container::after {
+      height: var(--line-height-mobile);
+      bottom: calc(-1*calc(var(--line-height-mobile) + 10px));
     }
 
     .hangul-logo-dot:before {
-      top: -155px;
+      border-top: 20px solid #232323;
+      width: 20px;
+      height: auto;
+      top: -270px;
+    }
+
+    .hangul-logo-dot::after {
+      border-top: 20px solid #232323;
+      width: 20px;
+      height: auto;
+      bottom: calc(-1*calc(var(--line-height-mobile) + 10px));
     }
   }
 </style>

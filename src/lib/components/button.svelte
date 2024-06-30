@@ -58,8 +58,14 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
 
+    .global-button {
+      width: 20rem;
+      padding: 1.5rem 2rem;
+    }
+
     .text {
-      font-size: 1rem;
+      font-size: 2rem;
+      font-weight: 200;
     }
   }
 </style>

@@ -29,7 +29,7 @@
 </svelte:head>
   
 <style>
-    .a{
+    .a {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -50,49 +50,13 @@
         padding-bottom: 2%
     }
 
-    .horizontal.divider {
-        /* place the header at the middle of the page */
-        margin-top: 0;
-        margin-bottom: 0;
-        /* make the header span the entire width of the page */
-        width: 100%;
-        /* center the text */
-        text-align: center;
-    }
-
-    .header:first-child {
-        margin-top: 1em;
-    }
-
-    .header{
-        font: 1.28571429rem;
-        padding-top: 2%;
-        border: none;
-        margin: calc(2rem - .14285714em) 0 1rem;
-        padding: 0 0;
-        /* font-family: Lato, 'Helvetica Neue', Arial, Helvetica, sans-serif; */
-        font-weight: 700;
-        line-height: 1.28571429em;
-        text-transform: none;
-        color:rgba(0, 0, 0, .87);
-        font-family: 'Roboto', sans-serif;
-    }
-
-    h1 {
-        font-family: Work Sans;
-        text-decoration: underline rgba(227, 184, 120, 1) 3px;
-        text-underline-offset: 15px;
-
-    }
-
-    p{
-        font-family: 'Roboto', sans-serif;
-        font-size: 1rem;
-    }
-
     @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+        .a {
+            margin: 2rem 0 0 0;
+        }
+        
         .horizontal-segment {
-            margin: 1rem 0 5rem 0;
+            margin: 3rem 0 5rem 0;
             padding: 0;
         }
     }

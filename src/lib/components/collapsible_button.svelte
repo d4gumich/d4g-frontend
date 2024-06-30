@@ -3,8 +3,8 @@
   export let heading;
 
   import { GRID_TEMPLATE_ROWS_SHOW_CONTENT } from "$lib/assets/constants/constants.js"; 
-  import ChevronDown from "svelte-material-icons/ChevronDown.svelte"
-  import ChevronUp from "svelte-material-icons/ChevronUp.svelte"
+  import ChevronDown from "../assets/icons/chevron-down-solid.svelte";
+  import ChevronUp from "../assets/icons/angle-up-solid.svelte";
 
   let open = false;
   let copyButtonClicked = false;
@@ -23,9 +23,9 @@
     <div class="title">{heading}</div>
     <div class="dropdown-arrow">
       {#if open}
-        <ChevronUp size="2rem"/>
+        <ChevronUp />
       {:else}
-        <ChevronDown size="2rem"/>
+        <ChevronDown />
       {/if}
     </div>
   </button>
@@ -90,7 +90,7 @@
     font-family: "Open Sans";
     font-size: 1rem;
     width: 100%;
-    padding: 0.5rem 0;
+    padding: 0;
   }
 
   .dropdown-arrow {
@@ -98,6 +98,8 @@
     padding: 0;
     position: relative;
     top: 1px;
+    width: 1rem;
+    height: 1rem;
   }
 
   .collapsible {
@@ -112,16 +114,24 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .collapsible-button-container {
-      width: 22.5rem;
+      width: 46.5rem;
+      margin: 1rem 0 0 0;
     }
 
     .toggle {
-      padding: 0.5rem 1rem;
+      padding: 1.5rem 1rem;
       margin: 0.3rem 0 0 0;
     }
 
     .title {
-      font-size: 1rem;
+      font-size: 2rem;
+      padding: 0 0 0 1rem;
+    }
+
+    .dropdown-arrow {
+      width: 2rem;
+      height: 2rem;
+      padding: 0 0.5rem 0 0;
     }
   }
 </style>

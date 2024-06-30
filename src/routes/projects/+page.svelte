@@ -74,9 +74,6 @@
   </style>
   
   <div class="a">
-    <!-- <Navbar /> -->
-
-    <!-- <h1>Latest Projects</h1> -->
     <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">
         {#each current_project as project}

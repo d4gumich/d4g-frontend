@@ -1,7 +1,7 @@
 <!-- Toggle.svelte -->
 <script>
   import {
-    MIN_SCREEN_WIDTH,
+    PHONE_SCREEN_WIDTH,
     HANGUL_VERSIONS,
     HANGUL_PROJECT_NAME,
   } from "$lib/assets/constants/constants.js";
@@ -32,7 +32,7 @@
 <div class="toggle-container">
   <p
     class="text"
-    style={(version === HANGUL_VERSIONS[0] && width > MIN_SCREEN_WIDTH)
+    style={(version === HANGUL_VERSIONS[0] && width > PHONE_SCREEN_WIDTH)
       ? `font-weight:800;`
       : ``}
   >
@@ -50,7 +50,7 @@
   </label>
   <p
     class="text"
-    style={(version === HANGUL_VERSIONS[1] && width > MIN_SCREEN_WIDTH)
+    style={(version === HANGUL_VERSIONS[1] && width > PHONE_SCREEN_WIDTH)
       ? `font-weight:800;`
       : ``}
   >
@@ -136,8 +136,12 @@
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .toggle-container {
+      padding: 2rem 1.5rem;
+    }
+
     .text {
-      font-size: 0.8rem;
+      font-size: 1.5rem;
     }
   }
 </style>

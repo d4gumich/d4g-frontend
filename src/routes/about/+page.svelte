@@ -15,13 +15,9 @@
     display: flex;
     flex-direction: row;
     padding: 20px 0 20px 0;
-    width: 100%; /* Make the sections cover the whole width */
+    width: 100%;
     align-items: center;
 
-  }
-
-  .odd-section {
-    background: var(--background-color-light);
   }
 
   .section-title {
@@ -47,39 +43,47 @@
     font-family: Open Sans;
     font-size: 20px;
     font-style: normal;
-    line-height: 30px; /* 150% */
+    line-height: 30px;
     padding: 0.5rem 10rem 0 3rem;
     display: flex;
     flex-direction: column;
-    align-items: flex-end; /* Align content to the right-hand side */
+    align-items: flex-end;
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .section-title {
       width: 80px;
-      font-size: 1rem;
-      padding-top: 4%;
-      margin: 0 0 0 5%;
+      font-size: 3rem;
+      padding: 0;
+      margin: 0 0 0 3rem;
     }
 
     .section-content {
-      font-size: 0.9rem;
-      padding: 0 1rem 0 0;
+      padding: 0 3rem;
+      margin: 2rem 0;
+      line-height: normal;
+      font-size: 1rem !important;
+    }
+
+    .section-content p {
+      font-size: 1rem !important;
     }
 
     .section {
-      padding: 0.1rem 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
     }
 
     .about-container {
-      margin: 2rem 0;
+      margin: 6rem 0;
     }
   }
 </style>
 
 
 <div class="about-container">
-  <div class="section odd-section">
+  <div class="section">
     <div class="section-title">Mission</div>
     <div class="section-content">
       <p>The UMSI Data4Good (D4G) center brings together non-profit organizations' data into larger datasets for benchmarking and trend analysis. Putting data in the hands of nonprofits contributes to the body of knowledge about a broad scope of development and relief programs, which in turn will lead to better decision-making in nonprofit work.</p>
@@ -94,7 +98,7 @@
     </div>
   </div>
 
-  <div class="section odd-section">
+  <div class="section">
     <div class="section-title">History</div>
     <div class="section-content">
       <!-- History content goes here -->
@@ -102,4 +106,3 @@
     </div>
   </div>
 </div>
-
