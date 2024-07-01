@@ -1,4 +1,6 @@
 <script>
+  export let currentPage = 'home'
+
   import logo from "$lib/assets/D4G-Logo-2.png"
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import { base } from "$app/paths"
@@ -9,11 +11,12 @@
   let enableNavBarBackground = false
   let navBarTransparency = 0;
   let navBarBorder = `border-bottom: none;`
-  let hamburgerColor = `background-color: var(--text-color-light);`
+  let hamburgerColor = `background-color: var(--text-color-main);`
   let screenWidth
-  let onHomePage = true
 
   $: navBarColor = `background-color: rgba(255, 252, 243, ${navBarTransparency});`
+
+  // $: console.log("currentPage", currentPage)
 
   onMount(() => {
     
@@ -51,16 +54,7 @@
   const handleHambugerItemClick = () => {
     fadeOutNavBar();
     isHambugerChecked = false;
-    onHomePage = false;
   }
-
-  const handleD4GLogoItemClick = () => {
-    fadeOutNavBar();
-    isHambugerChecked = false;
-    onHomePage = true;
-  }
-
-  $: console.log("onHomePage", onHomePage)
 
   const handleHamburgerClick = () => {
     if (!enableNavBarBackground) {
@@ -76,39 +70,46 @@
   }
 
   $: {
-    if (navBarTransparency > 0 || isHambugerChecked) {
-      navBarBorder = `border-bottom: var(--text-color-main) 0.1rem solid;`
-      hamburgerColor = `background-color: var(--text-color-main);`
-    }
-    else {
-      navBarBorder = `border-bottom: none;`
-      if (onHomePage) {
+    if (currentPage === 'home') {
+      if (navBarTransparency > 0 || isHambugerChecked) {
+        navBarBorder = `border-bottom: var(--text-color-main) 0.1rem solid;`
+        hamburgerColor = `background-color: var(--text-color-main);`
+      }
+      else {
+        navBarBorder = `border-bottom: none;`
         hamburgerColor = `background-color: var(--text-color-light);`
       }
     }
-
-    if (!onHomePage) {
+    else {
       hamburgerColor = `background-color: var(--text-color-main);`
+      
+      if (navBarTransparency > 0 || isHambugerChecked) {
+        navBarBorder = `border-bottom: var(--text-color-main) 0.1rem solid;`
+      }
+      else {
+        navBarBorder = `border-bottom: none;`
+      }
     }
+    
   }
 
 </script>
 
 <div class="nav" style={navBarColor + navBarBorder}>
   <div class="nav-header">
-    <a href="{base}/" style={`margin:0; padding:0;`} on:click={handleD4GLogoItemClick}>
+    <a href={`${base}/`} style={`margin:0; padding:0;`} on:click={handleHambugerItemClick}>
       <img class="logo" alt="Data4Good Logo" src={logo} />
     </a>
   </div>
 
   {#if !isMobile}
     <nav class="nav-links">
-      <a href="{base}/about">About</a>
-      <a href="{base}/news">News</a>
-      <a href="{base}/projects">Projects</a>
-      <a href="{base}/research">Research</a>
-      <a href="{base}/team">Team</a>
-      <a href="{base}/faq">FAQ</a>
+      <a href={`${base}/about`}>About</a>
+      <a href={`${base}/news`}>News</a>
+      <a href={`${base}/projects`}>Projects</a>
+      <a href={`${base}/research`}>Research</a>
+      <a href={`${base}/team`}>Team</a>
+      <a href={`${base}/faq`}>FAQ</a>
       <div class="dot" />
     </nav>
   {/if}
@@ -124,12 +125,12 @@
         </label>
 
         <nav class="menu1">
-          <a class="link1" href="{base}/about" on:click={handleHambugerItemClick}>About</a>
-          <a class="link1" href="{base}/news" on:click={handleHambugerItemClick}>News</a>
-          <a class="link1" href="{base}/projects" on:click={handleHambugerItemClick}>Projects</a>
-          <a class="link1" href="{base}/research" on:click={handleHambugerItemClick}>Research</a>
-          <a class="link1" href="{base}/team" on:click={handleHambugerItemClick}>Team</a>
-          <a class="link1" href="{base}/faq" on:click={handleHambugerItemClick}>FAQ</a>
+          <a class="link1" href={`${base}/about`} on:click={handleHambugerItemClick}>About</a>
+          <a class="link1" href={`${base}/news`} on:click={handleHambugerItemClick}>News</a>
+          <a class="link1" href={`${base}/projects`} on:click={handleHambugerItemClick}>Projects</a>
+          <a class="link1" href={`${base}/research`} on:click={handleHambugerItemClick}>Research</a>
+          <a class="link1" href={`${base}/team`} on:click={handleHambugerItemClick}>Team</a>
+          <a class="link1" href={`${base}/faq`} on:click={handleHambugerItemClick}>FAQ</a>
         </nav>
       </nav>
     </section>

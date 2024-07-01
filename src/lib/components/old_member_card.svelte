@@ -61,6 +61,10 @@
       text-decoration-style: initial;
       text-decoration-color: initial;
     }
+
+    @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+
+    }
   </style>
   
   <div class="cards">

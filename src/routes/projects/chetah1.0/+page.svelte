@@ -5,6 +5,9 @@
     import ChetahResults from "../../../lib/components/chetah_results.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
+    import Navbar from "$lib/components/navbar.svelte";
+
+    const currentPage = "chetah1.0";
 
     let searchQuery = "";
     let aboutChetah = false;
@@ -87,6 +90,7 @@
   <title>Chetah 1.0</title>
 </svelte:head>
 
+<Navbar {currentPage} />
 <div class="container">
     <div class="content-container {results ? 'flex-row' : ''}">
         <div class="logo-container">

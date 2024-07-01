@@ -1,3 +1,10 @@
+<script>
+  import Navbar from "$lib/components/navbar.svelte";
+  
+  const currentPage = "simex";
+</script>
+
+<Navbar {currentPage} />
 <div class="simex-container">
   <h1>Digital Crisis Simulation Exercise (SimEx)</h1>
   <p>

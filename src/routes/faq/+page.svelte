@@ -12,6 +12,9 @@
   import PeopleIcon from "svelte-material-icons/AccountGroup.svelte"
   import PersonIcon from "svelte-material-icons/Account.svelte"
   import StartArrow from "svelte-material-icons/RayStartArrow.svelte"
+  import Navbar from "$lib/components/navbar.svelte"
+
+  const currentPage = 'faq';
 
   let headingFontSize = `font-size: 1.1rem;`
   let isMobile = false
@@ -39,6 +42,7 @@
   <title>FAQ</title>
 </svelte:head>
 
+<Navbar {currentPage} />
 <div class="about-container">
   <Collapsible
     heading="What is Data4Good?"
@@ -57,7 +61,7 @@
     headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
-      Find our most recent work on the <a href="{base}/projects">Projects</a> page,
+      Find our most recent work on the <a href={`${base}/projects`}>Projects</a> page,
       and click on each project listed for more details.
     </div>
   </Collapsible>

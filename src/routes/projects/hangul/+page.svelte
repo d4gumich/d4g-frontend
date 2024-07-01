@@ -25,6 +25,9 @@
   import FeedbackModal from "$lib/components/feedback_modal.svelte";
   import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
   import TextCarousel from "$lib/components/text_carousel.svelte";
+  import Navbar from "$lib/components/navbar.svelte";
+
+  const currentPage = 'hangul';
 
   GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
 
@@ -302,6 +305,7 @@
   <title>Hangul {version}.0</title>
 </svelte:head>
 
+<Navbar {currentPage} />
 <div class="container">
   {#if !showResults}
     <div class="content-container">

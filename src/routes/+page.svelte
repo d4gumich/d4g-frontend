@@ -7,9 +7,12 @@
   import Poster from "$lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg"
   import FrontPageProjectDisplay from "$lib/components/front_page_project_display.svelte"
   import FrontPageProjectDisplayMirror from "$lib/components/front_page_project_display_mirror.svelte"
-
+  import Navbar from "$lib/components/navbar.svelte"
+  
   let isMobile = false;
   let screenWidth;
+
+  const currentPage = 'home';
 
   const latest_news = [
     {
@@ -47,6 +50,7 @@
   <title>Data4Good</title>
 </svelte:head>
 
+<Navbar {currentPage} />
 <div class="home">
   <div class="hero">
     <div class="hero-container">
@@ -64,7 +68,7 @@
     <h2>Connecting data, research and implementation to help create stronger nonprofit organizations</h2>
     <Button
           text="About Us"
-          link="{base}/about"
+          link={`${base}/about`}
           styleAdjustment={`margin:1rem 0 0 0;`}
         />
   </div>
@@ -79,12 +83,12 @@
     <div class="button-container">
       <Button
         text="See All Projects"
-        link="{base}/projects"
+        link={`${base}/projects`}
         styleAdjustment={`margin:0 5% 0 0;`}
       />
       <Button
         text="See All Research"
-        link="{base}/research"
+        link={`${base}/research`}
         styleAdjustment={`margin:0 0 0 0;`}
       />
     </div>

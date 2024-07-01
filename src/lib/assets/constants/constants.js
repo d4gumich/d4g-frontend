@@ -7,7 +7,7 @@ export const PAGES_TO_TIME_RATIO = 1.15; // old = 0.9
 export const KEYWORD_COUNT = 5;
 export const INTERVAL = 250; //ms
 export const HANGUL_VERSIONS = [1,2];
-export const HANGUL_PROJECT_NAME = "Hangul";
+export const HANGUL_PROJECT_NAME = "V";
 export const NO_TITLE_FOUND = "Title not Found";
 export const DEFAULT_TEXT = "Item could not be extracted. Please submit a bug report if concerned.";
 export const GRID_TEMPLATE_ROWS_SHOW_CONTENT = `grid-template-rows: 1fr;`;

@@ -5,8 +5,10 @@
     import { base } from '$app/paths';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
+    import Navbar from '$lib/components/navbar.svelte';
+    
+    const currentPage = 'projects';
 
-    // Define some data for the cards
     const current_project = [
       {
         name: 'Hangul',
@@ -73,6 +75,7 @@
     }
   </style>
   
+  <Navbar {currentPage} />
   <div class="a">
     <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">

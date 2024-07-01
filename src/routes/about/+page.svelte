@@ -81,7 +81,13 @@
   }
 </style>
 
+<script>
+  import Navbar from '$lib/components/navbar.svelte';
+  
+  const currentPage = 'about';
+</script>
 
+<Navbar {currentPage} />
 <div class="about-container">
   <div class="section">
     <div class="section-title">Mission</div>

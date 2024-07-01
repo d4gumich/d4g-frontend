@@ -113,19 +113,19 @@
     <!-- Column 1 -->
     <div class="footer-column">
       <div class="footer-title">Data4Good</div>
-      <a href="{base}/about">About</a>
-      <a href="{base}/news">News</a>
-      <a href="{base}/projects">Projects</a>
-      <a href="{base}/research">Research</a>
-      <a href="{base}/team">Team</a>
-      <a href="{base}/faq">FAQ</a>
+      <a href={`${base}/about`}>About</a>
+      <a href={`${base}/news`}>News</a>
+      <a href={`${base}/projects`}>Projects</a>
+      <a href={`${base}/research`}>Research</a>
+      <a href={`${base}/team`}>Team</a>
+      <a href={`${base}/faq`}>FAQ</a>
     </div>
   
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Projects</div>
-      <a href="{base}/projects/chetah1.0">Chetah</a>
-      <a href="{base}/projects/hangul">Hangul</a>
+      <a href={`${base}/projects/chetah1.0`}>Chetah</a>
+      <a href={`${base}/projects/hangul`}>Hangul</a>
     </div>
   
     <!-- Column 3 -->

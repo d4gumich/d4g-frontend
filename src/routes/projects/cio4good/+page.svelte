@@ -1,5 +1,8 @@
 <script>
 	import { Tabs, Tab, TabList, TabPanel } from 'svelte-tabs';
+	import Navbar from '$lib/components/navbar.svelte';
+
+	let currentPage = 'cio4good';
 </script>
 
 <svelte:head>
@@ -9,6 +12,7 @@
 	></script>
 </svelte:head>
 
+<Navbar {currentPage} />
 <div class="cio4good-container">
 	<Tabs>
 		<TabList>

@@ -3,6 +3,9 @@
     import Button from '$lib/components/button.svelte';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import SearchLogo from '$lib/assets/icons8-search-100.png';
+    import Navbar from '$lib/components/navbar.svelte';
+
+    const currentPage = 'chetah2.0';
 
     let searchQuery = '';
     let aboutCheetah = false;
@@ -196,6 +199,7 @@
 
 </style>
 
+<Navbar {currentPage} />
 <div class="container">
     <div class="content-container">
         <img class="logo" src={ChetahLogo} alt="Chetah Logo" height="115px" />

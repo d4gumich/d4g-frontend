@@ -36,8 +36,7 @@
       ? `font-weight:800;`
       : ``}
   >
-    {HANGUL_PROJECT_NAME}
-    {HANGUL_VERSIONS[0]}.0
+    {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[0]}.0
   </p>
   <label class="switch">
     <input
@@ -54,8 +53,7 @@
       ? `font-weight:800;`
       : ``}
   >
-    {HANGUL_PROJECT_NAME}
-    {HANGUL_VERSIONS[1]}.0
+    {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[1]}.0
   </p>
 </div>
 
@@ -141,7 +139,33 @@
     }
 
     .text {
-      font-size: 1.5rem;
+      margin: 0 0.5rem;
+      font-size: 1.7rem;
+    }
+
+    .switch {
+      width: 6rem;
+      height: 3rem;
+      margin: 0 0.5rem;
+    }
+
+    .slider {
+      box-shadow: -0.4rem 0.1rem 0.1rem #d7d7d7;
+    }
+
+    .slider:before {
+      height: 3rem;
+      width: 3rem;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(3rem);
+      -ms-transform: translateX(3rem);
+      transform: translateX(3rem);
+    }
+
+    .slider.round {
+      border-radius: 2rem;
     }
   }
 </style>

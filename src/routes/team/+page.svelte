@@ -3,6 +3,9 @@
   import TeamCard from "../../lib/components/team_card.svelte";
   import AlumniCard from "../../lib/components/alumni_card.svelte";
   import SzymonProfile from "$lib/assets/profile-pics/szymon_sarnowicz.png";
+  import Navbar from "$lib/components/navbar.svelte";
+
+  const currentPage = "team";
 
   const execTeam = [
     {
@@ -157,34 +160,45 @@
   <title>Team</title>
 </svelte:head>
 
-<div class="cards-container">
-  <div class="cards">
-    <SectionTitle title="Executive Team" />
-    {#each execTeam as member}
-      <TeamCard {...member} />
-    {/each}
-    <SectionTitle title="Data Science Team" />
-    {#each dataTeam as member}
-      <TeamCard {...member} />
-    {/each}
-    <SectionTitle title="Web and Systems Team" />
-    {#each webTeam as member}
-      <TeamCard {...member} />
-    {/each}
-    <SectionTitle title="Alumni" />
-    <div class="alumni-container">
-      {#each alumni as member}
-        <AlumniCard {...member} />
+<Navbar {currentPage} />
+<div class="container">
+  <div class="cards-container">
+    <div class="cards">
+      <SectionTitle title="Executive Team" />
+      {#each execTeam as member}
+        <TeamCard {...member} />
       {/each}
+      <SectionTitle title="Data Science Team" />
+      {#each dataTeam as member}
+        <TeamCard {...member} />
+      {/each}
+      <SectionTitle title="Web and Systems Team" />
+      {#each webTeam as member}
+        <TeamCard {...member} />
+      {/each}
+      <SectionTitle title="Alumni" />
+      <div class="alumni-container">
+        {#each alumni as member}
+          <AlumniCard {...member} />
+        {/each}
+      </div>
     </div>
   </div>
 </div>
 
 <style>
+  .container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 1%;
+  }
+
   .cards-container {
     width: 70%;
     margin: 0 0 2rem 0;
   }
+  
   .alumni-container {
     display: flex;
     gap: 2%;

@@ -1,14 +1,14 @@
 <script>
-    // Import the components from the components folder
-    // import Card from '$lib/components/card.svelte';
     import { base } from "$app/paths";
     import CurrResearchCard from '$lib/components/current_project_card.svelte';
     import PastResearchCard from '$lib/components/past_project_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
-  
-    // Define some data for the cards
+    import Navbar from '$lib/components/navbar.svelte';
+
+    const currentPage = 'research';
+
     const current_research = [
       {
         name: 'Hangul',
@@ -80,6 +80,7 @@
     }
   </style>
 
+  <Navbar {currentPage} />
   <div class="a">
     <!-- <Navbar /> -->
 
