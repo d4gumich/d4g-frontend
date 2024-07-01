@@ -16,13 +16,14 @@
 
   const currentPage = 'faq';
 
-  let headingFontSize = `font-size: 1.1rem;`
+  let headingFontSize;
   let isMobile = false
   let iconSize = "30px"
   let screenWidth
 
   $: collapsibleStyle = isMobile ? `width:90%;` : `width:70%;`
-  $: headingFontSize = isMobile ? `font-size: 2.5rem; max-width: 90%;` : `font-size: 1.1rem;`
+  $: headingFontSize = isMobile ? `font-size: 2rem; max-width: 90%;` : `font-size: 1.1rem;`
+  $: sectionContentAdjustment = isMobile ? `font-size: 1.5rem;` : `font-size: 1rem;`
 
   onMount(() => {
     if (typeof window !== 'undefined') {
@@ -49,7 +50,7 @@
     styleAdjustment={collapsibleStyle}
     headingFontSize={headingFontSize}
   >
-    <div slot="text" class="section-content">
+    <div slot="text" class="section-content" >
       UMSI Data4Good center brings together non-profit organizations' data into
       larger datasets for benchmarking and trend analysis.
     </div>
@@ -89,7 +90,7 @@
       </p>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"50px"} />
+          <p>></p>
         {:else}
           <StudentIcon size={iconSize} />
         {/if}
@@ -100,7 +101,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"30px"} />
+          <p>></p>
         {:else}
           <ChairIcon size={iconSize} />
         {/if}
@@ -110,7 +111,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"45px"} />
+          <p>></p>
         {:else}
           <ChartIcon size={iconSize} />
         {/if}
@@ -120,7 +121,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"32px"} />
+          <p>></p>
         {:else}
           <ResumeIcon size={iconSize} />
         {/if}
@@ -130,7 +131,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"27px"} />
+          <p>></p>
         {:else}
           <BuildingIcon size={iconSize} />
         {/if}
@@ -140,7 +141,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"40px"} />
+          <p>></p>
         {:else}
           <CashIcon size={iconSize} />
         {/if}
@@ -150,7 +151,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"45px"} />
+          <p>></p>
         {:else}
           <PeopleIcon size={iconSize} />
         {/if}
@@ -160,7 +161,7 @@
       </div>
       <div class="team-bullets-container">
         {#if isMobile}
-          <StartArrow size={"35px"} />
+         <p>></p>
         {:else}
           <PersonIcon size={iconSize} />
         {/if}
@@ -234,13 +235,21 @@
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
     .about-container {
-      margin: 1rem 0 3rem 0;
+      margin: 1rem 0 30rem 0;
       align-items: center;
     }
 
     .section-content {
       padding: 0;
-      font-size: 2.3rem;
+      font-size: 25px;
+    }
+
+    p {
+      font-size: 25px;
+    }
+
+    a {
+      font-size: 25px;
     }
 
     .team-bullets {

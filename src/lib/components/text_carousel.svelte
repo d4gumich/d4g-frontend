@@ -37,4 +37,10 @@
     font-family: "Open Sans";
     margin: 0 0 1.5rem 0;
   }
+
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .text {
+      font-size: 2rem;
+    }
+  }
 </style>

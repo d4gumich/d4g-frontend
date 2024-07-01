@@ -35,4 +35,10 @@
   .summary-loading {
 		margin: 0 1rem 0 0;
 	}
+
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .summary-loading {
+      font-size: 1.5rem;
+    }
+  }
 </style>

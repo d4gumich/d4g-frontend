@@ -66,5 +66,23 @@
       opacity: 1;
       transform: scale(1);
     }
-}
+  }
+
+  @media (max-device-width: 912px) and (min-resolution: 2dppx) {
+    .loading-bar {
+      width: 0;
+      background-color: #f0f0f0;
+      border-radius: 1rem;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    .progress {
+      width: 0%;
+      height: 1rem;
+      background-color: var(--button-color);
+      transition: width 0.3s ease;
+      border-radius: 1rem;
+    }
+  }
 </style>

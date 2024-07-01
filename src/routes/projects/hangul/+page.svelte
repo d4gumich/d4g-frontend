@@ -517,10 +517,11 @@
     .drop-text {
       font-size: 2rem;
       font-weight: 200;
+      margin: 2rem 0;
     }
 
     #file-input {
-      font-size: 0.8rem;
+      font-size: 2rem;
       width: 11rem;
     }
 
@@ -528,8 +529,9 @@
       border-radius: 4px;
       padding: 0 1rem;
       height: 4rem;
-      margin-right: 0.5rem;
-      font-size: 2rem;
+      margin: 0 0.5rem 1rem 0;
+      font-size: 1.5rem;
+      width: 100%;
     }
 
     .text {
@@ -538,12 +540,16 @@
     }
 
     .analyzing-text {
-      font-size: 0.8rem;
+      font-size: 2rem;
     }
 
     .rectangle {
       height: 30rem;
       width: 80%;
+    }
+
+    .loading-icon {
+      margin: 10rem 0 22rem 0;
     }
   }
 </style>

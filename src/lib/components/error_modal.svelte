@@ -83,16 +83,25 @@
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
-    .modal {
-      padding: 1rem;
+    .modal-overlay {
+      top: -200px;
     }
     
+    .modal {
+      padding: 5rem 2rem;
+      max-width: 90vw;
+    }
+
     .text-prompt {
-      font-size: 0.8rem;
+      font-size: 2rem;
+      text-align: center;
+      margin: 0.5rem 0;
     }
 
     .small-button {
-      font-size: 0.8rem;
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      margin: 0.5rem 0.8rem;
     }
   }
 </style>

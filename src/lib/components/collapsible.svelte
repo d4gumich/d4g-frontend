@@ -5,7 +5,7 @@
   export let textToCopy = ""
   export let showNotification = null
   export let styleAdjustment = ``
-  export let headingFontSize = `font-size: 1rem;`
+  export let headingFontSize = null;
   export let runOpenSequence = false;
   export let isValid = false;
   export let useCheckMark = false;
@@ -17,12 +17,37 @@
   import { onMount } from "svelte";
   import CheckMark from "svelte-material-icons/CheckCircle.svelte";
   import FailAlert from "svelte-material-icons/MessageAlert.svelte";
+  import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
 
   let copyButtonClicked = false;
   let open = false;
+  let isMobile = false;
+  let screenWidth;
+  let headingFontSizeDefault;
 
   $: showContent = `grid-template-rows: 1fr;`;
   $: hideBorder = `border-bottom: .1rem solid white;`;
+
+  $: {
+    if (headingFontSize == null) {
+      headingFontSizeDefault = isMobile ? `font-size: 2rem;`: `font-size: 1.1rem;`
+    } else {
+      headingFontSizeDefault = headingFontSize;
+    }
+  }
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      screenWidth = window.screen.width
+    }
+
+    if (screenWidth <= PHONE_SCREEN_WIDTH) {
+      isMobile = true
+    }
+    else {
+      isMobile = false
+    }
+  })
 
   onMount(async () => {
     if (runOpenSequence) {
@@ -55,15 +80,23 @@
 <div style={styleAdjustment}>
   <button class="toggle" style={open ? hideBorder : ``} on:click={handleOpen}>
     <div class="title">
-      <div style={headingFontSize}>{heading}</div>
+      <div style={headingFontSizeDefault}>{heading}</div>
       {#if useCheckMark}
         <div class="check-mark-spacer"></div>
       {/if}
       {#if isValid && useCheckMark}
-        <CheckMark size={"0.95rem"} color="#34b233" />
+        {#if isMobile}
+          <CheckMark size="2rem" color="#34b233" />
+        {:else}
+          <CheckMark size="0.95rem" color="#34b233" />
+        {/if}
       {/if}
       {#if !isValid && useCheckMark}
-        <FailAlert size={"0.95rem"} color="tomato" />
+        {#if isMobile}
+          <FailAlert size="2rem" color="tomato" />
+        {:else}
+          <FailAlert size="0.95rem" color="tomato" />
+        {/if}
       {/if}
       {#if showCopyButton}
         <button class="copy-button" on:click={copyTextToClipboard}>
@@ -181,6 +214,14 @@
     .dropdown-arrow {
       height: 2.5rem;
       width: 2.5rem;
+    }
+
+    .copy-button {
+      font-size: 1.5rem;
+      margin-left: 1rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: all 300ms ease;
     }
   }
 </style>

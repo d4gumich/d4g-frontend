@@ -36,11 +36,27 @@
     MILLISECONDS_TO_SECONDS,
   } from "$lib/assets/constants/constants.js";
 	import { getTopLocations } from "$lib/components/utils/helper_functions.js";
+	import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
 
 	let MDasHTML = marked(markdown_text);
 	let loadingProgressSummary = 0;
 	let loadingDocumentSummaryComplete = false;
 	let topLocations;
+	let screenWidth;
+	let isMobile = false;
+
+	onMount(() => {
+    if (typeof window !== 'undefined') {
+      screenWidth = window.screen.width
+    }
+
+    if (screenWidth <= PHONE_SCREEN_WIDTH) {
+      isMobile = true
+    }
+    else {
+      isMobile = false
+    }
+  })
 
 	const simulateLoadingSummaryBar = () => {
     const interval = setInterval(() => {
@@ -129,19 +145,31 @@
 	<div id="notification-summary-error" class="notification-hangul-results">There was an error fetching your document summary</div>
 	<div class="complete-results-display">
 		<p class="time-taken-text left">Metadata</p>
-		<Check color="var(--button-color)"/>
+		{#if isMobile}
+			<Check color="var(--button-color)" size="1.8rem"/>
+		{:else}
+			<Check color="var(--button-color)"/>
+		{/if}
 		<p class="time-taken-text right">({hangul_time}s)</p>
 	</div>
 	{#if loadingDocumentSummaryComplete && summary_generation_time !== -1}
 		<div class="complete-results-display">
 			<p class="time-taken-text left">Summary</p>
-			<Check color="var(--button-color)"/>
+			{#if isMobile}
+				<Check color="var(--button-color)" size="1.8rem"/>
+			{:else}
+				<Check color="var(--button-color)"/>
+			{/if}
 			<p class="time-taken-text right">({summary_generation_time}s)</p>
 		</div>
 	{:else if summary_generation_time === -1}
 		<div class="complete-results-display">
 			<p class="time-taken-text left">Summary</p>
-			<FailAlert color="tomato" />
+			{#if isMobile}
+				<FailAlert color="tomato" size="1.8rem"/>
+			{:else}
+				<FailAlert color="tomato"/>
+			{/if}
 			<p class="time-taken-text right">(0.00s)</p>
 		</div>
 	{:else}
@@ -227,7 +255,11 @@
 								 isValid={true} 
 								 useCheckMark={true}
 		>
-			<div slot="text" class="text-content">
+			<div slot="text" 
+			     class="text-content"
+					 style={isMobile ? 
+									"font-size: 13px;":
+									""}>
 			  {document_summary}
 		  </div>
 		</Collapsible>
@@ -319,7 +351,11 @@
 
 	{#if document_title && document_title != NO_TITLE_FOUND}
 		<Collapsible heading="DOCUMENT TITLE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
+			<div slot="text" 
+					 class="text-content"
+					 style={isMobile ? 
+				          "font-size: 22px;":
+				          ""}>
 				{document_title}
 			</div>
 		</Collapsible>
@@ -378,7 +414,11 @@
 
 	{#if keywords.length > 0}
 		<Collapsible heading="IDENTIFIED KEY PHRASE SEQUENCES" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
+			<div slot="text" 
+			     class="text-content"
+					 style={isMobile ? 
+						      "font-size: 19px;":
+						      ""}>
 				{#each keywords as keyword}
 					<p>{keyword}</p>
 				{/each}
@@ -430,7 +470,10 @@
 			useCheckMark={true}
 		>
 			<div slot="text" class="text-content">
-				<div class="scrollable-box">
+				<div class="scrollable-box" 
+				     style={isMobile ? 
+						        "font-size: 13px;":
+										""}>
 					{@html MDasHTML}
 				</div>
 			</div>
@@ -563,25 +606,38 @@
     100% {opacity: 0.2;}
   }
 
-	@media (max-device-width: 912px) {
+	@media (max-device-width: 912px) and (min-resolution: 2dppx) {
 		.hangul-result {
 			width: 90%;
 		}
 
 		.header-content {
-			font-size: 1.1rem;
+			font-size: 2rem;
+			margin: 3rem 0 1rem 0;
 		}
 
 		.text-content {
-			font-size: 0.9rem;
+			font-size: 30px;
 		}
 
 		.time-taken-text {
-			font-size: 0.9rem;
+			font-size: 1.5rem;
 		}
 
 		.prettyprint {
-			font-size: 0.8rem;
+			font-size: 10px;
+		}
+
+		.scrollable-box {
+			height: 30rem;
+		}
+
+		.notification {
+			font-size: 2rem;
+		}
+
+		.notification-hangul-results {
+			font-size: 2rem;
 		}
 	}
 </style>
