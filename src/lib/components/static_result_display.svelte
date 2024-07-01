@@ -81,7 +81,7 @@
     border-radius: 0;
     font-family: inherit;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 200;
     padding: 1rem 0 1rem 0.1rem;
     position: relative;
     z-index: 3;
@@ -127,6 +127,7 @@
 
     .result-text {
       font-size: 2rem;
+      max-width: 50%;
     }
   }
 </style>

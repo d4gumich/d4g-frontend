@@ -258,7 +258,7 @@
 			<div slot="text" 
 			     class="text-content"
 					 style={isMobile ? 
-									"font-size: 13px;":
+									"font-size: 17px;":
 									""}>
 			  {document_summary}
 		  </div>
@@ -472,7 +472,7 @@
 			<div slot="text" class="text-content">
 				<div class="scrollable-box" 
 				     style={isMobile ? 
-						        "font-size: 13px;":
+						        "font-size: 17px;":
 										""}>
 					{@html MDasHTML}
 				</div>
@@ -625,7 +625,7 @@
 		}
 
 		.prettyprint {
-			font-size: 10px;
+			font-size: 14px;
 		}
 
 		.scrollable-box {
