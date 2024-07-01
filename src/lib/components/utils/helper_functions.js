@@ -1,4 +1,7 @@
 // helper_functions.js
+import { TIME_MULTIPLIER_M, 
+         TIME_EXPONENT_B } from "$lib/assets/constants/constants";
+
 export const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -27,4 +30,8 @@ export const getTopLocations = (arr, prop) => {
     }
   }
   return topCountriesArr;
+}
+
+export const calculateEstimatedTime = (pages) => {
+  return Math.round(TIME_MULTIPLIER_M * Math.exp(TIME_EXPONENT_B * pages));
 }

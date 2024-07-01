@@ -2,14 +2,13 @@
   import {
     PDF_WORKER_SRC_URL,
     DEFAULT_DROP_TEXT,
-    PAGES_TO_TIME_RATIO,
     INTERVAL,
     SECONDS_TO_MILLISECONDS,
     MILLISECONDS_TO_SECONDS,
     TIMEOUT_BUFFER,
     SUMMARY_API_CALL_DELAY
   } from "$lib/assets/constants/constants.js";
-  import { sleep } from "$lib/components/utils/helper_functions.js";
+  import { sleep, calculateEstimatedTime } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
   import { fetchSummaryData, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
@@ -52,7 +51,7 @@
   let showResults = false;
   let loadingFastPass = false;
 
-  $: estimatedTimeToAnalyze = Math.round(PAGES_TO_TIME_RATIO * numberOfPages);
+  $: estimatedTimeToAnalyze = calculateEstimatedTime(numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
   $: loadingTimeRemaining = Math.round(
     estimatedTimeToAnalyze - loadingProgressMain
@@ -62,7 +61,7 @@
 
   const updateShowError = (value) => {
     showError = value;
-    dropText = DEFAULT_DROP_TEXT;
+    goBack(false);
   }
 
   async function getNumberOfPages(pdfFile) {
