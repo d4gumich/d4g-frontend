@@ -127,7 +127,6 @@
 
     .result-text {
       font-size: 2rem;
-      max-width: 50%;
     }
   }
 </style>
