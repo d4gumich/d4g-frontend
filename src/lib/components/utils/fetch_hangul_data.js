@@ -1,14 +1,10 @@
 import { KEYWORD_COUNT, 
          MILLISECONDS_TO_SECONDS,
-         SECONDS_TO_MILLISECONDS,
-         MAXIMUM_BACKOFF_MILLISECONDS,
          MAX_RETRIES } from "$lib/assets/constants/constants.js";
-import { sleep } from "$lib/components/utils/helper_functions.js";
+import { sleep, getBackoffWaitTime } from "$lib/components/utils/helper_functions.js";
 
 export async function fetchSummary(summary_parameters, version) {
   
-  let random_number_milliseconds;
-  let backoff_wait_time;
   let headers_ = new Headers();
 
   headers_.append('Content-Type', 'application/json');
@@ -30,11 +26,8 @@ export async function fetchSummary(summary_parameters, version) {
 
       return response.text();
     } catch (error) {
-      console.log(`Attempt ${fetch_attempt + 1} failed. Retrying...`);
-      random_number_milliseconds = Math.random() * SECONDS_TO_MILLISECONDS;
-      backoff_wait_time = Math.min((Math.pow(2, fetch_attempt) * SECONDS_TO_MILLISECONDS) + random_number_milliseconds, MAXIMUM_BACKOFF_MILLISECONDS);
-      console.log(`Waiting ${backoff_wait_time} milliseconds before retrying...`);
-      await sleep(backoff_wait_time);
+      console.log(`Attempt ${fetch_attempt + 1} to fetch the summary failed. Retrying...`);
+      await sleep(getBackoffWaitTime(fetch_attempt));
     }
   }
 
@@ -42,9 +35,8 @@ export async function fetchSummary(summary_parameters, version) {
 }
 
 async function fetchData(file, version, timeout) {
+
   let final_error;
-  let random_number_milliseconds;
-  let backoff_wait_time;
 
   for (let fetch_attempt = 0; fetch_attempt < MAX_RETRIES; fetch_attempt++) {
     try {
@@ -75,12 +67,9 @@ async function fetchData(file, version, timeout) {
       return await response.json();
 
     } catch(error) {
-      console.log(`Attempt ${fetch_attempt + 1} failed. Retrying...`);
+      console.log(`Attempt ${fetch_attempt + 1} to fetch initial data failed. Retrying...`);
       final_error = error;
-      random_number_milliseconds = Math.random() * SECONDS_TO_MILLISECONDS;
-      backoff_wait_time = Math.min((Math.pow(2, fetch_attempt) * SECONDS_TO_MILLISECONDS) + random_number_milliseconds, MAXIMUM_BACKOFF_MILLISECONDS);
-      console.log(`Waiting ${backoff_wait_time} milliseconds before retrying...`);
-      await sleep(backoff_wait_time);
+      await sleep(getBackoffWaitTime(fetch_attempt));
     }
   }
   throw final_error;
@@ -89,6 +78,7 @@ async function fetchData(file, version, timeout) {
 export async function fetchDataWithTimeout(file, version, timeout) {
   try {
     return await fetchData(file, version, timeout);
+
   } catch (error) {
     console.error(error);
     return null;

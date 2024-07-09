@@ -1,6 +1,9 @@
 // helper_functions.js
 import { TIME_MULTIPLIER_M, 
-         TIME_EXPONENT_B } from "$lib/assets/constants/constants";
+         TIME_EXPONENT_B,
+         SECONDS_TO_MILLISECONDS,
+         MILLISECONDS_TO_SECONDS,
+         MAXIMUM_BACKOFF_MILLISECONDS } from "$lib/assets/constants/constants";
 
 export const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,4 +37,17 @@ export const getTopLocations = (arr, prop) => {
 
 export const calculateEstimatedTime = (pages) => {
   return Math.round(TIME_MULTIPLIER_M * Math.exp(TIME_EXPONENT_B * pages));
+}
+
+export const getBackoffWaitTime = (fetch_attempt) => {
+  /* more info at https://docs.clearblade.com/iotcore/implementing-exponential-backoff */
+
+  let random_number_milliseconds;
+  let backoff_wait_time;
+
+  random_number_milliseconds = Math.random() * SECONDS_TO_MILLISECONDS;
+  backoff_wait_time = Math.min((Math.pow(2, fetch_attempt) * SECONDS_TO_MILLISECONDS) + random_number_milliseconds, MAXIMUM_BACKOFF_MILLISECONDS);
+  console.log(`Waiting ${Math.round(backoff_wait_time) * MILLISECONDS_TO_SECONDS} seconds before retrying...`);
+
+  return backoff_wait_time;
 }
