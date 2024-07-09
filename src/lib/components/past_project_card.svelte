@@ -53,7 +53,7 @@
     font-family: Work Sans;
     font-size: 23px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     line-height: normal;
     margin: auto;
   }

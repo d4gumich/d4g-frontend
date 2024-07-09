@@ -28,7 +28,7 @@
     font-family: "Work Sans";
     font-size: 40px;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     line-height: normal;
     padding-top: 1.5%;
     text-decoration: underline;

@@ -33,7 +33,7 @@
   <p
     class="text"
     style={(version === HANGUL_VERSIONS[0] && width > PHONE_SCREEN_WIDTH)
-      ? `font-weight:800;`
+      ? `border-bottom: 2px solid var(--button-color);`
       : ``}
   >
     {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[0]}.0
@@ -50,7 +50,7 @@
   <p
     class="text"
     style={(version === HANGUL_VERSIONS[1] && width > PHONE_SCREEN_WIDTH)
-      ? `font-weight:800;`
+      ? `border-bottom: 2px solid var(--button-color);`
       : ``}
   >
     {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[1]}.0
@@ -58,6 +58,10 @@
 </div>
 
 <style>
+  p {
+    transition: all 500ms ease;
+  }
+
   .toggle-container {
     display: flex;
     flex-direction: row;

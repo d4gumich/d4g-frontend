@@ -482,6 +482,10 @@
 </div>
 
 <style>
+	h3 {
+		font-weight: 500;
+	}
+
 	.hangul-result {
 		width: 60%;
 		display: flex;

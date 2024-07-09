@@ -144,7 +144,7 @@
     font-size: 6.1rem;
     text-align: initial;
     font-family: century-gothic, sans-serif;
-    font-weight: 600;
+    font-weight: 500;
     font-style: normal;
     text-transform: uppercase;
     width: max-content;
@@ -183,7 +183,7 @@
     margin: 1rem 0 0 0.1rem;
     font-size: 1.25rem;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     transition: all 500ms ease;
   }
 
@@ -204,6 +204,7 @@
 
   .about-container h2 {
     font-size: 1.5rem;
+    font-weight: 500;
     margin: 0 0 2rem 0;
     padding: 0;
   }
@@ -223,7 +224,7 @@
     font-family: "Open Sans";
     font-size: 3.5rem;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     margin: 2rem 0 0 0;
   }
 

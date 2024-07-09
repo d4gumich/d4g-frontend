@@ -53,7 +53,7 @@
     font-family: "Open Sans";
     font-size: 1rem;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {

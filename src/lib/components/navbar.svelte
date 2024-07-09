@@ -187,7 +187,7 @@
   }
 
   .nav-links a:hover {
-    font-weight: 800;
+    font-weight: 500;
   }
 
   .nav-links a::after {

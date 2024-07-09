@@ -101,7 +101,7 @@
       {#if showCopyButton}
         <button class="copy-button" on:click={copyTextToClipboard}>
           <div class="copy-icon"><CopyIcon /></div>
-          <div>copy</div>
+          <div class="copy-text">copy</div>
         </button>
       {/if}
     </div>
@@ -133,7 +133,7 @@
     border-radius: 0;
     font-family: inherit;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 500;
     padding: 1rem 1rem 1rem 0.1rem;
     position: relative;
     z-index: 3;
@@ -179,10 +179,11 @@
     background-color: var(--text-color-light);
     border: 0.1rem solid  var(--background-color-dark);
     border-radius: 0.5rem;
-    text-align: left;
-    align-items: left;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
     margin-left: 0.8rem;
-    padding: 0.2rem 0.5rem;
+    padding: 0.35rem 0.7rem;
     cursor: pointer;
     transition: all 300ms ease;
   }
@@ -195,6 +196,11 @@
     height: 0.75rem;
     width: 0.75rem;
     margin-right: 0.25rem;
+  }
+
+  .copy-text {
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
   .check-mark-spacer {
@@ -222,6 +228,10 @@
       padding: 0.2rem 0.5rem;
       cursor: pointer;
       transition: all 300ms ease;
+    }
+
+    .copy-text {
+      font-size: 1.5rem;
     }
   }
 </style>

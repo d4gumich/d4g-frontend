@@ -56,13 +56,12 @@
     font-family: "Open Sans";
     font-size: 3rem;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     margin: 0 0 2rem 0;
     text-decoration: underline rgba(227, 184, 120, 1) 3px;
     text-underline-offset: 10px;
     color: #232323;
     font-style: normal;
-    font-weight: 700;
     line-height: 30px;
   }
 
@@ -71,6 +70,7 @@
     font-family: "Open Sans";
     font-size: 1.2rem;
     margin: 0 0 1rem 0;
+    font-weight: 500;
   }
 
   h3 {
@@ -80,6 +80,7 @@
     color: rgba(0, 0, 0, 0.75);
     font-size: 1.2rem;
     font-style: normal;
+    font-weight: 500;
   }
 
   img {

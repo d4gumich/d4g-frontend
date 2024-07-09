@@ -7,15 +7,11 @@
   import ChevronUp from "../assets/icons/angle-up-solid.svelte";
 
   let open = false;
-  let copyButtonClicked = false;
 
   const handleOpen = () => {
-    if (copyButtonClicked === false) {
-      open = !open;
-    } else {
-      copyButtonClicked = false;
-    }
+    open = !open;
   };
+  
 </script>
 
 <div class="collapsible-button-container">

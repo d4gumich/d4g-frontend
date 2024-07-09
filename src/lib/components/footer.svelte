@@ -26,7 +26,7 @@
     }
   
     .footer-title {
-      font-weight: bold;
+      font-weight: 500;
       font-family: "Open Sans", sans-serif;
       color: var(--text-color-light);
     }

@@ -14,9 +14,10 @@
 <div class="modal-overlay">
   <div class="modal">
     <p class="text-prompt">
-      The file will take an estimated <b
-        >{estimatedTime} second{estimatedTime !== 1 ? "s" : ""}</b
-      > to analyze.
+      The file will take an estimated 
+      <span style={`border-bottom: 2px solid var(--button-color);`}>
+        {estimatedTime} second{estimatedTime !== 1 ? "s" : ""}
+      </span> to analyze.
     </p>
     <p class="text-prompt">Do you want to proceed?</p>
     <div class="button-section">

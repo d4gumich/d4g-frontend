@@ -18,3 +18,5 @@ export const PHONE_SCREEN_WIDTH = 912; //px
 export const SUMMARY_API_CALL_DELAY = 5000; //ms
 export const TIME_MULTIPLIER_M = 45.1;
 export const TIME_EXPONENT_B = 0.00923;
+export const MAXIMUM_BACKOFF_MILLISECONDS = 32000; //ms
+export const MAX_RETRIES = 3;

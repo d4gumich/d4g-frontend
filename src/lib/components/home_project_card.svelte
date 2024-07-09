@@ -86,7 +86,7 @@
         font-family: Lato;
         font-size: 50px;
         font-style: normal;
-        font-weight: 700;
+        font-weight: 500;
         line-height: 70px; /* 140% */
         margin: 0;
         text-decoration: underline rgba(227, 184, 120, 1) 3px;

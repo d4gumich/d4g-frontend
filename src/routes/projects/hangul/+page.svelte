@@ -11,7 +11,7 @@
   import { sleep, calculateEstimatedTime } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
-  import { fetchSummaryData, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
+  import { fetchSummary, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
 
   import Button from "$lib/components/button.svelte";
   import HangulResult from "$lib/components/hangul_result.svelte";
@@ -188,9 +188,9 @@
 
       } catch (error) {
         console.error("Could not fetch from d4gumsi.pythonanywhere.com", error);
+        goBack(true);
         errorType = 1;
         showError = true;
-        showAnalyzeButton = false;
 
         const emailParams = {
             to_name: "Szymon",
@@ -218,7 +218,7 @@
       loadingProgressMain = 0;
       analyzing = false;
 
-      if (result !== null && version === 2) {
+      if (showResults && version === 2) {
           console.log("fetching summary data");
           result.fetchingSummaryData = true;
           result.estimatedTimeToAnalyzeSummary = result.hangul_time * 1.5;
@@ -227,8 +227,8 @@
             console.log(`waiting ${SUMMARY_API_CALL_DELAY * MILLISECONDS_TO_SECONDS} seconds to call summary data`);
             await sleep(SUMMARY_API_CALL_DELAY);
             console.log("fetching summary data");
-            summary_result = await fetchSummaryData(result.document_summary_parameters,
-                                                  version);
+            summary_result = await fetchSummary(result.document_summary_parameters,
+                                                version);
             console.log("Document Summary:", summary_result);
             result.summary_generation_time = Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
             
@@ -427,7 +427,7 @@
     color: var(--text-color-main);
     font-family: "Open Sans";
     font-size: 1.1rem;
-    font-weight: 800;
+    font-weight: 500;
     margin: 0 0 0.2rem 0;
   }
 
@@ -455,7 +455,7 @@
     font-family: "Open Sans";
     font-size: 1.2rem;
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 30.857px; /* 154.285% */
   }
 
