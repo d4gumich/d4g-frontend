@@ -289,20 +289,6 @@
 		</Collapsible>
 	{/if}
 
-	{#if metadata.doc_type}
-		<Collapsible heading="DOCUMENT TYPE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{metadata.doc_type}
-			</div>
-		</Collapsible>
-	{:else}
-		<Collapsible heading="DOCUMENT TYPE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
-	{/if}
-
 	{#if report_type}
 		<StaticResultDisplay heading="REPORT TYPE" isValid={true} useCheckMark={true}>
 			<div slot="text" class="text-content-result-display">
