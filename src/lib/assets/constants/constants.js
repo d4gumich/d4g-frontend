@@ -20,3 +20,4 @@ export const TIME_MULTIPLIER_M = 45.1;
 export const TIME_EXPONENT_B = 0.00923;
 export const MAXIMUM_BACKOFF_MILLISECONDS = 32000; //ms
 export const MAX_RETRIES = 3;
+export const BYTES_TO_MB = 0.000001;

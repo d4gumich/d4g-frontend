@@ -20,6 +20,7 @@
 	export let estimatedTimeToAnalyzeSummary = 1000000;
 	export let fileName = "N/A";
 	export let version = 2;
+	export let document_size = 0;
 
 	import { NO_TITLE_FOUND, DEFAULT_TEXT } from "$lib/assets/constants/constants.js";
 	import { marked } from "marked";
@@ -203,10 +204,24 @@
 
 	{#if metadata["No.of Pages"]}
 		<StaticResultDisplay heading="NUMBER OF PAGES" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">{metadata["No.of Pages"]}</div>
+			<div slot="text" class="text-content-result-display">{metadata["No.of Pages"]}&nbsp;<span class="locations-subtext">({document_size}MBs)</span></div>
 		</StaticResultDisplay>
 	{:else}
 		<Collapsible heading="NUMBER OF PAGES" isValid={false} useCheckMark={true}>
+			<div slot="text" class="text-content">
+				{DEFAULT_TEXT}
+			</div>
+		</Collapsible>
+	{/if}
+
+	{#if metadata.Author}
+		<StaticResultDisplay heading="AUTHOR" isValid={true} useCheckMark={true}>
+			<div slot="text" class="text-content-result-display">
+				{metadata.Author}
+			</div>
+		</StaticResultDisplay>
+	{:else}
+		<Collapsible heading="AUTHOR" isValid={false} useCheckMark={true}>
 			<div slot="text" class="text-content">
 				{DEFAULT_TEXT}
 			</div>
@@ -275,20 +290,6 @@
 		</StaticResultDisplay>
 	{/if}
 
-	{#if metadata.Author}
-		<StaticResultDisplay heading="AUTHOR" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">
-				{metadata.Author}
-			</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="AUTHOR" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
-	{/if}
-
 	{#if report_type}
 		<StaticResultDisplay heading="REPORT TYPE" isValid={true} useCheckMark={true}>
 			<div slot="text" class="text-content-result-display">
@@ -306,9 +307,7 @@
 	{#if document_language}
 		<StaticResultDisplay heading="LANGUAGE" isValid={true} useCheckMark={true}>
 			<div slot="text" class="text-content-result-display">
-				{document_language.language} (score={document_language.score.toFixed(
-					2
-				)})
+				{document_language.language}
 			</div>
 		</StaticResultDisplay>
 	{:else}
@@ -341,8 +340,8 @@
 					 class="text-content"
 					 style={isMobile ? 
 				          "font-size: 22px;":
-				          ""}>
-				{document_title}
+				          "line-height: 2rem"}>
+				{document_title[0][1]} <span class="locations-subtext">({document_title[0][0]}pt font)</span>
 			</div>
 		</Collapsible>
 	{:else}

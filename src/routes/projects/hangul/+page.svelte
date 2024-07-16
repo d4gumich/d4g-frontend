@@ -6,12 +6,14 @@
     SECONDS_TO_MILLISECONDS,
     MILLISECONDS_TO_SECONDS,
     TIMEOUT_BUFFER,
-    SUMMARY_API_CALL_DELAY
+    SUMMARY_API_CALL_DELAY,
+    BYTES_TO_MB
   } from "$lib/assets/constants/constants.js";
   import { sleep, calculateEstimatedTime } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
   import { fetchSummary, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
+  import { writable } from "svelte/store";
 
   import Button from "$lib/components/button.svelte";
   import HangulResult from "$lib/components/hangul_result.svelte";
@@ -27,6 +29,8 @@
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = 'hangul';
+  const numberOfPages = writable(0);
+  const size = writable(0);
 
   GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
 
@@ -39,7 +43,6 @@
   let confirmResult;
   let showModal = false;
   let loadingProgressMain = 0;
-  let numberOfPages = 0;
   let verbose = true;
   let hidden = true;
   let version = 2;
@@ -51,7 +54,10 @@
   let showResults = false;
   let loadingFastPass = false;
 
-  $: estimatedTimeToAnalyze = calculateEstimatedTime(numberOfPages);
+  $: console.log("Size of file: ", $size, "MB");
+  $: console.log("Number of pages: ", $numberOfPages);
+
+  $: estimatedTimeToAnalyze = calculateEstimatedTime($numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
   $: loadingTimeRemaining = Math.round(
     estimatedTimeToAnalyze - loadingProgressMain
@@ -64,14 +70,17 @@
     goBack(false);
   }
 
-  async function getNumberOfPages(pdfFile) {
+  async function getDocumentPagesAndSize(pdfFile) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
 
       reader.onload = async function (event) {
         const loadingTask = getDocument(new Uint8Array(event.target.result));
         const pdfDocument = await loadingTask.promise;
-        resolve(pdfDocument.numPages);
+        resolve({
+          page_count_: pdfDocument.numPages,
+          size_: pdfFile.size // size in bytes
+        });
       };
 
       reader.onerror = function (event) {
@@ -144,7 +153,10 @@
         dropText = file.name;
 
         try {
-          numberOfPages = await getNumberOfPages(file);
+          getDocumentPagesAndSize(file).then(({ page_count_, size_ }) => {
+            numberOfPages.set(page_count_);
+            size.set((size_ * BYTES_TO_MB).toFixed(2));
+          });
           fileName = dropText.replace(/\.pdf$/, '');
         } catch (error) {
           console.error("Error loading PDF:", error);
@@ -176,6 +188,7 @@
         result.hangul_time = Math.round((Date.now() - main_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
         result.fileName = fileName;
         result.version = version;
+        result.document_size = $size;
         if (loadingProgressMain < estimatedTimeToAnalyze) {
           loadingProgressMain = estimatedTimeToAnalyze;
           loadingFastPass = true;
