@@ -3,6 +3,7 @@
   import TeamCard from "../../lib/components/team_card.svelte";
   import AlumniCard from "../../lib/components/alumni_card.svelte";
   import SzymonProfile from "$lib/assets/profile-pics/szymon_sarnowicz.png";
+  import SaraProfile from "$lib/assets/profile-pics/sara_haptonstall.png";
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = "team";
@@ -16,6 +17,14 @@
       image:
         "https://pbs.twimg.com/profile_images/1653043667211370496/tsXMk4do_400x400.jpg",
       linkedin: "https://www.linkedin.com/in/edward-g-happ/",
+    },
+    {
+      name: "Sara Haptonstall",
+      position: "Project Manager",
+      description:
+        "Sara is a graduate of the Master's  in Applied Data Science program from the University of Michigan. She holds a Bachelor's degree in  Accounting. Sara has extensive experience in using analytical tools to enhance business operations and decision-making, optimizing productivity and reducing costs through innovative automation and data analytics solutions.  Her technical skills include advanced proficiency in Python, SQL, and various AI & machine learning frameworks.",
+      image: SaraProfile,
+      linkedin: "https://www.linkedin.com/in/sarahaptonstall/",
     },
   ];
 
@@ -62,7 +71,7 @@
       name: "Szymon Sarnowicz",
       position: "Full Stack Developer",
       description:
-        "Szymon is a current Master's student at the University of Michigan School of Information, in the MADS program. He has an undergraduate degree in Mechanical Engineering from University of Washington. He is currently a Software Engineer at General Motors working on battery diagnostics as well as a previous Program Manager on Ultra Cruise.",
+        "Szymon is a current Master's student at the University of Michigan School of Information, in the MADS program. He is currently a Software Engineer at General Motors working on battery diagnostics as well as a previous Program Manager in Autonomous Systems. As a developer he has helped launch Hangul 2.1 which includes all new UI, improved API handling, and feature alerting.",
       image: SzymonProfile,
       linkedin: "https://www.linkedin.com/in/szymonsarnowicz/",
     },
