@@ -4,6 +4,7 @@
   import AlumniCard from "../../lib/components/alumni_card.svelte";
   import SzymonProfile from "$lib/assets/profile-pics/szymon_sarnowicz.png";
   import SaraProfile from "$lib/assets/profile-pics/sara_haptonstall.png";
+  import SudhaProfile from "$lib/assets/profile-pics/sudha_kannan.png";
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = "team";
@@ -36,6 +37,14 @@
         "Sidra is a Master's student at the University of Michigan School of Information, specializing in Data Science. She has an undergraduate degree in Computer Engineering. She has previously worked as an Edge Hacker for Zenatix Solutions and also co-founded a company called Pixli, where she worked on Software Development, UX/UI and Marketing.",
       image: "https://avatars.githubusercontent.com/u/5307694?v=4",
       linkedin: "https://www.linkedin.com/in/sidraeffendi/",
+    },
+    {
+      name: "Sudha Kannan",
+      position: "Data Scientist",
+      description:
+        "Sudharsana graduated with a Master’s in Mobile and Embedded Systems from the University of Passau, Germany, and holds a Bachelor’s degree in Information and Communication Technology. She has professional experience in Data Science, having worked for a consulting company, and has also been an academic researcher at the university in the field of Data Science. Additionally, Sudha has experience in Information Technology, having worked for Amazon and Tata Communications Limited in the IT sector.",
+      image: SudhaProfile,
+      linkedin: "http://www.linkedin.com/in/sudharsanakannan/",
     },
     {
       name: "Hina Joshua",
