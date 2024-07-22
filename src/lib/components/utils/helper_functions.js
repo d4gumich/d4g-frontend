@@ -51,3 +51,9 @@ export const getBackoffWaitTime = (fetch_attempt) => {
 
   return backoff_wait_time;
 }
+
+export const toTitleCase = (str) => {
+  return str.replace(/\w\S*/g, function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+}

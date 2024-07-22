@@ -36,7 +36,7 @@
     INTERVAL,
     MILLISECONDS_TO_SECONDS,
   } from "$lib/assets/constants/constants.js";
-	import { getTopLocations } from "$lib/components/utils/helper_functions.js";
+	import { getTopLocations, toTitleCase } from "$lib/components/utils/helper_functions.js";
 	import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
 
 	let MDasHTML = marked(markdown_text);
@@ -261,6 +261,24 @@
 	{/if}
 
 	<h3 class="header-content">CONTENT-BASED INFORMATION</h3>
+	{#if document_title && document_title != NO_TITLE_FOUND}
+		<Collapsible heading="DOCUMENT TITLE" isValid={true} useCheckMark={true}>
+			<div slot="text" 
+					 class="text-content"
+					 style={isMobile ? 
+				          "font-size: 22px;":
+				          "line-height: 2rem"}>
+				{toTitleCase(document_title[0][1])} <span class="locations-subtext">({document_title[0][0]}pt font)</span>
+			</div>
+		</Collapsible>
+	{:else}
+		<Collapsible heading="DOCUMENT TITLE" isValid={false} useCheckMark={true}>
+			<div slot="text" class="text-content">
+				{DEFAULT_TEXT}
+			</div>
+		</Collapsible>
+	{/if}
+
 	{#if document_summary && version === 2}
 		<Collapsible heading="DOCUMENT SUMMARY" 
 								 showCopyButton={true}
@@ -328,24 +346,6 @@
 		</Collapsible>
 	{:else}
 		<Collapsible heading="DOCUMENT THEMES" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
-	{/if}
-
-	{#if document_title && document_title != NO_TITLE_FOUND}
-		<Collapsible heading="DOCUMENT TITLE" isValid={true} useCheckMark={true}>
-			<div slot="text" 
-					 class="text-content"
-					 style={isMobile ? 
-				          "font-size: 22px;":
-				          "line-height: 2rem"}>
-				{document_title[0][1]} <span class="locations-subtext">({document_title[0][0]}pt font)</span>
-			</div>
-		</Collapsible>
-	{:else}
-		<Collapsible heading="DOCUMENT TITLE" isValid={false} useCheckMark={true}>
 			<div slot="text" class="text-content">
 				{DEFAULT_TEXT}
 			</div>
