@@ -36,7 +36,7 @@
     INTERVAL,
     MILLISECONDS_TO_SECONDS,
   } from "$lib/assets/constants/constants.js";
-	import { getTopLocations, toTitleCase } from "$lib/components/utils/helper_functions.js";
+	import { getTopLocations, toTitleCase, combineTitleFonts } from "$lib/components/utils/helper_functions.js";
 	import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
 
 	let MDasHTML = marked(markdown_text);
@@ -137,6 +137,15 @@
 			}, 500); // This timeout should match the CSS transition duration
 		}, timeout);
 	};
+
+	// let grouped = document_title.reduce((acc, [num, text]) => {
+	// 	acc[num] = acc[num] ? `${acc[num]} ${text}` : text;
+	// 	return acc;
+	// }, {});
+
+	// let combined = Object.entries(grouped).map(([num, text]) => [Number(num), text]);
+
+	// console.log(combined);
 </script>
 
 <div class="hangul-result">
@@ -268,7 +277,10 @@
 					 style={isMobile ? 
 				          "font-size: 22px;":
 				          "line-height: 2rem"}>
-				{toTitleCase(document_title[0][1])} <span class="locations-subtext">({document_title[0][0]}pt font)</span>
+				{#each combineTitleFonts(document_title).filter(item => item[1].length > 1) as item (item[1])}
+					{toTitleCase(item[1])} <span class="locations-subtext">@ {Math.round(item[0])}pt font</span><br/>
+				{/each}
+				<p class="locations-subtext">Displaying titles ordered by largest font in document</p>
 			</div>
 		</Collapsible>
 	{:else}

@@ -57,3 +57,12 @@ export const toTitleCase = (str) => {
       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
 }
+
+export const combineTitleFonts = (titleArray) => {
+  let grouped = titleArray.reduce((acc, [num, text]) => {
+		acc[num] = acc[num] ? `${acc[num]} ${text}` : text;
+		return acc;
+	}, {});
+
+	return Object.entries(grouped).map(([num, text]) => [Number(num), text]);
+}
