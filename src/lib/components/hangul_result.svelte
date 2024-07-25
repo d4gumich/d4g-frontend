@@ -277,7 +277,7 @@
 					 style={isMobile ? 
 				          "font-size: 22px;":
 				          "line-height: 2rem"}>
-				{#each combineTitleFonts(document_title).filter(item => item[1].length > 1) as item (item[1])}
+				{#each combineTitleFonts(document_title).sort((a, b) => b[0] - a[0]).filter(item => item[1].length > 1) as item (item[1])}
 					{toTitleCase(item[1])} <span class="locations-subtext">@ {Math.round(item[0])}pt font</span><br/>
 				{/each}
 				<p class="locations-subtext">Displaying titles ordered by largest font in document</p>
