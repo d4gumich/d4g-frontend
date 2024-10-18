@@ -7,6 +7,9 @@
 
     const currentPage = 'chetah2.0';
 
+    // Set between dev and build, for url "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah"
+    const host_url = 'http://localhost:5173/';
+
     let searchQuery = '';
     let aboutCheetah = false;
     let version = 'Chetah 2.0';
@@ -24,6 +27,8 @@
     function handleFeedbackClick() {
         showModal = true;
     }
+
+
 </script>
 
 <svelte:head>
