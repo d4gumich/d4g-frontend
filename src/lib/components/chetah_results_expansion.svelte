@@ -1,9 +1,20 @@
 <script>
-    export let title;
-    export let date;
-    export let link;
-    export let cluster;
-    export let summary_full;
+    export let report_title;
+    export let report_author;
+    export let organization_name;
+    export let doc_creation_date;
+    export let doc_modified_date;
+    export let year_of_report;
+    export let report_type;
+    export let pages_in_report;
+    export let language_of_doc;
+    export let locations_report;
+    export let themes;
+    export let summary;
+    export let file_name;
+    export let cleaned_text_content;
+    export let key_phrases_words;
+    
     let showModal = false;
 
     function toggleModal(){
