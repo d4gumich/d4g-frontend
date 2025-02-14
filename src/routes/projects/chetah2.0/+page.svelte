@@ -1,7 +1,7 @@
 <script>
     import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
-    import ChetahResults from "../../../lib/components/chetah_results.svelte";
+    import ChetahResults from "../../../lib/components/chetah_results_expansion.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
@@ -207,7 +207,6 @@
     .results-filter-container {
         margin-top: 20px;
     }
-
 
 
 
