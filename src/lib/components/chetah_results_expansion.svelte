@@ -31,6 +31,7 @@
             <p style="font-size: {1.5-i*0.2}rem;">{title}</p>
         {/each}
         <p>
+            <strong>Year of Report: </strong>{year_of_report||"No identified Author"}<br/>
             <strong>Report Author: </strong>{report_author||"No identified Author"}<br/>
             <strong>Organization: </strong>{organization_name||"No identified Organization"}<br/>
             <strong>Themes: </strong>{themes||"No identified Themes"}<br/>
