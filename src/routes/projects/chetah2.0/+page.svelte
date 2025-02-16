@@ -160,7 +160,7 @@
                     <p
                         style="margin: auto; width:100%; text-align:center; font-family: Open Sans;"
                     >
-                        <strong>{num_res} out of 238 results in {time} ms.</strong>
+                        <strong>{num_res} results in {time} ms.</strong>
                     </p>
                 {/if}
                 <div class="res-container">

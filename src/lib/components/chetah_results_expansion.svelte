@@ -1,4 +1,5 @@
 <script>
+    export let error;
     export let report_title;
     export let report_author;
     export let organization_name;
@@ -12,9 +13,9 @@
     export let themes;
     export let summary;
     export let file_name;
-    export let cleaned_text_content;
-    export let key_phrases_words;
-    
+    /* export let cleaned_text_content;
+    export let key_phrases_words; */
+
     let showModal = false;
 
     function toggleModal(){
@@ -23,29 +24,42 @@
 
 </script>
 
-<div class="result">
-    <p><a href={link} target="_blank" class="title">{title}</a> - {date}</p>
-    <!-- <p>{date}</p> -->
-    <p><strong>Clusters: </strong>{cluster}</p>
-    <p>{summary_full.substring(0, 250)} ... <button on:click={toggleModal}>+More</button>
-    </p>
+{#if !error}
+    <div class="result">
+        <!-- <h3><span class="title">{report_title}</span> - {year_of_report}</h3> -->
+        {#each report_title.slice(0,3) as title,i}
+            <p style="font-size: {1.5-i*0.2}rem;">{title}</p>
+        {/each}
+        <p>
+            <strong>Report Author: </strong>{report_author||"No identified Author"}<br/>
+            <strong>Organization: </strong>{organization_name||"No identified Organization"}<br/>
+            <strong>Themes: </strong>{themes||"No identified Themes"}<br/>
+            <strong>Report Type: </strong>{report_type||"No identified report type"}<br/>
+            <strong>Locations: </strong>{locations_report||"No identified locations"}<br/>
+            <strong>Pages: </strong>{pages_in_report||"No identified number of pages"}<br/>
+            <strong>Language: </strong>{language_of_doc||"Language of report not identified"}<br/>
+            <strong>Document created: </strong>{doc_creation_date||"No identified creation date"}<br/>
+            <strong>Report modified: </strong>{doc_modified_date||"No identified modified date"}<br/>
+            <strong>Report modified: </strong>{file_name||"No identified filename"}<br/>
+            <strong>Hangul Summary: </strong>{summary?.substring(0, 350)||"No hangul summary available"} ... <button on:click={toggleModal}>+More</button><br/>
+        </p>
 
-    {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
-            <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <span
-                    class="modal-close"
-                    on:click|stopPropagation={() => (showModal = false)}
-                    >&times;</span
-                >
-                <p>{summary_full}</p>
+        {#if showModal}
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="modal" on:click|self={() => (showModal = false)}>
+                <div class="modal-content">
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <span
+                        class="modal-close"
+                        on:click|stopPropagation={() => (showModal = false)}
+                        >&times;</span
+                    >
+                    <p>{summary}</p>
+                </div>
             </div>
-        </div>
-    {/if}
-</div>
-
+        {/if}
+    </div>
+{/if}
 <style>
     p {
         font-family: Open Sans;
@@ -55,7 +69,7 @@
         width: 70%;
         word-wrap: normal;
         margin: auto;
-        margin-left: 0;
+        margin-left: 5%;
         margin-bottom: 1%;
         margin-top: 2%;
         border-radius: 3%;
