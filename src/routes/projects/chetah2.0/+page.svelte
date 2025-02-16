@@ -9,7 +9,7 @@
     const currentPage = 'chetah2.0';
 
     // Set between dev and build, for url "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah"
-    const host_url = 'http://127.0.0.1:5000/';
+    const host_url = 'https://d4gumsi.pythonanywhere.com/';
 
     let searchQuery = '';
     let aboutChetah = false;
