@@ -9,11 +9,11 @@ export async function fetchSummary(summary_parameters, version) {
 
   headers_.append('Content-Type', 'application/json');
   headers_.append('Accept', 'application/json');
-  // `https://d4gumsi.pythonanywhere.com/api/v${version}/products/summary` fetch
+
   for (let fetch_attempt = 0; fetch_attempt < MAX_RETRIES; fetch_attempt++) {
     try {
       const response = await fetch(
-        `http://127.0.0.1:5000/api/v${version}/products/summary`,
+        `https://d4gumsi.pythonanywhere.com/api/v${version}/products/summary`,
         {
           method: "POST",
           headers: headers_,
@@ -52,7 +52,7 @@ async function fetchData(file, version, timeout) {
 
       const response = await Promise.race([
         fetch(
-          `http://127.0.0.1:5000/api/v${version}/products/hangul`,
+          `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
         {
           method: "POST",
           body: form,
