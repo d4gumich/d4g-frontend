@@ -115,8 +115,8 @@
       <div class="footer-title">Data4Good</div>
       <a href={`${base}/about`}>About</a>
       <a href={`${base}/news`}>News</a>
-      <a href={`${base}/projects`}>Projects</a>
-      <a href={`${base}/research`}>Research</a>
+      <a href={`${base}/products`}>Products</a>
+      <a href={`${base}/archive`}>Archive</a>
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
     </div>
@@ -125,7 +125,8 @@
     <div class="footer-column">
       <div class="footer-title">Projects</div>
       <a href={`${base}/projects/chetah1.0`}>Chetah</a>
-      <a href={`${base}/projects/hangul`}>Hangul</a>
+      <a href={`${base}/products/hangul`}>Hangul</a>
+      <a href={`${base}/products/hangul_api`}>Hangul API</a>
     </div>
   
     <!-- Column 3 -->

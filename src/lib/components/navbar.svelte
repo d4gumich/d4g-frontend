@@ -106,8 +106,8 @@
     <nav class="nav-links">
       <a href={`${base}/about`}>About</a>
       <a href={`${base}/news`}>News</a>
-      <a href={`${base}/projects`}>Projects</a>
-      <a href={`${base}/research`}>Research</a>
+      <a href={`${base}/products`}>Products</a>
+      <a href={`${base}/archive`}>Archive</a>
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
       <div class="dot" />
@@ -127,8 +127,8 @@
         <nav class="menu1">
           <a class="link1" href={`${base}/about`} on:click={handleHambugerItemClick}>About</a>
           <a class="link1" href={`${base}/news`} on:click={handleHambugerItemClick}>News</a>
-          <a class="link1" href={`${base}/projects`} on:click={handleHambugerItemClick}>Projects</a>
-          <a class="link1" href={`${base}/research`} on:click={handleHambugerItemClick}>Research</a>
+          <a class="link1" href={`${base}/products`} on:click={handleHambugerItemClick}>Products</a>
+          <a class="link1" href={`${base}/archive`} on:click={handleHambugerItemClick}>Archive</a>
           <a class="link1" href={`${base}/team`} on:click={handleHambugerItemClick}>Team</a>
           <a class="link1" href={`${base}/faq`} on:click={handleHambugerItemClick}>FAQ</a>
         </nav>
