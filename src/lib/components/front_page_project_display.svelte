@@ -17,7 +17,7 @@
     </div>
     <Button
       text="Try Hangul"
-      link={`${base}/projects/hangul`}
+      link={`${base}/products/hangul`}
       styleAdjustment={`margin: 1.25rem 0 0 0;`}
     />
   </div>

@@ -12,7 +12,7 @@
   import { sleep, calculateEstimatedTime } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
-  import { fetchSummary, fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
+  import { fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
   import { writable } from "svelte/store";
 
   import Button from "$lib/components/button.svelte";
@@ -57,7 +57,8 @@
   $: console.log("Size of file: ", $size, "MB");
   $: console.log("Number of pages: ", $numberOfPages);
 
-  $: estimatedTimeToAnalyze = calculateEstimatedTime($numberOfPages);
+  $: estimatedTimeToAnalyze = 60;
+  // $: estimatedTimeToAnalyze = calculateEstimatedTime($numberOfPages);
   $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
   $: loadingTimeRemaining = Math.round(
     estimatedTimeToAnalyze - loadingProgressMain

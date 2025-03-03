@@ -2,6 +2,7 @@
   export let name;
   export let detail;
   export let logo;
+  export let buttonText;
   export let researchLink;
   export let tryLink;
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
@@ -35,16 +36,20 @@
         <!-- two buttons from button component -->
       </div>
       <div class="button-container">
-        <Button
-          text="View Research"
-          link={researchLink}
-          styleAdjustment={`margin: 0;`}
-        />
-        <Button
-          text="Try {name}"
-          link={tryLink}
-          styleAdjustment={isMobile ? `margin: 1rem 0 0 0;` : 'margin: 0 0 0 1rem;'}
-        />
+        <div class="button">
+          <Button
+            text={buttonText}
+            link={researchLink}
+            styleAdjustment={`margin: 0;`}
+          />
+        </div>
+        <div class="button">
+          <Button
+            text="Try {name}"
+            link={tryLink}
+            styleAdjustment={isMobile ? `margin: 1rem 0 0 0;` : 'margin: 0 0 0 1rem;'}
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -105,8 +110,14 @@
   .button-container {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     margin-bottom: 2rem;
+  }
+
+  .button{
+    text-align: center;
+    display:table-cell;
+    vertical-align:middle;
   }
 
   h3 {

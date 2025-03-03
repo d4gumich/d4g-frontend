@@ -15,7 +15,7 @@
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
         logo: HangulLogo,
         researchLink: 'https://drive.google.com/file/d/1U_wHtC6DtPsfIBXHCeESfQXlDsXe5lHv/view',
-        tryLink: `${base}/projects/hangul`
+        tryLink: `${base}/products/hangul`
       },
       {
         name: 'Chetah 2.0',
