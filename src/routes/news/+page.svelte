@@ -4,23 +4,33 @@
     import NewsCard from '$lib/components/news_card.svelte';
     import SectionTitle from "../../lib/components/section_title.svelte";
     import Poster from '$lib/assets/UMSI Exposition - Sidra & Prithvi 17-Apr-23.jpg'
+    import nethope from '$lib/assets/nethope_hero_image.png'
+    import reliefweb from '$lib/assets/reliefweb_logo.jpg'
     import Navbar from '$lib/components/navbar.svelte';
   
     const currentPage = 'news';
 
     const latest_news = [
         {
+            image: nethope,
+            category: 'NetHope Summit 2024',
+            title: "Using AI to find and analyze NGO PDF reports by Edward Happ and Sidra Effendi",
+            link: "https://docs.google.com/presentation/d/16yn-pe-QLZzMClx0AMlHeRfL7Rt3q2Mn/edit?usp=sharing&ouid=106641686144189432819&rtpof=true&sd=true",
+            date: 'October 2024'
+        },
+        {
+            image: reliefweb,
+            category: 'ReliefWeb Presentation',
+            title: "AI Products & Demo",
+            link: "https://docs.google.com/presentation/d/1YeK5ZM0UUTl_S2nThGYt3QW0dHMOQiAF/edit?usp=sharing&ouid=106641686144189432819&rtpof=true&sd=true",
+            date: 'July 2024'
+        },
+        {
             image: Poster,
-            category: 'Exposition',
+            category: 'UMSI Exposition',
             title: "UMSI Exposition by Sidra and Prithvi on Hangul",
             date: 'April 17th 2023'
         }
-        // {
-        //     image: Poster,
-        //     category: 'Artificial Intelligence',
-        //     title: "UMSI Exposition by Sidra and Prithvi on Hangul",
-        //     date: 'July 25th 2023'
-        // }
     ]
   
 </script>

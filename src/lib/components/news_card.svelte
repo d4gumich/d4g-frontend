@@ -4,15 +4,19 @@
   export let category;
   export let title;
   export let date;
+  export let link;
 </script>
 
 <div class="card-container">
   <div class="card">
-    <img src={image} alt="logo" height="30%" />
+    <img src={image} alt="logo" height="30%" width="200px"/>
     <div class="content">
       <div class="text">
         <h1>{category}</h1>
         <h2>{title}</h2>
+        {#if link}
+        <h3><a href={link}>View Research</a></h3>
+        {/if}
         <h3>{date}</h3>
       </div>
     </div>
@@ -23,16 +27,17 @@
   .card-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin: 2rem 0 0 0;
+    align-items: flex-start;
+    margin: 2rem 0 0 8rem;
+    width: 80%;
   }
 
   .card {
-    width: auto;
+    display: flex;
+    width: 100%;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    display: flex;
+    justify-content: flex-start;
   }
 
   .content {
@@ -47,6 +52,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    width: 100%;
   }
 
   h1 {

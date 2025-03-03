@@ -53,7 +53,7 @@
       ? `border-bottom: 2px solid var(--button-color);`
       : ``}
   >
-    {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[1]}.0
+    {HANGUL_PROJECT_NAME}{HANGUL_VERSIONS[1]}.2
   </p>
 </div>
 

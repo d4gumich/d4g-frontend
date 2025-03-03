@@ -5,6 +5,8 @@
   import SzymonProfile from "$lib/assets/profile-pics/szymon_sarnowicz.png";
   import SaraProfile from "$lib/assets/profile-pics/sara_haptonstall.png";
   import SudhaProfile from "$lib/assets/profile-pics/sudha_kannan.png";
+  import ReedProfile from "$lib/assets/profile-pics/reed_paskvan.png"
+  import YilinProfile from "$lib/assets/profile-pics/yilin_fang.jpeg"
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = "team";
@@ -47,46 +49,102 @@
       linkedin: "http://www.linkedin.com/in/sudharsanakannan/",
     },
     {
-      name: "Hina Joshua",
-      position: "Data Scientist",
+      name: "Xabier Urruchua",
+      position: "Systems Specialist",
       description:
-        "Hina is a master's student at the University of Michigan School of Information, Master of Applied Data Science Program. She has a Master of Public Health degree from Michigan State University and has previously worked in the public health domain in government and corporate settings where she analyzed health data including state disease surveillance system data and medical insurance claims data for ad hoc and routine report compilation. Hina is interested in the application of NLP in the NGO domain to improve decision-making in development and relief programs.",
-      image:
-        "https://media.licdn.com/dms/image/C4E03AQHSs935QuzMhw/profile-displayphoto-shrink_800_800/0/1649256757363?e=2147483647&v=beta&t=THtp_Ris8Bt9DdFXiFedB7wxSsaMxqztomO_ZSE3yqU",
-      linkedin: "https://www.linkedin.com/in/hina-joshua-63013a10b/",
+        "TBA",
     },
     {
-      name: "Takao Kakegawa",
+      name: "Reed Paskvan",
       position: "Data Scientist",
       description:
-        "Takao is a current Master's student at the University of Michigan School of Information, in the MADS program. He has an undergraduate degree in Applied Mathematics and Statistics, with a computer science specialisation. He has prior experience in statistical analysis research through the SURF Fellowship at UC Berkeley.",
-      image:
-        "https://media.licdn.com/dms/image/C5603AQE0TAUWH63lAw/profile-displayphoto-shrink_800_800/0/1552117070041?e=2147483647&v=beta&t=N5xI3dLQoCNVUA_Ui5kMEiaQEKmxsZsgdNR2snJUUwQ",
-      linkedin: "https://www.linkedin.com/in/takao-kakegawa/",
+        "TBA",
+      image: ReedProfile
     },
+    {
+      name: "Sihyun Kyung",
+      position: "Data Scientist",
+      description:
+        "TBA",
+    }
+    // {
+    //   name: "Hina Joshua",
+    //   position: "Data Scientist",
+    //   description:
+    //     "Hina is a master's student at the University of Michigan School of Information, Master of Applied Data Science Program. She has a Master of Public Health degree from Michigan State University and has previously worked in the public health domain in government and corporate settings where she analyzed health data including state disease surveillance system data and medical insurance claims data for ad hoc and routine report compilation. Hina is interested in the application of NLP in the NGO domain to improve decision-making in development and relief programs.",
+    //   image:
+    //     "https://media.licdn.com/dms/image/C4E03AQHSs935QuzMhw/profile-displayphoto-shrink_800_800/0/1649256757363?e=2147483647&v=beta&t=THtp_Ris8Bt9DdFXiFedB7wxSsaMxqztomO_ZSE3yqU",
+    //   linkedin: "https://www.linkedin.com/in/hina-joshua-63013a10b/",
+    // },
+    // {
+    //   name: "Takao Kakegawa",
+    //   position: "Data Scientist",
+    //   description:
+    //     "Takao is a current Master's student at the University of Michigan School of Information, in the MADS program. He has an undergraduate degree in Applied Mathematics and Statistics, with a computer science specialisation. He has prior experience in statistical analysis research through the SURF Fellowship at UC Berkeley.",
+    //   image:
+    //     "https://media.licdn.com/dms/image/C5603AQE0TAUWH63lAw/profile-displayphoto-shrink_800_800/0/1552117070041?e=2147483647&v=beta&t=N5xI3dLQoCNVUA_Ui5kMEiaQEKmxsZsgdNR2snJUUwQ",
+    //   linkedin: "https://www.linkedin.com/in/takao-kakegawa/",
+    // },
   ];
 
   const webTeam = [
     {
+      name: "Yilin Fang",
+      position: "Web Developer and UX Designer",
+      description:
+        "Yilin is a senior dual degree student studying Computer Science and User Experience Design at the University of Michigan. Yilin has 3x project and internship experience with product design and research. She has advanced proficiency working with Python, REST API, SQL JavaScript and other full-stack development tools and languages. She is also interested in learning more about AI, LLMs and ML frameworks. ",
+      image:
+        YilinProfile,
+      linkedin: "https://www.linkedin.com/in/yilin-fang/",
+    },
+    // {
+    //   name: "Prithvijit Dasgupta",
+    //   position: "Systems Specialist and Web Developer",
+    //   description:
+    //     "Prithvijit is a current Master's student in the University of Michigan School of Information aiming to specialize in the Big Data Analytics track. He has experience working on distributed cloud systems and building RESTful APIs. He has an undergraduate degree in Mechanical Engineering.",
+    //   image:
+    //     "https://pbs.twimg.com/profile_images/1594033657437736971/sL_utrNg_400x400.jpg",
+    //   linkedin: "https://www.linkedin.com/in/prithvijit-dasgupta/",
+    // },
+    // {
+    //   name: "Szymon Sarnowicz",
+    //   position: "Full Stack Developer",
+    //   description:
+    //     "Szymon is a current Master's student at the University of Michigan School of Information, in the MADS program. He is currently a Software Engineer at General Motors working on battery diagnostics as well as a previous Program Manager in Autonomous Systems. As a developer he has helped launch Hangul 2.1 which includes all new UI, improved API handling, and feature alerting.",
+    //   image: SzymonProfile,
+    //   linkedin: "https://www.linkedin.com/in/szymonsarnowicz/",
+    // },
+  ];
+
+  const alumni = [
+    {
       name: "Prithvijit Dasgupta",
       position: "Systems Specialist and Web Developer",
-      description:
-        "Prithvijit is a current Master's student in the University of Michigan School of Information aiming to specialize in the Big Data Analytics track. He has experience working on distributed cloud systems and building RESTful APIs. He has an undergraduate degree in Mechanical Engineering.",
-      image:
-        "https://pbs.twimg.com/profile_images/1594033657437736971/sL_utrNg_400x400.jpg",
+      startYear: 2023,
+      endYear: 2024,
       linkedin: "https://www.linkedin.com/in/prithvijit-dasgupta/",
     },
     {
       name: "Szymon Sarnowicz",
       position: "Full Stack Developer",
-      description:
-        "Szymon is a current Master's student at the University of Michigan School of Information, in the MADS program. He is currently a Software Engineer at General Motors working on battery diagnostics as well as a previous Program Manager in Autonomous Systems. As a developer he has helped launch Hangul 2.1 which includes all new UI, improved API handling, and feature alerting.",
-      image: SzymonProfile,
+      startYear: 2023,
+      endYear: 2024,
       linkedin: "https://www.linkedin.com/in/szymonsarnowicz/",
     },
-  ];
-
-  const alumni = [
+    {
+      name: "Takao Kakegawa",
+      position: "Data Scientist",
+      startYear: 2023,
+      endYear: 2024,
+      linkedin: "https://www.linkedin.com/in/takao-kakegawa/",
+    },
+    {
+      name: "Hina Joshua",
+      position: "Data Scientist",
+      startYear: 2023,
+      endYear: 2024,
+      linkedin: "https://www.linkedin.com/in/hina-joshua-63013a10b/",
+    },
     {
       name: "Feng-Yu (Leo) Yeh",
       position: "Web Developer and UX Design",

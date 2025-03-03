@@ -58,6 +58,7 @@
         margin: 0.2rem 0;
         padding: 0;
         font-size: 1rem;
+        text-align: center;
     }
 
     p {
@@ -83,6 +84,7 @@
         h5 {
             font-size: 2rem;
             font-weight: 200;
+            text-align: center;
         }
 
         p {

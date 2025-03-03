@@ -8,6 +8,8 @@
   import FrontPageProjectDisplay from "$lib/components/front_page_project_display.svelte"
   import FrontPageProjectDisplayMirror from "$lib/components/front_page_project_display_mirror.svelte"
   import Navbar from "$lib/components/navbar.svelte"
+  import nethope from '$lib/assets/nethope_hero_image.png'
+  import reliefweb from '$lib/assets/reliefweb_logo.jpg'
   
   let isMobile = false;
   let screenWidth;
@@ -16,10 +18,11 @@
 
   const latest_news = [
     {
-      image: Poster,
-      category: "Exposition",
-      title: "UMSI Exposition by Sidra and Prithvi on Hangul",
-      date: "April 17th 2023",
+      image: nethope,
+      category: 'NetHope Summit 2024',
+      title: "Using AI to find and analyze NGO PDF reports by Edward Happ and Sidra Effendi",
+      link: "https://docs.google.com/presentation/d/16yn-pe-QLZzMClx0AMlHeRfL7Rt3q2Mn/edit?usp=sharing&ouid=106641686144189432819&rtpof=true&sd=true",
+      date: 'October 2024'
     },
   ];
 

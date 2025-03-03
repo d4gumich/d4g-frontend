@@ -6,7 +6,9 @@ import {
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
     preprocess: vitePreprocess(),
- 
+    paths: {
+        relative: false,
+    },
     kit: {
         adapter: adapter(),
 

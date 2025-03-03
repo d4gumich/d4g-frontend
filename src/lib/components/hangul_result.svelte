@@ -3,7 +3,7 @@
 	export let document_language;
 	export let document_theme = null; // default value when not present
 	export let document_title;
-	export let document_summary_parameters = null; // default value when not present
+	// export let document_summary_parameters = null; // default value when not present
 	export let document_summary = null; // default value when not present
 	export let content;
 	export let report_type;
@@ -14,7 +14,7 @@
 	export let keywords;
 	export let verbose;
 	export let hangul_time;
-	export let summary_generation_time = 0;
+	export let summary_generation_time = -1;
 	export let markdown_text;
 	export let fetchingSummaryData = false;
 	export let estimatedTimeToAnalyzeSummary = 1000000;
@@ -38,8 +38,10 @@
   } from "$lib/assets/constants/constants.js";
 	import { getTopLocations, toTitleCase, combineTitleFonts } from "$lib/components/utils/helper_functions.js";
 	import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
+	import { derived } from "svelte/store";
+    import { checkboxes } from "$lib/store.js";
+	import { num_keywords } from "$lib/store.js";
 
-	let MDasHTML = marked(markdown_text);
 	let loadingProgressSummary = 0;
 	let loadingDocumentSummaryComplete = false;
 	let topLocations;
@@ -99,26 +101,28 @@
     }
   }
 
-	$: {
-		if (loadingDocumentSummaryComplete && summary_generation_time !== 0) {
-			afterUpdate(async () => {
-				await sleep(2000);
-				showNotification("notification-document-summary", 10000);
-			});
-		}
-	}
+	// $: {
+	// 	if (loadingDocumentSummaryComplete && summary_generation_time !== 0) {
+	// 		afterUpdate(async () => {
+	// 			await sleep(2000);
+	// 			showNotification("notification-document-summary", 10000);
+	// 		});
+	// 	}
+	// }
+
+	// $: {
+	// 	if (summary_generation_time === -1) {
+	// 		afterUpdate(() => {
+	// 			showNotification("notification-summary-error", 10000);
+	// 		});
+	// 	}
+	// }
 
 	$: {
-		if (summary_generation_time === -1) {
-			afterUpdate(() => {
-				showNotification("notification-summary-error", 10000);
-			});
-		}
-	}
-
-	$: {
-		if (Object.keys(locations).length > 0) {
-			topLocations = getTopLocations(locations, "no_of_occurences");
+		if (locations != null) {
+			if (Object.keys(locations).length > 0) {
+				topLocations = getTopLocations(locations, "no_of_occurences");
+			}
 		}
 	}
 
@@ -138,14 +142,72 @@
 		}, timeout);
 	};
 
+	export const isDocLanguageChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 1)?.checked ?? false
+	);
+
+	export const isDocTitleChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 2)?.checked ?? false
+	);
+
+	export const isDocSummaryChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 3)?.checked ?? false
+	);
+
+	export const isContentChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 4)?.checked ?? false
+	);
+
+	export const isReportTypeChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 5)?.checked ?? false
+	);
+
+	export const isLocationsChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 6)?.checked ?? false
+	);
+
+	export const isFullContentChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 7)?.checked ?? false
+	);
+
+	export const isMarkdownTextChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 8)?.checked ?? false
+	);
+
+	export const isDocThemeChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 9)?.checked ?? false
+	);
+
+	export const isNewDisastersChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 10)?.checked ?? false
+	);
+
+	export const isAuthorChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.label === "Author")?.checked ?? false
+	);
+
+	export const isCreatedDateChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 12)?.checked ?? false
+	);
+
+	export const isModifiedDateChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 13)?.checked ?? false
+	);
+
+	export const isNumPagesChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 14)?.checked ?? false
+	);
+
+	export const isCharsPerPageChecked = derived(checkboxes, $checkboxes =>
+		$checkboxes.find(c => c.id === 15)?.checked ?? false
+	);
+
 	// let grouped = document_title.reduce((acc, [num, text]) => {
 	// 	acc[num] = acc[num] ? `${acc[num]} ${text}` : text;
 	// 	return acc;
 	// }, {});
 
 	// let combined = Object.entries(grouped).map(([num, text]) => [Number(num), text]);
-
-	// console.log(combined);
 </script>
 
 <div class="hangul-result">
@@ -154,7 +216,7 @@
 	<div id="notification-document-summary" class="notification-hangul-results">Your document summary is ready to view</div>
 	<div id="notification-summary-error" class="notification-hangul-results">There was an error fetching your document summary</div>
 	<div class="complete-results-display">
-		<p class="time-taken-text left">Metadata</p>
+		<p class="time-taken-text left">Results</p>
 		{#if isMobile}
 			<Check color="var(--button-color)" size="1.8rem"/>
 		{:else}
@@ -162,7 +224,7 @@
 		{/if}
 		<p class="time-taken-text right">({hangul_time}s)</p>
 	</div>
-	{#if loadingDocumentSummaryComplete && summary_generation_time !== -1}
+	<!-- {#if loadingDocumentSummaryComplete && summary_generation_time !== -1}
 		<div class="complete-results-display">
 			<p class="time-taken-text left">Summary</p>
 			{#if isMobile}
@@ -190,7 +252,7 @@
 				barWidth="10rem"
 			/>
 		</div>
-	{/if}
+	{/if} -->
 
 	<h3 class="header-content">METADATA</h3>
 	{#if metadata["File name"] !== "file" || fileName !== "N/A"}
@@ -211,42 +273,48 @@
 		</Collapsible>
 	{/if}
 
-	{#if metadata["No.of Pages"]}
-		<StaticResultDisplay heading="NUMBER OF PAGES" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">{metadata["No.of Pages"]}&nbsp;<span class="locations-subtext">({document_size}MBs)</span></div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="NUMBER OF PAGES" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isNumPagesChecked}
+		{#if metadata["No.of Pages"]}
+			<StaticResultDisplay heading="NUMBER OF PAGES" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">{metadata["No.of Pages"]}&nbsp;<span class="locations-subtext">({document_size}MBs)</span></div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="NUMBER OF PAGES" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
-	{#if metadata.Author}
-		<StaticResultDisplay heading="AUTHOR" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">
-				{metadata.Author}
-			</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="AUTHOR" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isAuthorChecked}
+		{#if metadata.Author}
+			<StaticResultDisplay heading="AUTHOR" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">
+					{metadata.Author}
+				</div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="AUTHOR" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
-
-	{#if metadata.doc_created_date}
-		<StaticResultDisplay heading="DOCUMENT CREATION DATE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">{metadata.doc_created_date}</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="DOCUMENT CREATION DATE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	
+	{#if $isCreatedDateChecked}
+		{#if metadata.doc_created_date}
+			<StaticResultDisplay heading="DOCUMENT CREATION DATE" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">{metadata.doc_created_date}</div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="DOCUMENT CREATION DATE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
 	{#if metadata.doc_saved_date}
@@ -257,128 +325,156 @@
 		</StaticResultDisplay>
 	{/if}
 
-	{#if metadata.doc_modified_date}
-		<StaticResultDisplay heading="DOCUMENT MODIFIED DATE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">{metadata.doc_modified_date}</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="DOCUMENT MODIFIED DATE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isModifiedDateChecked}
+		{#if metadata.doc_modified_date}
+			<StaticResultDisplay heading="DOCUMENT MODIFIED DATE" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">{metadata.doc_modified_date}</div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="DOCUMENT MODIFIED DATE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
+	{/if}
+
+	{#if $isCharsPerPageChecked}
+		{#if metadata.charsPerPage}
+			<Collapsible heading="CHARACTERS PER PAGE" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content">{metadata.charsPerPage}</div>
+			</Collapsible>
+		{:else}
+			<Collapsible heading="CHARACTERS PER PAGE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
 	<h3 class="header-content">CONTENT-BASED INFORMATION</h3>
-	{#if document_title && document_title != NO_TITLE_FOUND}
-		<Collapsible heading="DOCUMENT TITLE" isValid={true} useCheckMark={true}>
-			<div slot="text" 
-					 class="text-content"
-					 style={isMobile ? 
-				          "font-size: 22px;":
-				          "line-height: 2rem"}>
-				{#each combineTitleFonts(document_title).sort((a, b) => b[0] - a[0]).filter(item => item[1].length > 1) as item (item[1])}
-					{toTitleCase(item[1])} <span class="locations-subtext">@ {Math.round(item[0])}pt font</span><br/>
-				{/each}
-				<p class="locations-subtext">Displaying titles ordered by largest font in document</p>
-			</div>
-		</Collapsible>
-	{:else}
-		<Collapsible heading="DOCUMENT TITLE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isDocTitleChecked}
+		{#if document_title && document_title != NO_TITLE_FOUND}
+			<Collapsible heading="DOCUMENT TITLE" isValid={true} useCheckMark={true}>
+				<div slot="text" 
+						class="text-content"
+						style={isMobile ? 
+							"font-size: 22px;":
+							"line-height: 2rem"}>
+					{#each combineTitleFonts(document_title).sort((a, b) => b[0] - a[0]).filter(item => item[1].length > 1) as item (item[1])}
+						{toTitleCase(item[1])} <span class="locations-subtext">@ {Math.round(item[0])}pt font</span><br/>
+					{/each}
+					<p class="locations-subtext">Displaying titles ordered by largest font in document</p>
+				</div>
+			</Collapsible>
+		{:else}
+			<Collapsible heading="DOCUMENT TITLE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
-	{#if document_summary && version === 2}
-		<Collapsible heading="DOCUMENT SUMMARY" 
-								 showCopyButton={true}
-								 textToCopy={document_summary}
-								 {showNotification}
-								 runOpenSequence={true}
-								 isValid={true} 
-								 useCheckMark={true}
-		>
-			<div slot="text" 
-			     class="text-content"
-					 style={isMobile ? 
-									"font-size: 17px;":
-									""}>
-			  {document_summary}
-		  </div>
-		</Collapsible>
-	{:else if version === 2 && summary_generation_time === -1}
-		<Collapsible heading="DOCUMENT SUMMARY" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
+	{#if $isDocSummaryChecked}
+		{#if document_summary && version === 2}
+			<Collapsible heading="DOCUMENT SUMMARY" 
+									showCopyButton={true}
+									textToCopy={document_summary}
+									{showNotification}
+									runOpenSequence={true}
+									isValid={true} 
+									useCheckMark={true}
+			>
+				<div slot="text" 
+					class="text-content"
+						style={isMobile ? 
+										"font-size: 17px;":
+										""}>
+				{document_summary}
 			</div>
-		</Collapsible>
-	{:else if version === 2}
-		<StaticResultDisplay heading="DOCUMENT SUMMARY">
-			<div slot="text" class="text-content-result-display animate-loading">Loading...</div>
-		</StaticResultDisplay>
+			</Collapsible>
+		{:else if version === 2 && summary_generation_time === -1}
+			<Collapsible heading="DOCUMENT SUMMARY" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{:else if version === 2}
+			<StaticResultDisplay heading="DOCUMENT SUMMARY">
+				<div slot="text" class="text-content-result-display animate-loading">Loading...</div>
+			</StaticResultDisplay>
+		{/if}
 	{/if}
 
-	{#if report_type}
-		<StaticResultDisplay heading="REPORT TYPE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">
-				{report_type}
-			</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="REPORT TYPE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isReportTypeChecked}
+		{#if report_type}
+			<StaticResultDisplay heading="REPORT TYPE" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">
+					{report_type}
+				</div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="REPORT TYPE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
-	{#if document_language}
-		<StaticResultDisplay heading="LANGUAGE" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content-result-display">
-				{document_language.language}
-			</div>
-		</StaticResultDisplay>
-	{:else}
-		<Collapsible heading="LANGUAGE" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isDocLanguageChecked}
+		{#if document_language}
+			<StaticResultDisplay heading="LANGUAGE" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content-result-display">
+					{document_language.language}
+				</div>
+			</StaticResultDisplay>
+		{:else}
+			<Collapsible heading="LANGUAGE" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
+	{/if}
+	
+	{#if $isDocThemeChecked}
+		{#if document_theme}
+			<Collapsible heading="DOCUMENT THEMES" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{#each document_theme as theme}
+			<p>{theme}</p>
+			{/each}
+				</div>
+			</Collapsible>
+		{:else}
+			<Collapsible heading="DOCUMENT THEMES" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
-	{#if document_theme}
-		<Collapsible heading="DOCUMENT THEMES" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{#each document_theme as theme}
-          <p>{theme}</p>
-        {/each}
-			</div>
-		</Collapsible>
-	{:else}
-		<Collapsible heading="DOCUMENT THEMES" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
-	{/if}
-
-	{#if locations && Object.keys(locations).length > 0 && topLocations !== null}
-		<Collapsible heading="LOCATIONS" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{#each Object.values(topLocations) as location (location.country)}
-					<p>{location.country} occured {location.occurences} time{location.occurences > 1 ? 's' : ''}</p>
-				{/each}
-				<p class="locations-subtext">Displaying most frequent locations</p>
-			</div>
-		</Collapsible>
-	{:else}
-		<Collapsible heading="LOCATIONS" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	{#if $isLocationsChecked}
+		{#if locations && Object.keys(locations).length > 0 && topLocations !== null}
+			<Collapsible heading="LOCATIONS" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{#each Object.values(topLocations) as location (location.country)}
+						<p>{location.country} occured {location.occurences} time{location.occurences > 1 ? 's' : ''}</p>
+					{/each}
+					<p class="locations-subtext">Displaying most frequent locations</p>
+				</div>
+			</Collapsible>
+		{:else}
+			<Collapsible heading="LOCATIONS" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
 
 	{#if disasters && version === 1}
@@ -392,22 +488,25 @@
 			</div>
 		</Collapsible>
 	{/if}
-
-	{#if new_detected_disasters && new_detected_disasters.length > 0 && version === 2}
-		<Collapsible heading="DISASTERS" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{#each new_detected_disasters as disaster}
-					<p>{disaster}</p>
-				{/each}
-			</div>
-		</Collapsible>
-	{:else if version === 2}
-		<Collapsible heading="DISASTERS" isValid={false} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				{DEFAULT_TEXT}
-			</div>
-		</Collapsible>
+	
+	{#if $isNewDisastersChecked}
+		{#if new_detected_disasters && new_detected_disasters.length > 0 && version === 2}
+			<Collapsible heading="DISASTERS" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{#each new_detected_disasters as disaster}
+						<p>{disaster}</p>
+					{/each}
+				</div>
+			</Collapsible>
+		{:else if version === 2}
+			<Collapsible heading="DISASTERS" isValid={false} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					{DEFAULT_TEXT}
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
+
 
 	{#if keywords.length > 0}
 		<Collapsible heading="IDENTIFIED KEY PHRASE SEQUENCES" isValid={true} useCheckMark={true}>
@@ -416,9 +515,17 @@
 					 style={isMobile ? 
 						      "font-size: 19px;":
 						      ""}>
-				{#each keywords as keyword}
-					<p>{keyword}</p>
-				{/each}
+				{#if $num_keywords > 0}
+					{#each keywords as keyword}
+						<p>{keyword}</p>
+					{/each}
+				{/if}
+			</div>
+		</Collapsible>
+	{:else if version === 2 && !$isDocSummaryChecked}
+		<Collapsible heading="IDENTIFIED KEY PHRASE SEQUENCES" isValid={false} useCheckMark={true}>
+			<div slot="text" class="text-content">
+				{"Key phrase sequences cannot be generated if document summary detection is not selected for this version of Hangul."}
 			</div>
 		</Collapsible>
 	{:else}
@@ -430,51 +537,75 @@
 	{/if}
 
 	<h3 class="header-content">RAW OUTPUT</h3>
-	{#if verbose}
-		<Collapsible heading="VERBOSE OUTPUT" isValid={true} useCheckMark={true}>
-			<div slot="text" class="text-content">
-				<div class="scrollable-box">
-					<pre class="prettyprint">
-								{JSON.stringify(
-							{
-								metadata,
-								document_language,
-								document_summary,
-								document_theme,
-								document_title,
-								content,
-								report_type,
-								locations,
-								disasters,
-								full_content,
-								keywords,
-							},
-							null,
-							2
-						)}
-						</pre>
+		{#if verbose}
+			<Collapsible heading="VERBOSE OUTPUT" isValid={true} useCheckMark={true}>
+				<div slot="text" class="text-content">
+					<div class="scrollable-box">
+						<pre class="prettyprint">
+									{JSON.stringify(
+								{
+									metadata,
+									document_language,
+									document_summary,
+									document_theme,
+									document_title,
+									content,
+									report_type,
+									locations,
+									disasters,
+									full_content,
+									keywords,
+								},
+								null,
+								2
+							)}
+							</pre>
+					</div>
 				</div>
-			</div>
-		</Collapsible>
+			</Collapsible>
+		{/if}
+	{#if $isFullContentChecked}
+		{#if full_content}
+			<Collapsible
+				heading="FULL CONTENT"
+				showCopyButton={true}
+				textToCopy={full_content}
+				{showNotification}
+				isValid={true} 
+				useCheckMark={true}
+			>
+				<div slot="text" class="text-content">
+					<div class="scrollable-box" 
+						style={isMobile ? 
+									"font-size: 17px;":
+											""}>
+						{@html marked(markdown_text)}
+					</div>
+				</div>
+			</Collapsible>
+		{/if}
 	{/if}
-	{#if markdown_text}
-		<Collapsible
-			heading="MARKDOWN TEXT"
-			showCopyButton={true}
-			textToCopy={markdown_text}
-			{showNotification}
-			isValid={true} 
-			useCheckMark={true}
-		>
-			<div slot="text" class="text-content">
-				<div class="scrollable-box" 
-				     style={isMobile ? 
-						        "font-size: 17px;":
-										""}>
-					{@html MDasHTML}
+	
+	{#if $isMarkdownTextChecked}
+		{#if markdown_text}
+			<Collapsible
+				heading="MARKDOWN TEXT"
+				showCopyButton={true}
+				textToCopy={markdown_text}
+				{showNotification}
+				isValid={true} 
+				useCheckMark={true}
+			>
+				<div slot="text" class="text-content">
+					<div class="scrollable-box" 
+						style={isMobile ? 
+									"font-size: 17px;":
+											""}>
+						{@html marked(markdown_text)}
+					</div>
 				</div>
-			</div>
-		</Collapsible>
+			</Collapsible>
+		{/if}
 	{/if}
 </div>
 
@@ -575,6 +706,7 @@
 		align-items: center;
 		text-align: center;
 		height: 1rem;
+		max-width: 100%;
 	}
 
 	.complete-results-display {
