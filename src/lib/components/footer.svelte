@@ -123,7 +123,7 @@
   
     <!-- Column 2 -->
     <div class="footer-column">
-      <div class="footer-title">Projects</div>
+      <div class="footer-title">Products</div>
       <a href={`${base}/projects/chetah1.0`}>Chetah</a>
       <a href={`${base}/products/hangul`}>Hangul</a>
       <a href={`${base}/products/hangul_api`}>Hangul API</a>
