@@ -1,44 +1,41 @@
+<!-- logo and un cluster needs to be in the same div class, and the search-container and the result need to be in the same div class when the user entered their queries -->
 <script>
     import { base } from "$app/paths";
     import Button from "$lib/components/button.svelte";
-    import ChetahResults from "../../../lib/components/chetah_2_results.svelte";
+    import ChetahResults from "../../../lib/components/chetah_results.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
 
-    const currentPage = 'chetah2.0';
+    const currentPage = "chetah1.0";
 
-    // Set between dev and build, for url "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah"
-    const host_url = 'https://d4gumsi.pythonanywhere.com/';
-
-    let searchQuery = '';
+    let searchQuery = "";
     let aboutChetah = false;
-    let version = 'Chetah 2.0';
+    let version = "Chetah 1.0";
     let results = null;
     let time = 0;
     let num_res = 0;
-    const versions = ['Chetah 1.0', 'Chetah 2.0'];
+    const versions = ["Chetah 1.0", "Chetah 2.0"];
     const handleVersionChange = (event) => {
         version = event.target.value;
-        if (version === 'Chetah 1.0') {
-            window.location.href = `${base}/products/chetah1.0`;
+        if (version === "Chetah 2.0") {
+            window.location.href = `${base}/products/chetah2.0`;
         }
-    }
+    };
 
     let showModal = false;
-    let formUrl = 'https://forms.gle/n51U4g2K9cafpZUu5';
+    let formUrl = "https://forms.gle/n51U4g2K9cafpZUu5";
 
     function handleFeedbackClick() {
         showModal = true;
     }
 
     async function doFetch(searchQuery) {
+        const url = "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah";
         const data = { query: searchQuery };
-        const endpoint = 'api/v2/products/chetah'
-        const url = host_url + endpoint
-        console.log("Hello", url); // Prints "Hello world" to the console
-        const response = await fetch(url,{
+        const response = await fetch(url, {
             method: "POST",
+            cors: "cors",
             headers: {
                 "content-type": "application/json",
             },
@@ -47,7 +44,7 @@
         return response.json();
     }
 
-    function search(searchQuery){
+    function search(searchQuery) {
         time = Date.now();
         num_res = 0;
         const cleanedQuery = searchQuery.trim();
@@ -64,10 +61,33 @@
                 search(searchQuery)
         }
     }
+
+    let showUNClustersModal = false;
+
+    function handleUNClustersClick() {
+        showUNClustersModal = true;
+    }
+
+    function handleUNClustersSubmit(event) {
+        // Prevent the default form submission behavior
+        event.preventDefault();
+
+        // Get the selected UN Cluster filters
+        const clusterInputs = document.querySelectorAll('input[name="cluster"]:checked');
+        const selectedClusters = Array.from(clusterInputs).map(input => input.value);
+
+        // Update the search query with the selected UN Cluster filters
+        searchQuery = `${selectedClusters.join(':')}:${searchQuery}`;
+
+        // Close the modal and trigger a new search with the updated query
+        showUNClustersModal = false;
+        search(searchQuery);
+    }
+
 </script>
 
 <svelte:head>
-  <title>Chetah 2.0</title>
+  <title>Chetah 1.0</title>
 </svelte:head>
 
 <Navbar {currentPage} />
@@ -160,10 +180,59 @@
                     <p
                         style="margin: auto; width:100%; text-align:center; font-family: Open Sans;"
                     >
-                        <strong>{num_res} results in {time} ms.</strong>
+                        <strong>{num_res} out of 238 results in {time} ms.</strong>
                     </p>
                 {/if}
                 <div class="res-container">
+                    <div class="filter-container">
+                        <Button text="UN Clusters" click={handleUNClustersClick} />
+                    </div>
+                    {#if showUNClustersModal}
+                        <div class="cluster-modal">
+                            <div class="cluster-modal-content">
+                                <span class="modal-close" on:click={() => (showUNClustersModal = false)}>×</span>
+                                <div class="modal-header">
+                                    <h2 class="selected">UN Clusters</h2>
+                                </div>
+                                <div class="modal-body">
+                                    <form on:submit|preventDefault={handleUNClustersSubmit}>
+                                        <fieldset>
+                                            <legend>Select UN Cluster</legend>
+                                            <label><input type="checkbox" name="cluster" value="Health"> Health</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Education"> Education</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Nutrition"> Nutrition</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Protection"> Protection</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Water"> Water</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Camp"> Camp</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Early Recovery"> Early Recovery</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Emergency Telecom"> Emergency Telecom</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Food Security"> Food Security</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Humanitarian"> Humanitarian</label><br>
+                                            <label><input type="checkbox" name="cluster" value="Logistics"> Logistics</label><br>
+                                        </fieldset>
+                                        <div class="modal-footer">
+                                            <button type="button" on:click={() => (showUNClustersModal = false)}>Cancel</button>
+                                            <!-- <button type="submit">Submit</button> -->
+
+                                            <button type="submit" on:click={() => {
+                                                // Get the selected UN Cluster filters
+                                                const clusterInputs = document.querySelectorAll('input[name="cluster"]:checked');
+                                                const selectedClusters = Array.from(clusterInputs).map(input => input.value);
+
+                                                // Update the search query with the selected UN Cluster filters
+                                                searchQuery = `${selectedClusters.join(':')}:${searchQuery}`;
+
+                                                // Close the modal and trigger a new search with the updated query
+                                                showUNClustersModal = false;
+                                                search(searchQuery);
+                                            }}>Submit</button>
+
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
                     <div class="res">
                         {#each results as result}
                             <ChetahResults {...result} />
@@ -207,6 +276,11 @@
     .results-filter-container {
         margin-top: 20px;
     }
+
+    .modal-footer{
+        margin-top: 3%;
+    }
+
 
 
 
@@ -333,6 +407,94 @@
         display: flex;
         flex-direction: column;
     }
+
+    .filter-container{
+        display: flex;
+        align-items: flex-start;
+        text-align: center;
+        flex-direction: row;
+        justify-content: center;
+        width: 55%;
+        margin-right: -3%;
+        margin-top: 1.7%;
+    }
+
+    /* un cluster modal */
+
+    .cluster-modal {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .cluster-modal-content {
+        display: flex;
+        flex-direction: row;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        width: auto;
+        height: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-left: 2%;
+        margin-right: 2%;
+    }
+
+    .modal-header h2 {
+        margin-right: auto;
+    }
+
+    .modal-header h2.selected {
+        font-weight: bold;
+        border-left: 3px solid #E3B878;;
+        padding-left: 10px;
+        color: var(--tertiary, #1B3350);
+        font-family: Open Sans;
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 700;
+        line-height: 30.857px; /* 154.285% */
+    }
+
+    .modal-body {
+        display: flex;
+    }
+
+    .modal-body form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-body fieldset {
+        border: 1px solid black;
+        display: flex;
+        width: 425px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2%;
+        /* margin: 5%; */
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .modal-footer button {
+        margin-left: 10px;
+    }
+
 
     /* modal */
     .modal {
