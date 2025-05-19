@@ -5,6 +5,7 @@
     import { base } from '$app/paths';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
+    import OwlLogo from '$lib/assets/owl_logo.jpg';
     import Navbar from '$lib/components/navbar.svelte';
     
     const currentPage = 'products';
@@ -33,6 +34,14 @@
         buttonText: "View Documentation",
         researchLink: '../products/api_documentation/',
         tryLink: `${base}/products/hangul_api`
+      },
+      {
+        name: 'Owl',
+        detail: 'Owl is an AI-powered Question and Answer bot designed to provide accurate and efficient responses to user queries. Built with Python, it leverages advanced natural language processing techniques to understand and generate human-like answers.',
+        logo: OwlLogo,
+        buttonText: "View Documentation",
+        researchLink: 'https://github.com/d4gumich/owl',
+        tryLink: `https://owld4g.streamlit.app/`
       }
     ];
   
