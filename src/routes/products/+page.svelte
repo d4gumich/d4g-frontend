@@ -41,7 +41,7 @@
         logo: OwlLogo,
         buttonText: "View Documentation",
         researchLink: 'https://github.com/d4gumich/owl',
-        tryLink: `https://owld4g.streamlit.app/`
+        tryLink: `${base}/products/owl`
       }
     ];
   

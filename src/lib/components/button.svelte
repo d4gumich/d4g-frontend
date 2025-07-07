@@ -18,7 +18,9 @@
   box-sizing: border-box;
   color: var(--text-color-main);
   cursor: pointer;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: normal;
   outline: none;
   padding: 1rem 1.5rem;
