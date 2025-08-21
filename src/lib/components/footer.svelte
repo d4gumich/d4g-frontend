@@ -127,7 +127,7 @@
       <a href={`${base}/projects/chetah1.0`}>Chetah</a>
       <a href={`${base}/products/hangul`}>Hangul</a>
       <a href={`${base}/products/hangul_api`}>Hangul API</a>
-      <a href={`https://owld4g.streamlit.app/`}>Owl</a>
+      <a href={`${base}/products/owl`}>Owl</a>
     </div>
   
     <!-- Column 3 -->
