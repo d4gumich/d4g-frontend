@@ -62,8 +62,8 @@
     headingFontSize={headingFontSize}
   >
     <div slot="text" class="section-content">
-      Find our most recent work on the <a href={`${base}/projects`}>Projects</a> page,
-      and click on each project listed for more details.
+      Find our most recent work on the <a href={`${base}/products`}>Products</a> page,
+      and click on each product listed for more details.
     </div>
   </Collapsible>
 

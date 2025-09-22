@@ -119,6 +119,7 @@
       <a href={`${base}/archive`}>Archive</a>
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
+      <a href={`${base}/joinus`}>Join Us</a>
     </div>
   
     <!-- Column 2 -->
@@ -146,6 +147,6 @@
     <div class="footer-divider"></div>
   
     <!-- Bottom Text -->
-    <div class="footer-bottom-text">&copy; 2024 Data4Good All rights reserved.</div>
+    <div class="footer-bottom-text">&copy; 2025 Data4Good All rights reserved.</div>
   </div>
   
