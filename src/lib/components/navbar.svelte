@@ -110,6 +110,7 @@
       <a href={`${base}/archive`}>Archive</a>
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
+      <a href={`${base}/joinus`}>Join Us</a>
       <div class="dot" />
     </nav>
   {/if}
