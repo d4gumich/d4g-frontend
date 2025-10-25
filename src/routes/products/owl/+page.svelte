@@ -144,9 +144,9 @@
         <div class="param-block">
           <label for="model" class="param-text">Select LLM Model for Answer</label>
           <select id="model" bind:value={model}>
-            <option value="gemini-1.5-flash">gemini-1.5-flash</option>
-            <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b</option>
-            <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+            <option value="gemini-2.5-flash-lite" selected>gemini-2.5-flash-lite (Free Tier)</option>
+            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
+            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
           </select>
         </div>
       
