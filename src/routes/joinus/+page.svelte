@@ -85,7 +85,7 @@
 <div class="a">
     <SectionTitle title="Join the Team" />
     <div class="section-content">
-        <p class="section-text">We are always looking for students and professionals interested in making a difference in the non-profit space to join us. Fill out this short <a id="email-link" href="https://forms.gle/ZoigvyPURYDZuRmu7" target="_blank">form</a> or reach out to us at: <a id="email-link" href="mailto:info@data4good.center">info@data4good.center</a></p>
+        <p class="section-text">We are always looking for students and professionals interested in making a difference in the non-profit space to join us. Fill out this short <a id="email-link" href="https://forms.gle/yXUSmMMMhYiSkmULA" target="_blank">form</a> or reach out to us at: <a id="email-link" href="mailto:d4gcenter@gmail.com">d4gcenter@gmail.com</a></p>
         <p class="section-text">Want to get involved in one of our projects? Here's what we are currently working on: </p>
     </div>
     <div class="section">
