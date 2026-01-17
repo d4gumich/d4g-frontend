@@ -132,6 +132,7 @@
           <a class="link1" href={`${base}/archive`} on:click={handleHambugerItemClick}>Archive</a>
           <a class="link1" href={`${base}/team`} on:click={handleHambugerItemClick}>Team</a>
           <a class="link1" href={`${base}/faq`} on:click={handleHambugerItemClick}>FAQ</a>
+          <a class="link1" href={`${base}/joinus`} on:click={handleHambugerItemClick}>Join Us</a>
         </nav>
       </nav>
     </section>
@@ -273,7 +274,7 @@
     display: -ms-grid;
     display: grid;
     grid-template-rows: 1fr repeat(4, 0.5fr);
-    grid-row-gap: 25px;
+    grid-row-gap: 20px;
     padding: 0;
     list-style: none;
     clear: both;
