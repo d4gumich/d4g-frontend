@@ -5,14 +5,13 @@ import {
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-    preprocess: vitePreprocess(),
-    paths: {
-        relative: false,
-    },
-    kit: {
-        adapter: adapter(),
+  preprocess: vitePreprocess(),
 
-    }
+  kit: {
+    adapter: adapter({
+      fallback: '404.html'
+    })
+  }
 };
  
 export default config;
