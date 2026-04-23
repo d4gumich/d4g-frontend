@@ -42,6 +42,14 @@
         buttonText: "View Documentation",
         researchLink: 'https://github.com/d4gumich/owl',
         tryLink: `${base}/products/owl`
+      },
+      {
+        name: 'Socrates v2',
+        detail: 'Socrates is a structured inquiry system designed to improve question quality, surface hidden assumptions, and generate action-oriented synthesis through a disciplined dialectic process.',
+        logo: OwlLogo,
+        buttonText: "View Documentation",
+        researchLink: 'https://github.com/d4gumich/data4good-umich',
+        tryLink: `${base}/socrates-test`
       }
     ];
   
