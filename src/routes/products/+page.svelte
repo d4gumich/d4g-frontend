@@ -52,10 +52,21 @@
         researchLink: 'https://github.com/d4gumich/data4good-umich',
         tryLink: `${base}/socrates-test`,
         experimental: true
+      },
+      {
+        name: 'Lighthouse',
+        detail: 'Lighthouse provides high-fidelity automated extraction and comparison of professional profiles and job requirements.',
+        logo: OwlLogo, // Using OwlLogo as placeholder if no specific lighthouse logo
+        buttonText: "View Documentation",
+        researchLink: 'https://github.com/d4gumich/hugging-face-space-connection-test',
+        tryLink: `${base}/products/lighthouse`,
+        experimental: true
       }
     ];
 
-    $: secretKey = $page.url.searchParams.get('key');
+    import { browser } from '$app/environment';
+    
+    $: secretKey = browser ? $page.url.searchParams.get('key') : null;
     
     // Derived projects list that appends the key to links if it exists
     $: projectsWithAuth = current_project.map(p => {

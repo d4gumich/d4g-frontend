@@ -4,20 +4,27 @@
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import { onMount } from "svelte";
     import { page } from '$app/stores';
+    import { browser } from '$app/environment';
+    import { base } from '$app/paths';
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
     const currentPage = 'socrates-test';
-    const secretKey = $page.url.searchParams.get('key');
+    
+    let secretKey = $state(null);
+    onMount(() => {
+        secretKey = $page.url.searchParams.get('key');
+    });
+
     const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
-    let input = "";
-    let loading = false;
-    let error = "";
-    let session_id = null;
-    let run_id = null;
+    let input = $state("");
+    let loading = $state(false);
+    let error = $state("");
+    let session_id = $state(null);
+    let run_id = $state(null);
 
     // Socrates State tracking
-    let state = {
+    let socratesState = $state({
         mode: null,
         route: null,
         refined_question: null,
@@ -31,11 +38,11 @@
         action_draft: null,
         evaluator_scores: {},
         passed_eval: false
-    };
+    });
 
-    let events = [];
-    let current_node = null;
-    let retry_count = 0;
+    let events = $state([]);
+    let current_node = $state(null);
+    let retry_count = $state(0);
     const MAX_RETRIES = 3;
 
     async function submitSocrates(isRetry = false) {
@@ -55,7 +62,7 @@
 
         // Reset state only on first attempt
         if (!isRetry) {
-            state = {
+            socratesState = {
                 mode: null,
                 route: null,
                 refined_question: null,
@@ -148,7 +155,7 @@
         
         const updates = event[nodeName];
         if (updates) {
-            state = { ...state, ...updates };
+            socratesState = { ...socratesState, ...updates };
         }
     }
 
@@ -225,22 +232,22 @@
 
                     <div class="dialectic-results">
 
-                        {#if state.mode}
+                        {#if socratesState.mode}
                             <div class="result-section">
                                 <h4>Classification</h4>
-                                <p><strong>Mode:</strong> {state.mode}</p>
-                                <p><strong>Route:</strong> {state.route}</p>
+                                <p><strong>Mode:</strong> {socratesState.mode}</p>
+                                <p><strong>Route:</strong> {socratesState.route}</p>
                             </div>
                         {/if}
 
-                        {#if state.refined_question}
+                        {#if socratesState.refined_question}
                             <div class="result-section highlight">
                                 <h4>Refined Question</h4>
-                                <p class="refined-q">{state.refined_question}</p>
-                                {#if state.assumptions?.length}
+                                <p class="refined-q">{socratesState.refined_question}</p>
+                                {#if socratesState.assumptions?.length}
                                     <h5>Assumptions</h5>
                                     <ul>
-                                        {#each state.assumptions as assumption}
+                                        {#each socratesState.assumptions as assumption}
                                             <li>{assumption}</li>
                                         {/each}
                                     </ul>
@@ -248,28 +255,28 @@
                             </div>
                         {/if}
 
-                        {#if state.thesis}
+                        {#if socratesState.thesis}
                             <div class="result-section">
                                 <h4>Thesis</h4>
-                                <p>{state.thesis}</p>
+                                <p>{socratesState.thesis}</p>
                             </div>
                         {/if}
 
-                        {#if state.antithesis}
+                        {#if socratesState.antithesis}
                             <div class="result-section">
                                 <h4>Antithesis</h4>
-                                <p>{state.antithesis}</p>
+                                <p>{socratesState.antithesis}</p>
                             </div>
                         {/if}
 
-                        {#if state.synthesis}
+                        {#if socratesState.synthesis}
                             <div class="result-section">
                                 <h4>Synthesis</h4>
-                                <p>{state.synthesis}</p>
-                                {#if state.open_tensions?.length}
+                                <p>{socratesState.synthesis}</p>
+                                {#if socratesState.open_tensions?.length}
                                     <h5>Open Tensions</h5>
                                     <ul>
-                                        {#each state.open_tensions as tension}
+                                        {#each socratesState.open_tensions as tension}
                                             <li>{tension}</li>
                                         {/each}
                                     </ul>
@@ -277,22 +284,22 @@
                             </div>
                         {/if}
 
-                        {#if state.action_draft}
+                        {#if socratesState.action_draft}
                             <div class="result-section action-box">
                                 <h4>Action Draft</h4>
-                                <p>{state.action_draft}</p>
-                                {#if state.next_action}
-                                    <p><strong>Next Step:</strong> {state.next_action}</p>
+                                <p>{socratesState.action_draft}</p>
+                                {#if socratesState.next_action}
+                                    <p><strong>Next Step:</strong> {socratesState.next_action}</p>
                                 {/if}
                             </div>
                         {/if}
 
-                        {#if state.evaluator_scores && Object.keys(state.evaluator_scores).length > 0}
+                        {#if socratesState.evaluator_scores && Object.keys(socratesState.evaluator_scores).length > 0}
                             <div class="result-section evaluation">
                                 <h4>Self-Evaluation</h4>
-                                <p><strong>Passed:</strong> {state.passed_eval ? "✅ YES" : "❌ NO"}</p>
+                                <p><strong>Passed:</strong> {socratesState.passed_eval ? "✅ YES" : "❌ NO"}</p>
                                 <ul>
-                                    {#each Object.entries(state.evaluator_scores) as [category, score]}
+                                    {#each Object.entries(socratesState.evaluator_scores) as [category, score]}
                                         <li>{category}: {score}/2</li>
                                     {/each}
                                 </ul>
@@ -300,6 +307,7 @@
                         {/if}
 
                     </div>
+
                 </div>
             {/if}
         </div>
