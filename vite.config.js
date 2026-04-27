@@ -3,14 +3,10 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({      
 	plugins: [sveltekit()],
-  optimizeDeps: {
-    exclude: ['svelte-tabs'],
-    esbuildOptions: {
-      target: 'esnext'
+  resolve: {
+    alias: {
+      'svelte-tabs': 'svelte-tabs/src/index.js'
     }
-  },
-  ssr: {
-    noExternal: ['svelte-tabs']
   },
   build: {
     target: 'esnext'
