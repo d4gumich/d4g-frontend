@@ -6,6 +6,7 @@
     import { lighthouseResults, lighthouseActions, lighthouseSettings } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
     import { fade } from 'svelte/transition';
+    import { base } from '$app/paths';
 
     const currentPage = 'products';
 
@@ -30,82 +31,79 @@
     }
 </script>
 
-<nav class="navbar">
-    <div class="nav-content">
-        <div class="brand">
-            <img src={logo} alt="Data4Good Logo" class="logo" />
-            <div class="nav-titles">
-                <h1>Lighthouse</h1>
-                <p>AI Profile Analysis</p>
-            </div>
-        </div>
-    </div>
-</nav>
+<svelte:head>
+    <title>Lighthouse | AI Profile Analysis</title>
+    <link rel="stylesheet" href="{base}/lighthouse.css">
+</svelte:head>
 
-<main class="container">
-    <div class="dashboard-grid">
-        <aside class="sidebar">
-            <LighthouseControl />
-            
-            <div class="card upload-card">
-                <h3>Upload Document</h3>
-                <p>Analyze your PDF resume</p>
+<Navbar {currentPage} />
+
+<div class="lighthouse-body">
+    <main class="lighthouse-container">
+        <div class="dashboard-grid">
+            <aside class="sidebar">
+                <LighthouseControl />
                 
-                <div class="file-options">
-                    <label class="checkbox-container">
-                        <input type="checkbox" bind:checked={shouldSanitize} />
-                        <span class="checkmark"></span>
-                        Sanitize PDF (Remove PII)
-                    </label>
-                </div>
-
-                <div class="file-input-group">
-                    <input 
-                        type="file" 
-                        id="pdf-upload"
-                        accept="application/pdf" 
-                        onchange={handleFileChange} 
-                        class="file-input"
-                    />
-                    <label for="pdf-upload" class="file-label">
-                        {file ? file.name : "Choose PDF..."}
-                    </label>
-                </div>
-                <button 
-                    class="btn-primary w-full" 
-                    class:btn-loading={$lighthouseResults.loading}
-                    onclick={handleUpload}
-                    disabled={!file || $lighthouseResults.loading}
-                >
-                    {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
-                </button>
-            </div>
-
-            {#if $lighthouseResults.history.length > 0}
-                <div class="card history-card" in:fade>
-                    <h3>Recent Documents</h3>
-                    <div class="history-list">
-                        {#each $lighthouseResults.history as doc}
-                            <div class="history-item" class:active={doc.id === $lighthouseResults.currentId}>
-                                <button class="select-doc" onclick={() => lighthouseActions.selectDocument(doc.id)}>
-                                    <span class="doc-name">{doc.name}</span>
-                                    <span class="doc-meta">{new Date(doc.timestamp).toLocaleDateString()}</span>
-                                </button>
-                                <button class="delete-doc" onclick={() => lighthouseActions.deleteDocument(doc.id)} title="Delete">
-                                    ✕
-                                </button>
-                            </div>
-                        {/each}
+                <div class="card upload-card">
+                    <h3>Upload Document</h3>
+                    <p>Analyze your PDF resume</p>
+                    
+                    <div class="file-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" bind:checked={shouldSanitize} />
+                            <span class="checkmark"></span>
+                            Sanitize PDF (Remove PII)
+                        </label>
                     </div>
-                </div>
-            {/if}
-        </aside>
 
-        <section class="main-content">
-            <LighthouseResults />
-        </section>
-    </div>
-</main>
+                    <div class="file-input-group">
+                        <input 
+                            type="file" 
+                            id="pdf-upload"
+                            accept="application/pdf" 
+                            onchange={handleFileChange} 
+                            class="file-input"
+                        />
+                        <label for="pdf-upload" class="file-label">
+                            {file ? file.name : "Choose PDF..."}
+                        </label>
+                    </div>
+                    <button 
+                        class="btn-primary w-full" 
+                        class:btn-loading={$lighthouseResults.loading}
+                        onclick={handleUpload}
+                        disabled={!file || $lighthouseResults.loading}
+                    >
+                        {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
+                    </button>
+                </div>
+
+                {#if $lighthouseResults.history.length > 0}
+                    <div class="card history-card" in:fade>
+                        <h3>Recent Documents</h3>
+                        <div class="history-list">
+                            {#each $lighthouseResults.history as doc}
+                                <div class="history-item" class:active={doc.id === $lighthouseResults.currentId}>
+                                    <button class="select-doc" onclick={() => lighthouseActions.selectDocument(doc.id)}>
+                                        <span class="doc-name">{doc.name}</span>
+                                        <span class="doc-meta">{new Date(doc.timestamp).toLocaleDateString()}</span>
+                                    </button>
+                                    <button class="delete-doc" onclick={() => lighthouseActions.deleteDocument(doc.id)} title="Delete">
+                                        ✕
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </aside>
+
+            <section class="main-content">
+                <LighthouseResults />
+            </section>
+        </div>
+    </main>
+</div>
 
 <Console />
 
