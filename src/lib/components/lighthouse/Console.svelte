@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { lighthouseStatus, lighthouseResults } from '../lighthouseStore.js';
+    import { lighthouseStatus, lighthouseResults } from '$lib/lighthouseStore.js';
     import { fade, slide } from 'svelte/transition';
 
     let logs = $state([]);

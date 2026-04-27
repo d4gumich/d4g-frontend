@@ -1,5 +1,5 @@
 <script>
-    import { lighthouseResults, lighthouseActions, lighthouseStatus, lighthouseSettings } from '../lighthouseStore.js';
+    import { lighthouseResults, lighthouseActions, lighthouseStatus, lighthouseSettings } from '$lib/lighthouseStore.js';
     import { fade, slide } from 'svelte/transition';
 
     let activeTab = $state('preview'); // 'preview', 'analysis'

@@ -1,6 +1,6 @@
 <script>
     import { onMount, onDestroy } from 'svelte';
-    import { lighthouseStatus, lighthouseActions } from '../lighthouseStore.js';
+    import { lighthouseStatus, lighthouseActions } from '$lib/lighthouseStore.js';
 
     let interval;
 

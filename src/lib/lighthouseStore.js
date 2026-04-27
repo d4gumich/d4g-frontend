@@ -1,7 +1,8 @@
 import { writable, get } from 'svelte/store';
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
-const HOST_URL = 'http://127.0.0.1:8000';
-const BASE_PATH = '/api/v1/products/lighthouse';
+const HOST_URL = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+const BASE_PATH = 'api/v1/products/lighthouse';
 
 // Mock Data for Development
 const MOCK_ANALYSIS = {

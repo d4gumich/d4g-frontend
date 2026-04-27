@@ -1,10 +1,13 @@
 <script>
-    import LighthouseResults from "$lib/components/lighthouse_results.svelte";
-    import LighthouseControl from "$lib/components/LighthouseControl.svelte";
-    import Console from "$lib/components/Console.svelte";
+    import Navbar from "$lib/components/navbar.svelte";
+    import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
+    import LighthouseControl from "$lib/components/lighthouse/LighthouseControl.svelte";
+    import Console from "$lib/components/lighthouse/Console.svelte";
     import { lighthouseResults, lighthouseActions, lighthouseSettings } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
     import { fade } from 'svelte/transition';
+
+    const currentPage = 'products';
 
     let file = $state(null);
     let shouldSanitize = $state(false);
