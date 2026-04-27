@@ -5,6 +5,7 @@ import { sleep, getBackoffWaitTime } from "$lib/components/utils/helper_function
 import { get } from 'svelte/store';
 import { checkboxes } from "$lib/store.js";
 import { num_keywords } from "$lib/store.js";
+import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
 // export async function fetchSummary(summary_parameters, version) {
   
@@ -63,10 +64,10 @@ async function fetchData(file, version, timeout, isAPI) {
         }, timeout);
       });
 
+      const base_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
       const response = await Promise.race([
         fetch(
-          `https://d4gumsi.pythonanywhere.com/api/v${version}/products/hangul`,
-          // 'http://127.0.0.1:5000/api/v2/products/hangul',
+          `${base_url}api/v${version}/products/hangul`,
         {
           method: "POST",
           body: form,

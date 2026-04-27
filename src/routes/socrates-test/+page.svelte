@@ -4,19 +4,13 @@
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import { onMount } from "svelte";
     import { page } from '$app/stores';
+    import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
     const currentPage = 'socrates-test';
     const secretKey = $page.url.searchParams.get('key');
+    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     let input = "";
-    let loading = false;
-    let error = "";
-    let session_id = null;
-    let run_id = null;
-
-    // Use localhost:8000 for local development, or the production URL
-    // const host_url = 'https://d4gumsi.pythonanywhere.com/';
-    const host_url = 'http://localhost:8000/';
 
     // Socrates State tracking
     let state = {

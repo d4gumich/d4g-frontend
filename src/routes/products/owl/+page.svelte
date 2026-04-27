@@ -5,8 +5,10 @@
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import ChevronDown from "$lib/assets/icons/chevron-down-solid.svelte";
     import ChevronUp from "$lib/assets/icons/angle-up-solid.svelte";
+    import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
     const currentPage = 'owl';
+    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     let query = "";
     let aboutOwl= false;
@@ -53,7 +55,7 @@
       const startTime = performance.now();
 
       try {
-        const response = await fetch('https://d4gumsi.pythonanywhere.com/api/owl', {
+        const response = await fetch(`${host_url}api/v1/products/owl`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
