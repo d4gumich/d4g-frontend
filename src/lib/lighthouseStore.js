@@ -81,7 +81,23 @@ function formatError(err) {
 
 async function apiRequest(path, options = {}) {
     try {
-        const response = await fetch(`${HOST_URL}${BASE_PATH}${path}`, options);
+        // Get secret key from URL if available
+        let secretKey = null;
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            secretKey = urlParams.get('key');
+        }
+
+        const headers = {
+            ...options.headers,
+            'X-Experimental-API-Key': secretKey
+        };
+
+        const response = await fetch(`${HOST_URL}${BASE_PATH}${path}`, {
+            ...options,
+            headers
+        });
+        
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
             throw new Error(errorData.detail || `Server error: ${response.status}`);
