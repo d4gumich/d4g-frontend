@@ -9,6 +9,9 @@ export default defineConfig({
       target: 'esnext'
     }
   },
+  ssr: {
+    noExternal: ['svelte-tabs']
+  },
   build: {
     target: 'esnext'
   }
