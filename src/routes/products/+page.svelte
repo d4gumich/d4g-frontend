@@ -7,6 +7,7 @@
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import OwlLogo from '$lib/assets/owl_logo.jpg';
     import Navbar from '$lib/components/navbar.svelte';
+    import { page } from '$app/stores';
     
     const currentPage = 'products';
 
@@ -49,9 +50,13 @@
         logo: OwlLogo,
         buttonText: "View Documentation",
         researchLink: 'https://github.com/d4gumich/data4good-umich',
-        tryLink: `${base}/socrates-test`
+        tryLink: `${base}/socrates-test`,
+        experimental: true
       }
     ];
+
+    $: secretKey = $page.url.searchParams.get('key');
+    $: showExperimental = secretKey !== null && secretKey.length > 5;
   
   </script>
 
@@ -85,8 +90,9 @@
     <SectionTitle title="Latest Products" />
     <div class="horizontal-segment">
         {#each current_project as project}
-        <!-- Use a separate component for each card -->
-          <CurrProjCard {...project} />
+          {#if !project.experimental || showExperimental}
+            <CurrProjCard {...project} />
+          {/if}
         {/each}
     </div>
 

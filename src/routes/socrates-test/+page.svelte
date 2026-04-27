@@ -3,8 +3,10 @@
     import Button from "$lib/components/button.svelte";
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import { onMount } from "svelte";
+    import { page } from '$app/stores';
 
     const currentPage = 'socrates-test';
+    const secretKey = $page.url.searchParams.get('key');
 
     let input = "";
     let loading = false;
@@ -78,7 +80,10 @@
             
             const response = await fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Experimental-API-Key": secretKey
+                },
                 body: JSON.stringify({
                     input: input,
                     channel: "web-test"
