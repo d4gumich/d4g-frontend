@@ -56,7 +56,15 @@
     ];
 
     $: secretKey = $page.url.searchParams.get('key');
-    $: showExperimental = secretKey !== null && secretKey.length > 5;
+    
+    // Derived projects list that appends the key to links if it exists
+    $: projectsWithAuth = current_project.map(p => {
+        if (p.experimental && secretKey) {
+            const separator = p.tryLink.includes('?') ? '&' : '?';
+            return { ...p, tryLink: `${p.tryLink}${separator}key=${secretKey}` };
+        }
+        return p;
+    });
   
   </script>
 
@@ -89,8 +97,8 @@
   <div class="a">
     <SectionTitle title="Latest Products" />
     <div class="horizontal-segment">
-        {#each current_project as project}
-          {#if !project.experimental || showExperimental}
+        {#each projectsWithAuth as project}
+          {#if !project.experimental || (secretKey && secretKey.length > 5)}
             <CurrProjCard {...project} />
           {/if}
         {/each}

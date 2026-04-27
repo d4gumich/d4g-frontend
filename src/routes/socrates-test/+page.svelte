@@ -11,6 +11,10 @@
     const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     let input = "";
+    let loading = false;
+    let error = "";
+    let session_id = null;
+    let run_id = null;
 
     // Socrates State tracking
     let state = {
@@ -162,138 +166,162 @@
 
 <Navbar {currentPage} />
 
-<div class="container">
-    <div class="content-container">
-        <div class="heading-container">
-            <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
-            <p class="info-text">Structured inquiry engine for refined thinking.</p>
+{#if !secretKey || secretKey.length < 5}
+    <div class="container">
+        <div class="content-container unauthorized">
+            <h2>🔒 Unauthorized Access</h2>
+            <p>You do not have permission to access this experimental feature.</p>
+            <p>Please return to the <a href="{base}/products?key=YOUR_KEY">products page</a> and provide a valid access key.</p>
         </div>
-
-        <div class="input-container">
-            <textarea
-                class="socrates-input"
-                placeholder="Share your vague or reactive thinking here..."
-                bind:value={input}
-                on:keypress={filterEnter}
-                rows="4"
-            ></textarea>
-            <div class="button-row">
-                <Button
-                    text={loading ? "Thinking..." : "Begin Dialectic"}
-                    click={submitSocrates}
-                    disabled={loading || !input.trim()}
-                />
-            </div>
-        </div>
-
-        {#if error}
-            <div class="error-box">
-                <p>❌ {error}</p>
-            </div>
-        {/if}
-
-        {#if loading || events.length > 0}
-            <div class="results-container">
-                
-                <!-- PROGRESS LOG -->
-                <div class="progress-log">
-                    <h3>Process Log</h3>
-                    <ul>
-                        {#each events as node}
-                            <li class={node === current_node ? "active-node" : ""}>
-                                Processed node: <strong>{node}</strong>
-                                {#if node === current_node && loading}
-                                    <span class="pulse">...</span>
-                                {/if}
-                            </li>
-                        {/each}
-                    </ul>
-                </div>
-
-                <div class="dialectic-results">
-                    
-                    {#if state.mode}
-                        <div class="result-section">
-                            <h4>Classification</h4>
-                            <p><strong>Mode:</strong> {state.mode}</p>
-                            <p><strong>Route:</strong> {state.route}</p>
-                        </div>
-                    {/if}
-
-                    {#if state.refined_question}
-                        <div class="result-section highlight">
-                            <h4>Refined Question</h4>
-                            <p class="refined-q">{state.refined_question}</p>
-                            {#if state.assumptions?.length}
-                                <h5>Assumptions</h5>
-                                <ul>
-                                    {#each state.assumptions as assumption}
-                                        <li>{assumption}</li>
-                                    {/each}
-                                </ul>
-                            {/if}
-                        </div>
-                    {/if}
-
-                    {#if state.thesis}
-                        <div class="result-section">
-                            <h4>Thesis</h4>
-                            <p>{state.thesis}</p>
-                        </div>
-                    {/if}
-
-                    {#if state.antithesis}
-                        <div class="result-section">
-                            <h4>Antithesis</h4>
-                            <p>{state.antithesis}</p>
-                        </div>
-                    {/if}
-
-                    {#if state.synthesis}
-                        <div class="result-section">
-                            <h4>Synthesis</h4>
-                            <p>{state.synthesis}</p>
-                            {#if state.open_tensions?.length}
-                                <h5>Open Tensions</h5>
-                                <ul>
-                                    {#each state.open_tensions as tension}
-                                        <li>{tension}</li>
-                                    {/each}
-                                </ul>
-                            {/if}
-                        </div>
-                    {/if}
-
-                    {#if state.action_draft}
-                        <div class="result-section action-box">
-                            <h4>Action Draft</h4>
-                            <p>{state.action_draft}</p>
-                            {#if state.next_action}
-                                <p><strong>Next Step:</strong> {state.next_action}</p>
-                            {/if}
-                        </div>
-                    {/if}
-
-                    {#if state.evaluator_scores && Object.keys(state.evaluator_scores).length > 0}
-                        <div class="result-section evaluation">
-                            <h4>Self-Evaluation</h4>
-                            <p><strong>Passed:</strong> {state.passed_eval ? "✅ YES" : "❌ NO"}</p>
-                            <ul>
-                                {#each Object.entries(state.evaluator_scores) as [category, score]}
-                                    <li>{category}: {score}/2</li>
-                                {/each}
-                            </ul>
-                        </div>
-                    {/if}
-
-                </div>
-            </div>
-        {/if}
     </div>
-</div>
+{:else}
+    <div class="container">
+        <div class="content-container">
+            <div class="heading-container">
+                <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
+                <p class="info-text">Structured inquiry engine for refined thinking.</p>
+            </div>
+
+            <div class="input-container">
+                <textarea
+                    class="socrates-input"
+                    placeholder="Share your vague or reactive thinking here..."
+                    bind:value={input}
+                    on:keypress={filterEnter}
+                    rows="4"
+                ></textarea>
+                <div class="button-row">
+                    <Button
+                        text={loading ? "Thinking..." : "Begin Dialectic"}
+                        click={submitSocrates}
+                        disabled={loading || !input.trim()}
+                    />
+                </div>
+            </div>
+
+            {#if error}
+                <div class="error-box">
+                    <p>❌ {error}</p>
+                </div>
+            {/if}
+
+            {#if loading || events.length > 0}
+                <div class="results-container">
+
+                    <!-- PROGRESS LOG -->
+                    <div class="progress-log">
+                        <h3>Process Log</h3>
+                        <ul>
+                            {#each events as node}
+                                <li class={node === current_node ? "active-node" : ""}>
+                                    Processed node: <strong>{node}</strong>
+                                    {#if node === current_node && loading}
+                                        <span class="pulse">...</span>
+                                    {/if}
+                                </li>
+                            {/each}
+                        </ul>
+                    </div>
+
+                    <div class="dialectic-results">
+
+                        {#if state.mode}
+                            <div class="result-section">
+                                <h4>Classification</h4>
+                                <p><strong>Mode:</strong> {state.mode}</p>
+                                <p><strong>Route:</strong> {state.route}</p>
+                            </div>
+                        {/if}
+
+                        {#if state.refined_question}
+                            <div class="result-section highlight">
+                                <h4>Refined Question</h4>
+                                <p class="refined-q">{state.refined_question}</p>
+                                {#if state.assumptions?.length}
+                                    <h5>Assumptions</h5>
+                                    <ul>
+                                        {#each state.assumptions as assumption}
+                                            <li>{assumption}</li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                            </div>
+                        {/if}
+
+                        {#if state.thesis}
+                            <div class="result-section">
+                                <h4>Thesis</h4>
+                                <p>{state.thesis}</p>
+                            </div>
+                        {/if}
+
+                        {#if state.antithesis}
+                            <div class="result-section">
+                                <h4>Antithesis</h4>
+                                <p>{state.antithesis}</p>
+                            </div>
+                        {/if}
+
+                        {#if state.synthesis}
+                            <div class="result-section">
+                                <h4>Synthesis</h4>
+                                <p>{state.synthesis}</p>
+                                {#if state.open_tensions?.length}
+                                    <h5>Open Tensions</h5>
+                                    <ul>
+                                        {#each state.open_tensions as tension}
+                                            <li>{tension}</li>
+                                        {/each}
+                                    </ul>
+                                {/if}
+                            </div>
+                        {/if}
+
+                        {#if state.action_draft}
+                            <div class="result-section action-box">
+                                <h4>Action Draft</h4>
+                                <p>{state.action_draft}</p>
+                                {#if state.next_action}
+                                    <p><strong>Next Step:</strong> {state.next_action}</p>
+                                {/if}
+                            </div>
+                        {/if}
+
+                        {#if state.evaluator_scores && Object.keys(state.evaluator_scores).length > 0}
+                            <div class="result-section evaluation">
+                                <h4>Self-Evaluation</h4>
+                                <p><strong>Passed:</strong> {state.passed_eval ? "✅ YES" : "❌ NO"}</p>
+                                <ul>
+                                    {#each Object.entries(state.evaluator_scores) as [category, score]}
+                                        <li>{category}: {score}/2</li>
+                                    {/each}
+                                </ul>
+                            </div>
+                        {/if}
+
+                    </div>
+                </div>
+            {/if}
+        </div>
+    </div>
+{/if}
 
 <style>
+    .unauthorized {
+        text-align: center;
+        background: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-top: 10rem;
+    }
+
+    .unauthorized h2 {
+        color: #d32f2f;
+    }
+
     .container {
+
         display: flex;
         flex-direction: column;
         align-items: center;
