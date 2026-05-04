@@ -5,13 +5,21 @@
     import Console from "$lib/components/lighthouse/Console.svelte";
     import { lighthouseResults, lighthouseActions, lighthouseSettings } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
+    import { browser } from '$app/environment';
+    import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
     import { base } from '$app/paths';
     import { page } from '$app/stores';
 
     const currentPage = 'products';
     
-    $: secretKey = $page.url.searchParams.get('key');
+    let secretKey = $state(null);
+
+    onMount(() => {
+        if (browser) {
+            secretKey = $page.url.searchParams.get('key');
+        }
+    });
 
     let file = $state(null);
     let shouldSanitize = $state(false);
@@ -45,90 +53,92 @@
     ⚠️ DEMO VERSION: This is an experimental prototype still in development.
 </div>
 
-{#if !secretKey || secretKey.length < 5}
-    <div class="container-unauthorized">
-        <div class="content-container-unauthorized">
-            <h2>🔒 Unauthorized Access</h2>
-            <p>You do not have permission to access this experimental feature.</p>
-            <div class="instructions">
-                <h3>How to access:</h3>
-                <ol>
-                    <li>Obtain an <strong>Experimental Access Key</strong> from the D4G team.</li>
-                    <li>Go to the <a href="{base}/products">Products Page</a>.</li>
-                    <li>Append <code>?key=YOUR_KEY</code> to the URL.</li>
-                    <li>Click <strong>Try Lighthouse</strong>.</li>
-                </ol>
-            </div>
-            <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
-        </div>
-    </div>
-{:else}
-    <div class="lighthouse-body">
-    <main class="lighthouse-container">
-        <div class="dashboard-grid">
-            <aside class="sidebar">
-                <LighthouseControl />
-                
-                <div class="card upload-card">
-                    <h3>Upload Document</h3>
-                    <p>Analyze your PDF resume</p>
-                    
-                    <div class="file-options">
-                        <label class="checkbox-container">
-                            <input type="checkbox" bind:checked={shouldSanitize} />
-                            <span class="checkmark"></span>
-                            Sanitize PDF (Remove PII)
-                        </label>
-                    </div>
-
-                    <div class="file-input-group">
-                        <input 
-                            type="file" 
-                            id="pdf-upload"
-                            accept="application/pdf" 
-                            onchange={handleFileChange} 
-                            class="file-input"
-                        />
-                        <label for="pdf-upload" class="file-label">
-                            {file ? file.name : "Choose PDF..."}
-                        </label>
-                    </div>
-                    <button 
-                        class="btn-primary w-full" 
-                        class:btn-loading={$lighthouseResults.loading}
-                        onclick={handleUpload}
-                        disabled={!file || $lighthouseResults.loading}
-                    >
-                        {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
-                    </button>
+{#if browser}
+    {#if !secretKey || secretKey.length < 5}
+        <div class="container-unauthorized">
+            <div class="content-container-unauthorized">
+                <h2>🔒 Unauthorized Access</h2>
+                <p>You do not have permission to access this experimental feature.</p>
+                <div class="instructions">
+                    <h3>How to access:</h3>
+                    <ol>
+                        <li>Obtain an <strong>Experimental Access Key</strong> from the D4G team.</li>
+                        <li>Go to the <a href="{base}/products">Products Page</a>.</li>
+                        <li>Append <code>?key=YOUR_KEY</code> to the URL.</li>
+                        <li>Click <strong>Try Lighthouse</strong>.</li>
+                    </ol>
                 </div>
-
-                {#if $lighthouseResults.history.length > 0}
-                    <div class="card history-card" in:fade>
-                        <h3>Recent Documents</h3>
-                        <div class="history-list">
-                            {#each $lighthouseResults.history as doc}
-                                <div class="history-item" class:active={doc.id === $lighthouseResults.currentId}>
-                                    <button class="select-doc" onclick={() => lighthouseActions.selectDocument(doc.id)}>
-                                        <span class="doc-name">{doc.name}</span>
-                                        <span class="doc-meta">{new Date(doc.timestamp).toLocaleDateString()}</span>
-                                    </button>
-                                    <button class="delete-doc" onclick={() => lighthouseActions.deleteDocument(doc.id)} title="Delete">
-                                        ✕
-                                    </button>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-            </aside>
-
-            <section class="main-content">
-                <LighthouseResults />
-            </section>
+                <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
+            </div>
         </div>
-    </main>
-</div>
+    {:else}
+        <div class="lighthouse-body">
+        <main class="lighthouse-container">
+            <div class="dashboard-grid">
+                <aside class="sidebar">
+                    <LighthouseControl />
+                    
+                    <div class="card upload-card">
+                        <h3>Upload Document</h3>
+                        <p>Analyze your PDF resume</p>
+                        
+                        <div class="file-options">
+                            <label class="checkbox-container">
+                                <input type="checkbox" bind:checked={shouldSanitize} />
+                                <span class="checkmark"></span>
+                                Sanitize PDF (Remove PII)
+                            </label>
+                        </div>
+
+                        <div class="file-input-group">
+                            <input 
+                                type="file" 
+                                id="pdf-upload"
+                                accept="application/pdf" 
+                                onchange={handleFileChange} 
+                                class="file-input"
+                            />
+                            <label for="pdf-upload" class="file-label">
+                                {file ? file.name : "Choose PDF..."}
+                            </label>
+                        </div>
+                        <button 
+                            class="btn-primary w-full" 
+                            class:btn-loading={$lighthouseResults.loading}
+                            onclick={handleUpload}
+                            disabled={!file || $lighthouseResults.loading}
+                        >
+                            {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
+                        </button>
+                    </div>
+
+                    {#if $lighthouseResults.history.length > 0}
+                        <div class="card history-card" in:fade>
+                            <h3>Recent Documents</h3>
+                            <div class="history-list">
+                                {#each $lighthouseResults.history as doc}
+                                    <div class="history-item" class:active={doc.id === $lighthouseResults.currentId}>
+                                        <button class="select-doc" onclick={() => lighthouseActions.selectDocument(doc.id)}>
+                                            <span class="doc-name">{doc.name}</span>
+                                            <span class="doc-meta">{new Date(doc.timestamp).toLocaleDateString()}</span>
+                                        </button>
+                                        <button class="delete-doc" onclick={() => lighthouseActions.deleteDocument(doc.id)} title="Delete">
+                                            ✕
+                                        </button>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                </aside>
+
+                <section class="main-content">
+                    <LighthouseResults />
+                </section>
+            </div>
+        </main>
+    </div>
+    {/if}
 {/if}
 
 <Console />

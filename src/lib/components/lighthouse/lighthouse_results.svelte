@@ -4,11 +4,11 @@
 
     let activeTab = $state('preview'); // 'preview', 'analysis'
 
-    let currentDoc = $derived($lighthouseResults.history.find(d => d.id === $lighthouseResults.currentId));
+    let currentDoc = $derived($lighthouseResults?.history?.find(d => d.id === $lighthouseResults.currentId) ?? null);
     let results = $derived(currentDoc?.analysis);
     let sections = $derived(currentDoc?.sections || []);
     let isSanitized = $derived(currentDoc?.isSanitized);
-    let isEngineRunning = $derived($lighthouseStatus.stage === 'RUNNING' || $lighthouseSettings.useMockData);
+    let isEngineRunning = $derived($lighthouseStatus?.stage === 'RUNNING' || $lighthouseSettings?.useMockData);
 
     let selectedText = $derived(
         sections

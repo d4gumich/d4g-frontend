@@ -8,6 +8,7 @@
     import OwlLogo from '$lib/assets/owl_logo.jpg';
     import Navbar from '$lib/components/navbar.svelte';
     import { page } from '$app/stores';
+    import { onMount } from 'svelte';
     import { browser } from '$app/environment';
     
     const currentPage = 'projects';
@@ -46,16 +47,20 @@
       }
     ];
 
-    $: secretKey = browser ? $page.url.searchParams.get('key') : null;
+    let secretKey = $state(null);
+
+    onMount(() => {
+        secretKey = $page.url.searchParams.get('key');
+    });
 
     // Derived projects list that appends the key to links if it exists
-    $: projectsWithAuth = current_project.map(p => {
+    let projectsWithAuth = $derived(current_project.map(p => {
         if (p.experimental && secretKey) {
             const separator = p.tryLink.includes('?') ? '&' : '?';
             return { ...p, tryLink: `${p.tryLink}${separator}key=${secretKey}` };
         }
         return p;
-    });
+    }));
 
     const past_project = [
       {
@@ -115,11 +120,13 @@
   <div class="a">
     <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">
+      {#if browser}
         {#each projectsWithAuth as project}
           {#if !project.experimental || (secretKey && secretKey.length > 5)}
             <CurrProjCard {...project} />
           {/if}
         {/each}
+      {/if}
     </div>
 
     <SectionTitle title="Past Projects" />
