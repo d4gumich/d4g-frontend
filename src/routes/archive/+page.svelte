@@ -12,6 +12,12 @@
     const currentPage = 'archive';
 
     const past_project = [
+      {
+        name: 'Socrates v1 (Archived Prototype)',
+        detail: 'Initial experimental prototype of the Socrates dialectic engine. This version explored structured inquiry using sequential LLM nodes.',
+        researchLink: `${base}/socrates-test`,
+        type: 'Prototype'
+      },
        {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',

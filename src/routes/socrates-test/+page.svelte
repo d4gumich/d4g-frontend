@@ -2,6 +2,7 @@
     import Navbar from "$lib/components/navbar.svelte";
     import Button from "$lib/components/button.svelte";
     import LoadingBar from "$lib/components/loading_bar.svelte";
+    import SocratesSetup from "$lib/components/SocratesSetup.svelte";
     import { onMount } from "svelte";
     import { page } from '$app/stores';
     import { browser } from '$app/environment';
@@ -11,11 +12,68 @@
     const currentPage = 'socrates-test';
     
     let secretKey = $state(null);
-    onMount(() => {
-        secretKey = $page.url.searchParams.get('key');
-    });
+    let sessionActive = $state(false);
+    let sessionProvider = $state("");
+    let sessionModel = $state("");
+    let showSetup = $state(true);
+    let initializing = $state(true);
 
     const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+
+    onMount(async () => {
+        secretKey = $page.url.searchParams.get('key');
+        await checkSession();
+
+        // Re-check session when user returns to tab to prevent UI state loss
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                checkSession();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    });
+
+    async function checkSession() {
+        try {
+            const response = await fetch(`${host_url}api/v1/auth/status`, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'include'
+            });
+            const data = await response.json();
+            if (data.status === 'active') {
+                sessionActive = true;
+                sessionProvider = data.provider;
+                sessionModel = data.model;
+                showSetup = false;
+            } else {
+                sessionActive = false;
+                showSetup = true;
+            }
+        } catch (err) {
+            console.error("Failed to check session status:", err);
+            showSetup = true;
+        } finally {
+            initializing = false;
+        }
+    }
+
+    async function handleLogout() {
+        try {
+            await fetch(`${host_url}api/v1/auth/logout`, {
+                method: "POST",
+                credentials: 'include'
+            });
+        } catch (err) {
+            console.error("Logout failed:", err);
+        } finally {
+            sessionActive = false;
+            showSetup = true;
+        }
+    }
 
     let input = $state("");
     let loading = $state(false);
@@ -86,13 +144,13 @@
             const response = await fetch(url, {
                 method: "POST",
                 headers: { 
-                    "Content-Type": "application/json",
-                    "X-Experimental-API-Key": secretKey
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     input: input,
                     channel: "web-test"
-                })
+                }),
+                credentials: 'include'
             });
 
             if (!response.ok) {
@@ -173,161 +231,161 @@
 
 <Navbar {currentPage} />
 
-{#if !secretKey || secretKey.length < 5}
-    <div class="container">
-        <div class="content-container unauthorized">
-            <h2>🔒 Unauthorized Access</h2>
-            <p>You do not have permission to access this experimental feature.</p>
-            <p>Please return to the <a href="{base}/products?key=YOUR_KEY">products page</a> and provide a valid access key.</p>
-        </div>
-    </div>
-{:else}
-    <div class="container">
-        <div class="content-container">
-            <div class="heading-container">
-                <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
-                <p class="info-text">Structured inquiry engine for refined thinking.</p>
-            </div>
+<div class="demo-warning">
+    ⚠️ ARCHIVED PROTOTYPE: This is an older version of the Socrates dialectic engine. For the current product, please visit <a href="{base}/products" class="banner-link">Socrates v2</a> on the Products page.
+</div>
 
-            <div class="input-container">
-                <textarea
-                    class="socrates-input"
-                    placeholder="Share your vague or reactive thinking here..."
-                    bind:value={input}
-                    on:keypress={filterEnter}
-                    rows="4"
-                ></textarea>
-                <div class="button-row">
-                    <Button
-                        text={loading ? "Thinking..." : "Begin Dialectic"}
-                        click={submitSocrates}
-                        disabled={loading || !input.trim()}
-                    />
-                </div>
-            </div>
-
-            {#if error}
-                <div class="error-box">
-                    <p>❌ {error}</p>
-                </div>
-            {/if}
-
-            {#if loading || events.length > 0}
-                <div class="results-container">
-
-                    <!-- PROGRESS LOG -->
-                    <div class="progress-log">
-                        <h3>Process Log</h3>
-                        <ul>
-                            {#each events as node}
-                                <li class={node === current_node ? "active-node" : ""}>
-                                    Processed node: <strong>{node}</strong>
-                                    {#if node === current_node && loading}
-                                        <span class="pulse">...</span>
-                                    {/if}
-                                </li>
-                            {/each}
-                        </ul>
-                    </div>
-
-                    <div class="dialectic-results">
-
-                        {#if socratesState.mode}
-                            <div class="result-section">
-                                <h4>Classification</h4>
-                                <p><strong>Mode:</strong> {socratesState.mode}</p>
-                                <p><strong>Route:</strong> {socratesState.route}</p>
-                            </div>
-                        {/if}
-
-                        {#if socratesState.refined_question}
-                            <div class="result-section highlight">
-                                <h4>Refined Question</h4>
-                                <p class="refined-q">{socratesState.refined_question}</p>
-                                {#if socratesState.assumptions?.length}
-                                    <h5>Assumptions</h5>
-                                    <ul>
-                                        {#each socratesState.assumptions as assumption}
-                                            <li>{assumption}</li>
-                                        {/each}
-                                    </ul>
-                                {/if}
-                            </div>
-                        {/if}
-
-                        {#if socratesState.thesis}
-                            <div class="result-section">
-                                <h4>Thesis</h4>
-                                <p>{socratesState.thesis}</p>
-                            </div>
-                        {/if}
-
-                        {#if socratesState.antithesis}
-                            <div class="result-section">
-                                <h4>Antithesis</h4>
-                                <p>{socratesState.antithesis}</p>
-                            </div>
-                        {/if}
-
-                        {#if socratesState.synthesis}
-                            <div class="result-section">
-                                <h4>Synthesis</h4>
-                                <p>{socratesState.synthesis}</p>
-                                {#if socratesState.open_tensions?.length}
-                                    <h5>Open Tensions</h5>
-                                    <ul>
-                                        {#each socratesState.open_tensions as tension}
-                                            <li>{tension}</li>
-                                        {/each}
-                                    </ul>
-                                {/if}
-                            </div>
-                        {/if}
-
-                        {#if socratesState.action_draft}
-                            <div class="result-section action-box">
-                                <h4>Action Draft</h4>
-                                <p>{socratesState.action_draft}</p>
-                                {#if socratesState.next_action}
-                                    <p><strong>Next Step:</strong> {socratesState.next_action}</p>
-                                {/if}
-                            </div>
-                        {/if}
-
-                        {#if socratesState.evaluator_scores && Object.keys(socratesState.evaluator_scores).length > 0}
-                            <div class="result-section evaluation">
-                                <h4>Self-Evaluation</h4>
-                                <p><strong>Passed:</strong> {socratesState.passed_eval ? "✅ YES" : "❌ NO"}</p>
-                                <ul>
-                                    {#each Object.entries(socratesState.evaluator_scores) as [category, score]}
-                                        <li>{category}: {score}/2</li>
-                                    {/each}
-                                </ul>
-                            </div>
-                        {/if}
-
-                    </div>
-
-                </div>
-            {/if}
-        </div>
-    </div>
+{#if showSetup}
+    <SocratesSetup 
+        onComplete={() => checkSession()} 
+        onCancel={sessionActive ? () => { showSetup = false; } : null}
+        onLogout={sessionActive ? handleLogout : null}
+        initialProvider={sessionActive ? sessionProvider : "google"}
+        initialModel={sessionActive ? sessionModel : "gemini-3.1-pro-preview"}
+        sessionActive={sessionActive}
+    />
 {/if}
 
+<div class="container">
+    <div class="content-container">
+        <div class="heading-container">
+            <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
+            <p class="info-text">Structured inquiry engine for refined thinking.</p>
+            {#if sessionActive}
+                <div class="session-info">
+                    <button class="status-indicator interactive" onclick={() => { showSetup = true; }} title="Manage AI Session">
+                        <span class="dot-green"></span>
+                        Connected: <strong class="model-name">{sessionModel}</strong>
+                    </button>
+                </div>
+            {/if}
+        </div>
+
+        <div class="input-container">
+            <textarea
+                class="socrates-input"
+                placeholder="Share your vague or reactive thinking here..."
+                bind:value={input}
+                onkeypress={filterEnter}
+                rows="4"
+            ></textarea>
+            <div class="button-row">
+                <Button
+                    text={loading ? "Thinking..." : "Begin Dialectic"}
+                    click={submitSocrates}
+                    disabled={loading || !input.trim()}
+                />
+            </div>
+        </div>
+
+        {#if error}
+            <div class="error-box">
+                <p>❌ {error}</p>
+            </div>
+        {/if}
+
+        {#if loading || events.length > 0}
+            <div class="results-container">
+
+                <!-- PROGRESS LOG -->
+                <div class="progress-log">
+                    <h3>Process Log</h3>
+                    <ul>
+                        {#each events as node}
+                            <li class={node === current_node ? "active-node" : ""}>
+                                Processed node: <strong>{node}</strong>
+                                {#if node === current_node && loading}
+                                    <span class="pulse">...</span>
+                                {/if}
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
+
+                <div class="dialectic-results">
+
+                    {#if socratesState.mode}
+                        <div class="result-section">
+                            <h4>Classification</h4>
+                            <p><strong>Mode:</strong> {socratesState.mode}</p>
+                            <p><strong>Route:</strong> {socratesState.route}</p>
+                        </div>
+                    {/if}
+
+                    {#if socratesState.refined_question}
+                        <div class="result-section highlight">
+                            <h4>Refined Question</h4>
+                            <p class="refined-q">{socratesState.refined_question}</p>
+                            {#if socratesState.assumptions?.length}
+                                <h5>Assumptions</h5>
+                                <ul>
+                                    {#each socratesState.assumptions as assumption}
+                                        <li>{assumption}</li>
+                                    {/each}
+                                </ul>
+                            {/if}
+                        </div>
+                    {/if}
+
+                    {#if socratesState.thesis}
+                        <div class="result-section">
+                            <h4>Thesis</h4>
+                            <p>{socratesState.thesis}</p>
+                        </div>
+                    {/if}
+
+                    {#if socratesState.antithesis}
+                        <div class="result-section">
+                            <h4>Antithesis</h4>
+                            <p>{socratesState.antithesis}</p>
+                        </div>
+                    {/if}
+
+                    {#if socratesState.synthesis}
+                        <div class="result-section">
+                            <h4>Synthesis</h4>
+                            <p>{socratesState.synthesis}</p>
+                            {#if socratesState.open_tensions?.length}
+                                <h5>Open Tensions</h5>
+                                <ul>
+                                    {#each socratesState.open_tensions as tension}
+                                        <li>{tension}</li>
+                                    {/each}
+                                </ul>
+                            {/if}
+                        </div>
+                    {/if}
+
+                    {#if socratesState.action_draft}
+                        <div class="result-section action-box">
+                            <h4>Action Draft</h4>
+                            <p>{socratesState.action_draft}</p>
+                            {#if socratesState.next_action}
+                                <p><strong>Next Step:</strong> {socratesState.next_action}</p>
+                            {/if}
+                        </div>
+                    {/if}
+
+                    {#if socratesState.evaluator_scores && Object.keys(socratesState.evaluator_scores).length > 0}
+                        <div class="result-section evaluation">
+                            <h4>Self-Evaluation</h4>
+                            <p><strong>Passed:</strong> {socratesState.passed_eval ? "✅ YES" : "❌ NO"}</p>
+                            <ul>
+                                {#each Object.entries(socratesState.evaluator_scores) as [category, score]}
+                                    <li>{category}: {score}/2</li>
+                                {/each}
+                            </ul>
+                        </div>
+                    {/if}
+
+                </div>
+
+            </div>
+        {/if}
+    </div>
+</div>
+
 <style>
-    .unauthorized {
-        text-align: center;
-        background: white;
-        padding: 3rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        margin-top: 10rem;
-    }
-
-    .unauthorized h2 {
-        color: #d32f2f;
-    }
-
     .container {
 
         display: flex;
@@ -359,6 +417,54 @@
     .info-text {
         font-size: 1.2rem;
         color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .session-info {
+        font-size: 0.95rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #2e7d32;
+        font-weight: 600;
+        background: #e8f5e9;
+        padding: 0.4rem 1rem;
+        border-radius: 2rem;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .status-indicator.interactive {
+        cursor: pointer;
+    }
+
+    .status-indicator.interactive:hover {
+        background: #c8e6c9;
+        border-color: #2e7d32;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .dot-green {
+        width: 8px;
+        height: 8px;
+        background-color: #4caf50;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 5px #4caf50;
+    }
+
+    .model-name {
+        color: var(--text-color-main);
     }
 
     .input-container {
@@ -378,6 +484,7 @@
         font-size: 1.1rem;
         margin-bottom: 1.5rem;
         resize: vertical;
+        min-height: 200px;
     }
 
     .socrates-input:focus {
@@ -457,11 +564,6 @@
         0% { opacity: 1; }
         50% { opacity: 0.3; }
         100% { opacity: 1; }
-    }
-
-    .loading-item {
-        color: var(--button-color);
-        font-style: italic;
     }
 
     .result-section {

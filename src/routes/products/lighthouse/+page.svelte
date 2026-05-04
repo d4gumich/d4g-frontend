@@ -7,8 +7,11 @@
     import logo from "$lib/assets/D4G-Logo-2.png";
     import { fade } from 'svelte/transition';
     import { base } from '$app/paths';
+    import { page } from '$app/stores';
 
     const currentPage = 'products';
+    
+    $: secretKey = $page.url.searchParams.get('key');
 
     let file = $state(null);
     let shouldSanitize = $state(false);
@@ -38,7 +41,29 @@
 
 <Navbar {currentPage} />
 
-<div class="lighthouse-body">
+<div class="demo-warning">
+    ⚠️ DEMO VERSION: This is an experimental prototype still in development.
+</div>
+
+{#if !secretKey || secretKey.length < 5}
+    <div class="container-unauthorized">
+        <div class="content-container-unauthorized">
+            <h2>🔒 Unauthorized Access</h2>
+            <p>You do not have permission to access this experimental feature.</p>
+            <div class="instructions">
+                <h3>How to access:</h3>
+                <ol>
+                    <li>Obtain an <strong>Experimental Access Key</strong> from the D4G team.</li>
+                    <li>Go to the <a href="{base}/products">Products Page</a>.</li>
+                    <li>Append <code>?key=YOUR_KEY</code> to the URL.</li>
+                    <li>Click <strong>Try Lighthouse</strong>.</li>
+                </ol>
+            </div>
+            <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
+        </div>
+    </div>
+{:else}
+    <div class="lighthouse-body">
     <main class="lighthouse-container">
         <div class="dashboard-grid">
             <aside class="sidebar">
@@ -104,10 +129,60 @@
         </div>
     </main>
 </div>
+{/if}
 
 <Console />
 
 <style>
+    .container-unauthorized {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        background-color: var(--background-color-light);
+    }
+
+    .content-container-unauthorized {
+        text-align: center;
+        background: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        max-width: 500px;
+    }
+
+    .content-container-unauthorized h2 {
+        color: #d32f2f;
+        margin-top: 0;
+    }
+
+    .instructions {
+        text-align: left;
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin: 1.5rem 0;
+        border-left: 4px solid var(--button-color);
+    }
+
+    .instructions h3 {
+        margin-top: 0;
+        font-size: 1rem;
+        color: var(--text-color-main);
+    }
+
+    .instructions ol {
+        padding-left: 1.2rem;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .return-link {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
     .navbar {
         background-color: white;
         border-bottom: 1px solid var(--border-color);

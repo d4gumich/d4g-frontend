@@ -5,11 +5,31 @@
     import { base } from '$app/paths';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
+    import OwlLogo from '$lib/assets/owl_logo.jpg';
     import Navbar from '$lib/components/navbar.svelte';
+    import { page } from '$app/stores';
+    import { browser } from '$app/environment';
     
     const currentPage = 'projects';
 
     const current_project = [
+      {
+        name: 'Socrates v2',
+        detail: 'Socrates is a structured inquiry system designed to improve question quality, surface hidden assumptions, and generate action-oriented synthesis through a disciplined dialectic process.',
+        logo: OwlLogo,
+        buttonText: "View Documentation",
+        researchLink: 'https://github.com/1O1-ORG/socrateos-platform/tree/main',
+        tryLink: 'https://1o1.org/'
+      },
+      {
+        name: 'Lighthouse',
+        detail: 'Lighthouse provides high-fidelity automated extraction and comparison of professional profiles and job requirements.',
+        logo: OwlLogo,
+        researchLink: 'https://github.com/d4gumich/hugging-face-space-connection-test',
+        tryLink: `${base}/products/lighthouse`,
+        experimental: true,
+        isDemo: true
+      },
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
@@ -26,7 +46,24 @@
       }
     ];
 
+    $: secretKey = browser ? $page.url.searchParams.get('key') : null;
+
+    // Derived projects list that appends the key to links if it exists
+    $: projectsWithAuth = current_project.map(p => {
+        if (p.experimental && secretKey) {
+            const separator = p.tryLink.includes('?') ? '&' : '?';
+            return { ...p, tryLink: `${p.tryLink}${separator}key=${secretKey}` };
+        }
+        return p;
+    });
+
     const past_project = [
+      {
+        name: 'Socrates v1 (Archived Prototype)',
+        detail: 'Initial experimental prototype of the Socrates dialectic engine. This version explored structured inquiry using sequential LLM nodes.',
+        researchLink: `${base}/socrates-test`,
+        type: 'Prototype'
+      },
        {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
@@ -45,8 +82,7 @@
         researchLink: `${base}/projects/simex`,
         type: 'Project'
       }
-
-    ]
+    ];
   
   </script>
 
@@ -79,9 +115,10 @@
   <div class="a">
     <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">
-        {#each current_project as project}
-        <!-- Use a separate component for each card -->
-          <CurrProjCard {...project} />
+        {#each projectsWithAuth as project}
+          {#if !project.experimental || (secretKey && secretKey.length > 5)}
+            <CurrProjCard {...project} />
+          {/if}
         {/each}
     </div>
 

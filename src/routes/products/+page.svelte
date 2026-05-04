@@ -49,9 +49,9 @@
         detail: 'Socrates is a structured inquiry system designed to improve question quality, surface hidden assumptions, and generate action-oriented synthesis through a disciplined dialectic process.',
         logo: OwlLogo,
         buttonText: "View Documentation",
-        researchLink: 'https://github.com/d4gumich/data4good-umich',
-        tryLink: `${base}/socrates-test`,
-        experimental: true
+        researchLink: 'https://github.com/1O1-ORG/socrateos-platform/tree/main',
+        tryLink: 'https://1o1.org/',
+        isDemo: true
       },
       {
         name: 'Lighthouse',
@@ -60,7 +60,8 @@
         buttonText: "View Documentation",
         researchLink: 'https://github.com/d4gumich/hugging-face-space-connection-test',
         tryLink: `${base}/products/lighthouse`,
-        experimental: true
+        experimental: true,
+        isDemo: true
       }
     ];
 

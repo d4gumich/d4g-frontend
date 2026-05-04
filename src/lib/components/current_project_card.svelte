@@ -2,9 +2,10 @@
   export let name;
   export let detail;
   export let logo;
-  export let buttonText;
+  export let buttonText = "View Research";
   export let researchLink;
   export let tryLink;
+  export let isDemo = false;
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Button from "./button.svelte"
   import { onMount } from "svelte"
@@ -28,6 +29,9 @@
 
 <div class="card-container">
   <div class="card">
+    {#if isDemo}
+      <div class="demo-badge">DEMO!!</div>
+    {/if}
     <img src={logo} alt="logo" height="30%" />
     <div class="content">
       <div class="text">
@@ -65,6 +69,7 @@
   }
 
   .card {
+    position: relative;
     display: flex;
     width: auto;
     max-width: 400px;
@@ -77,6 +82,26 @@
     flex-shrink: 0;
     border-radius: 15px;
     border: 1px solid #000;
+    overflow: hidden;
+  }
+
+  .demo-badge {
+    position: absolute;
+    top: 20px;
+    right: -40px;
+    background: #e3b878; /* Matching the site's button color */
+    color: #232323;
+    width: 150px;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 0.75rem;
+    font-weight: 800;
+    transform: rotate(45deg);
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    pointer-events: none;
   }
 
   .content {
