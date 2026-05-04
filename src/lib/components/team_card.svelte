@@ -40,7 +40,7 @@
       {/if}
     </a>
     <h4>{position}</h4>
-    <p>{description}</p>
+    <p>{@html description}</p>
   </div>
 </div>
 
