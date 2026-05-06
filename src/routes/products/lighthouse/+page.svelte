@@ -5,6 +5,7 @@
     import Console from "$lib/components/lighthouse/Console.svelte";
     import { lighthouseResults, lighthouseActions, lighthouseSettings } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
+    import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
     import { browser } from '$app/environment';
     import { onMount } from 'svelte';
     import { fade } from 'svelte/transition';
@@ -51,6 +52,18 @@
 
 <div class="demo-warning">
     ⚠️ DEMO VERSION: This is an experimental prototype still in development.
+</div>
+
+<div class="navbar">
+    <div class="nav-content">
+        <div class="brand">
+            <img class="logo" src={LighthouseLogo} alt="Lighthouse Logo" />
+            <div class="nav-titles">
+                <h1>Lighthouse</h1>
+                <p>High-Fidelity AI Profile Analysis</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 {#if browser}

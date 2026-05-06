@@ -6,6 +6,8 @@
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import OwlLogo from '$lib/assets/owl_logo.jpg';
+    import LighthouseLogo from '$lib/assets/LighthouseLogo.png';
+    import SocratesLogo from '$lib/assets/socrates_logo.png';
     import Navbar from '$lib/components/navbar.svelte';
     import { page } from '$app/stores';
     
@@ -47,7 +49,7 @@
       {
         name: 'Socrates v2',
         detail: 'Socrates is a structured inquiry system designed to improve question quality, surface hidden assumptions, and generate action-oriented synthesis through a disciplined dialectic process.',
-        logo: OwlLogo,
+        logo: SocratesLogo,
         buttonText: "View Documentation",
         researchLink: 'https://github.com/1O1-ORG/socrateos-platform/tree/main',
         tryLink: 'https://1o1.org/',
@@ -56,7 +58,7 @@
       {
         name: 'Lighthouse',
         detail: 'Lighthouse provides high-fidelity automated extraction and comparison of professional profiles and job requirements.',
-        logo: OwlLogo, // Using OwlLogo as placeholder if no specific lighthouse logo
+        logo: LighthouseLogo,
         buttonText: "View Documentation",
         researchLink: 'https://github.com/d4gumich/hugging-face-space-connection-test',
         tryLink: `${base}/products/lighthouse`,
