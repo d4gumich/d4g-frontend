@@ -14,9 +14,9 @@
   const execTeam = [
     {
       name: "Edward G. Happ",
-      position: "Executive Fellow Emeritus",
+      position: "Director",
       description:
-        "Edward G. Happ is an Executive Fellow at the University of Michigan School of Information, where he is teaching and conducting research. His 40 years of professional experience include all facets of managing information services and high technology businesses, including general management with P&L responsibility, operations, product management, sales, marketing, customer service, human resources management, technical consulting, manufacturing, and both software and hardware development.",
+        "Edward G. Happ is the founder and volunteer director of the Data4Good Center. He is a former Executive Fellow at the University of Michigan School of Information, where he taught and advised student research. He is the former Global CIO at The IFRC and Save the Children. He is Co-founder, former Chairman, and a Leadership Fellow of NetHope, a US based consortium of leading international relief, development and conservation nonprofits focused on ICT and collaboration. He has over 20 years of board experience at NetHope, NTEN and ecclesiastical organizations.",
       image:
         "https://pbs.twimg.com/profile_images/1653043667211370496/tsXMk4do_400x400.jpg",
       linkedin: "https://www.linkedin.com/in/edward-g-happ/",
