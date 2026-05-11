@@ -159,6 +159,36 @@ export const lighthouseActions = {
         }
     },
 
+    async pause() {
+        lighthouseStatus.update(s => ({ ...s, loading: true }));
+        try {
+            const status = await apiRequest('/pause', { method: 'POST' });
+            lighthouseStatus.update(s => ({ 
+                ...status, 
+                loading: false,
+                error: null
+            }));
+            return status;
+        } catch (err) {
+            lighthouseStatus.update(s => ({ ...s, loading: false, error: formatError(err) }));
+        }
+    },
+
+    async stop() {
+        lighthouseStatus.update(s => ({ ...s, loading: true }));
+        try {
+            const status = await apiRequest('/stop', { method: 'POST' });
+            lighthouseStatus.update(s => ({ 
+                ...status, 
+                loading: false,
+                error: null
+            }));
+            return status;
+        } catch (err) {
+            lighthouseStatus.update(s => ({ ...s, loading: false, error: formatError(err) }));
+        }
+    },
+
     async uploadPdf(file, sanitize = false) {
         lighthouseResults.update(r => ({ ...r, loading: true, error: null }));
         
@@ -257,18 +287,37 @@ export const lighthouseActions = {
 
             const ensureArray = (input) => {
                 if (!input) return [];
-                if (Array.isArray(input)) return input.map(item => typeof item === 'object' ? JSON.stringify(item) : String(item));
-                if (typeof input === 'string') {
+                let arr = [];
+                if (Array.isArray(input)) {
+                    arr = input.map(item => typeof item === 'object' ? JSON.stringify(item) : String(item));
+                } else if (typeof input === 'string') {
                     try {
                         const parsed = JSON.parse(input);
-                        if (Array.isArray(parsed)) return parsed.map(String);
+                        if (Array.isArray(parsed)) arr = parsed.map(String);
+                        else arr = [String(parsed)];
                     } catch (e) {
-                        if (input.includes('\n')) return input.split('\n').map(s => s.trim().replace(/^[-•*]\s*/, '')).filter(Boolean);
-                        if (input.includes(',')) return input.split(',').map(s => s.trim()).filter(Boolean);
-                        return [input];
+                        // Split by common delimiters
+                        if (input.includes('\n')) {
+                            arr = input.split('\n');
+                        } else if (input.includes(',')) {
+                            arr = input.split(',');
+                        } else if (input.includes(';')) {
+                            arr = input.split(';');
+                        } else {
+                            arr = [input];
+                        }
                     }
+                } else {
+                    arr = [String(input)];
                 }
-                return [String(input)];
+
+                // Clean, trim, and deduplicate
+                return [...new Set(
+                    arr.map(s => s.trim()
+                        .replace(/^[-•*]\s*/, '')
+                        .replace(/[.]$/, '')
+                    ).filter(Boolean)
+                )];
             };
 
             const ensureJobArray = (input) => {

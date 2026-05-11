@@ -63,9 +63,17 @@
         <button 
             class="btn-accent" 
             onclick={lighthouseActions.pause}
-            disabled={$lighthouseStatus.loading || $lighthouseStatus.stage === 'STOPPED'}
+            disabled={$lighthouseStatus.loading || $lighthouseStatus.stage === 'STOPPED' || $lighthouseStatus.stage === 'PAUSED'}
         >
             Pause Space
+        </button>
+
+        <button 
+            class="btn-danger" 
+            onclick={lighthouseActions.stop}
+            disabled={$lighthouseStatus.loading || $lighthouseStatus.stage === 'OFFLINE'}
+        >
+            Stop Engine
         </button>
         
         <button 
@@ -125,25 +133,47 @@
     }
 
     .actions {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
         gap: 0.5rem;
-        align-items: center;
+        align-items: stretch;
     }
 
     .btn-refresh {
-        background: none;
-        border: 1px solid var(--border-color);
-        color: var(--text-color-main);
-        padding: 0.8rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        padding: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 42px;
-        height: 42px;
+        width: 38px;
+        height: 38px;
+        border-radius: 6px;
     }
 
-    .btn-refresh:hover:not(:disabled) {
-        background: #f0f0f0;
+    .btn-primary, .btn-accent, .btn-danger {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-radius: 6px;
+    }
+
+    .btn-danger {
+        background-color: #ff5252;
+        color: white;
+        border: 1px solid #d32f2f;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+        background-color: #ff1744;
+    }
+
+    .btn-danger:disabled {
+        background-color: #ffcdd2;
+        border-color: #ef9a9a;
+        cursor: not-allowed;
     }
 
     .spinning {

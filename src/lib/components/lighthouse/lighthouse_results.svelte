@@ -128,10 +128,14 @@
                     <div class="analysis-column">
                         <div class="card compact-card">
                             <h3>Extracted Skills</h3>
-                            <div class="skills-list">
-                                {#each results.extracted_skills as skill}
-                                    <span class="skill-tag">{skill}</span>
-                                {/each}
+                            <div class="skills-list scroll-box-sm">
+                                {#if results.extracted_skills?.length > 0}
+                                    {#each results.extracted_skills as skill}
+                                        <span class="skill-tag">{skill}</span>
+                                    {/each}
+                                {:else}
+                                    <p class="empty-msg-sm">No specific skills identified.</p>
+                                {/if}
                             </div>
                         </div>
 
@@ -139,9 +143,18 @@
                             <h3>Top Job Matches</h3>
                             <div class="jobs-list">
                                 {#each results.top_jobs as job}
-                                    <div class="job-item">
-                                        <strong>{job.title}</strong>
-                                        <span class="score">{Math.round(job.score * 100)}%</span>
+                                    <div class="job-item tooltip-trigger">
+                                        <div class="job-main">
+                                            <strong>{job.title}</strong>
+                                            <span class="score">{Math.round(job.score * 100)}%</span>
+                                        </div>
+                                        
+                                        {#if job.skills}
+                                            <div class="tooltip-content">
+                                                <h4>Matched Skills:</h4>
+                                                <p>{job.skills}</p>
+                                            </div>
+                                        {/if}
                                     </div>
                                 {/each}
                             </div>
@@ -280,14 +293,91 @@
 
     .analysis-column { display: flex; flex-direction: column; gap: 1.5rem; }
 
-    .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; }
+    .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; }
     .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; }
 
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .skill-tag { background: var(--button-color-green); font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .scroll-box-sm { max-height: 200px; overflow-y: auto; padding-right: 0.25rem; }
+    .empty-msg-sm { font-size: 0.8rem; color: #888; font-style: italic; }
 
-    .job-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #f5f5f5; }
-    .score { color: var(--success-color); font-weight: 700; }
+    .skill-tag { 
+        background: #f0f4f8; 
+        color: var(--blue-color-main);
+        border: 1px solid #d1d9e0;
+        font-size: 0.7rem; 
+        padding: 0.2rem 0.6rem; 
+        border-radius: 12px;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .jobs-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .job-item { 
+        position: relative;
+        background: #f9f9f9;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border: 1px solid #eee;
+        transition: all 0.2s ease;
+    }
+
+    .job-item:hover {
+        border-color: var(--blue-color-main);
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .job-main { display: flex; justify-content: space-between; align-items: center; }
+    .job-main strong { font-size: 0.9rem; color: var(--text-color-main); }
+    .score { color: #2e7d32; font-weight: 700; font-size: 0.85rem; }
+
+    /* Tooltip Styling */
+    .tooltip-content {
+        position: absolute;
+        left: calc(100% + 10px);
+        top: 0;
+        width: 300px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        pointer-events: none;
+    }
+
+    .tooltip-trigger:hover .tooltip-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(5px);
+    }
+
+    .tooltip-content h4 { 
+        margin: 0 0 0.5rem 0; 
+        font-size: 0.8rem; 
+        text-transform: uppercase; 
+        color: #888; 
+        letter-spacing: 0.5px;
+    }
+
+    .tooltip-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: #444;
+    }
+
+    @media (max-width: 1300px) {
+        .tooltip-content {
+            left: auto;
+            right: 0;
+            top: calc(100% + 5px);
+        }
+    }
 
     .recommendations-card { height: 100%; display: flex; flex-direction: column; }
     .scroll-box { max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
