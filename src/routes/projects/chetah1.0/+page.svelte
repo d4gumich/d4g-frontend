@@ -135,9 +135,10 @@
                     style = "background-image: url({SearchLogo});"
                     height="10px"
                     on:click={search(searchQuery)}
-                />
+                    aria-label="Search"
+                ></button>
             {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
@@ -190,11 +191,18 @@
                         <Button text="UN Clusters" click={handleUNClustersClick} />
                     </div>
                     {#if showUNClustersModal}
-                        <div class="cluster-modal">
+                        <div class="cluster-modal" role="dialog" aria-modal="true" aria-labelledby="cluster-title">
                             <div class="cluster-modal-content">
-                                <span class="modal-close" on:click={() => (showUNClustersModal = false)}>×</span>
+                                <span 
+                                    class="modal-close" 
+                                    on:click={() => (showUNClustersModal = false)}
+                                    role="button"
+                                    tabindex="0"
+                                    on:keydown={(e) => e.key === 'Enter' && (showUNClustersModal = false)}
+                                    aria-label="Close clusters modal"
+                                >×</span>
                                 <div class="modal-header">
-                                    <h2 class="selected">UN Clusters</h2>
+                                    <h2 id="cluster-title" class="selected">UN Clusters</h2>
                                 </div>
                                 <div class="modal-body">
                                     <form on:submit|preventDefault={handleUNClustersSubmit}>
@@ -246,17 +254,18 @@
     </div>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
+        <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Feedback Modal">
             <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    aria-label="Close feedback modal"
                     >&times;</span
                 >
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <iframe src={formUrl} width="100%" height="100%" />
+                <iframe src={formUrl} width="100%" height="100%" title="Chetah Feedback Form"></iframe>
             </div>
         </div>
     {/if}

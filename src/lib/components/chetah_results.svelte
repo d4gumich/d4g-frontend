@@ -20,13 +20,15 @@
     </p>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
+        <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Summary Modal">
             <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    aria-label="Close modal"
                     >&times;</span
                 >
                 <p>{summary_full}</p>
