@@ -3,18 +3,16 @@
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import Button from './button.svelte';
 
-    let { 
-        onComplete, 
-        onCancel = null, 
-        onLogout = null, 
-        initialProvider = "google", 
-        initialModel = "gemini-3.1-pro-preview",
-        sessionActive = false
-    } = $props();
+    let { onComplete, onCancel = null, onLogout = null, initialProvider = "google", initialModel = "gemini-3.1-pro-preview", sessionActive = false } = $props();
 
-    let provider = $state(initialProvider);
-    let model = $state(initialModel);
+    let provider = $state("google");
+    let model = $state("gemini-3.1-pro-preview");
     let apiKey = $state("");
+
+    $effect(() => {
+        if (initialProvider) provider = initialProvider;
+        if (initialModel) model = initialModel;
+    });
     let loading = $state(false);
     let error = $state("");
 
