@@ -15,15 +15,20 @@
   on:click|self={() => (showModal = false)}
   on:keydown={handleModalKeydown}
   tabindex="-1"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Feedback Modal"
 >
   <div class="modal-content">
     <span
       class="modal-close"
       on:click|stopPropagation={() => (showModal = false)}
       on:keydown|stopPropagation={handleModalKeydown}
-      tabindex="-1">&times;</span
+      tabindex="0"
+      role="button"
+      aria-label="Close modal">&times;</span
     >
-    <iframe src={GOOGLE_FORM_URL} width="100%" height="100%" title="Feedback form" />
+    <iframe src={GOOGLE_FORM_URL} width="100%" height="100%" title="Feedback form"></iframe>
   </div>
 </div>
 

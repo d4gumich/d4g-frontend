@@ -112,8 +112,8 @@
       <a href={`${base}/faq`}>FAQ</a>
       <a href={`${base}/joinus`}>Join Us</a>
       <div class="dot"></div>
-    </nav>
-  {/if}
+      </nav>
+      {/if}
 
   {#if isMobile}
     <section class="p-menu1">

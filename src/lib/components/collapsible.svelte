@@ -78,7 +78,15 @@
 </script>
 
 <div style={styleAdjustment}>
-  <button class="toggle" style={open ? hideBorder : ``} on:click={handleOpen}>
+  <div 
+    class="toggle" 
+    style={open ? hideBorder : ``} 
+    on:click={handleOpen}
+    role="button"
+    tabindex="0"
+    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleOpen()}
+    aria-expanded={open}
+  >
     <div class="title">
       <div style={headingFontSizeDefault}>{heading}</div>
       {#if useCheckMark}
@@ -99,7 +107,7 @@
         {/if}
       {/if}
       {#if showCopyButton}
-        <button class="copy-button" on:click={copyTextToClipboard}>
+        <button class="copy-button" on:click|stopPropagation={copyTextToClipboard} aria-label="Copy to clipboard">
           <div class="copy-icon"><CopyIcon /></div>
           <div class="copy-text">copy</div>
         </button>
@@ -112,7 +120,7 @@
         <ChevronDown />
       {/if}
     </div>
-  </button>
+  </div>
   <div class="collapsible" style={open ? showContent : ``}>
     <div>
       <slot name="text" />

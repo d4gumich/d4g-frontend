@@ -10,6 +10,7 @@
     import SocratesLogo from '$lib/assets/socrates_logo.png';
     import Navbar from '$lib/components/navbar.svelte';
     import LighthouseSetup from '$lib/components/LighthouseSetup.svelte';
+    import { lighthouseActions, lighthouseStatus } from '$lib/lighthouseStore.js';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
@@ -80,13 +81,8 @@
 
     async function checkSession() {
         try {
-            const lighthouseResp = await fetch(`${base}/api/v1/auth/lighthouse-status`, {
-                headers: { 'Accept': 'application/json' },
-                credentials: 'include'
-            });
-            const lighthouseData = await lighthouseResp.json();
-
-            if (lighthouseData.status === 'active') {
+            const status = await lighthouseActions.fetchStatus(true);
+            if (status && $lighthouseStatus.sessionActive) {
                 secretKey = "verified-session";
             }
         } catch (err) {

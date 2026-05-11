@@ -46,28 +46,23 @@
         </p>
 
         {#if showModal}
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div class="modal" on:click|self={() => (showModal = false)}>
+            <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Summary Modal">
                 <div class="modal-content">
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <span
                         class="modal-close"
                         on:click|stopPropagation={() => (showModal = false)}
+                        role="button"
+                        tabindex="0"
+                        on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                        aria-label="Close modal"
                         >&times;</span
                     >
                     <p>{summary}</p>
                 </div>
             </div>
         {/if}
-    </div>
-{/if}
-
-<style>
-    p {
-        font-family: Open Sans;
-        margin: 1%;
-    }
-    .result {
+        ...
+        .result {
         width: 70%;
         word-wrap: normal;
         margin: auto;
@@ -75,23 +70,9 @@
         margin-bottom: 1%;
         margin-top: 2%;
         border-radius: 3%;
-    }
+        }
 
-    .title{
-        /* color: #446FDB; */
-        font-family: Work Sans;
-        font-size: 20px;
-        font-style: normal;
-        font-weight: 700;
-        line-height: normal;
-        letter-spacing: -0.4px;
-        text-transform: capitalize;
-    }
-
-    a {
-        text-decoration: none;
-        color: #1a0dab;
-    }
+        /* modal */
     
 
     a:visited {

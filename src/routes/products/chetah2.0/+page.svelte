@@ -114,9 +114,10 @@
                     style = "background-image: url({SearchLogo});"
                     height="10px"
                     on:click={search(searchQuery)}
-                />
+                    aria-label="Search"
+                ></button>
             {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
@@ -176,17 +177,18 @@
     </div>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
+        <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Feedback Modal">
             <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    aria-label="Close modal"
                     >&times;</span
                 >
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <iframe src={formUrl} width="100%" height="100%" />
+                <iframe src={formUrl} width="100%" height="100%" title="Chetah Feedback Form"></iframe>
             </div>
         </div>
     {/if}

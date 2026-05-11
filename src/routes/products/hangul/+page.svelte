@@ -368,6 +368,10 @@
         class="rectangle"
         on:drop|preventDefault={handleFileSelect}
         on:dragover|preventDefault={handleDragOver}
+        role="region"
+        aria-label="File upload drop zone"
+        tabindex="0"
+        on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && document.getElementById('file-input').click()}
       >
         <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
         <p class="drop-text">{dropText}</p>

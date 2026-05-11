@@ -118,8 +118,20 @@ export const lighthouseActions = {
         }
         
         try {
-            const statusData = await apiRequest('/status');
-            const sessionData = await apiRequest('/auth/lighthouse-status'); // Uses auth logic in apiRequest
+            // 1. Check Auth status first (Unprotected endpoint)
+            const sessionData = await apiRequest('/auth/lighthouse-status');
+            const isAuth = sessionData.status === 'active';
+
+            let statusData = { stage: 'OFFLINE', hardware: 'None', message: '' };
+            
+            // 2. Only check Engine status if we have a valid session (Protected endpoint)
+            if (isAuth) {
+                try {
+                    statusData = await apiRequest('/status');
+                } catch (err) {
+                    console.error("Failed to fetch engine status even though session is active", err);
+                }
+            }
 
             lighthouseStatus.update(s => {
                 const isHardwareReady = statusData.hardware && 
@@ -130,7 +142,7 @@ export const lighthouseActions = {
                 return {
                     ...s,
                     ...statusData,
-                    sessionActive: sessionData.status === 'active',
+                    sessionActive: isAuth,
                     loading: false,
                     isRefreshing: false,
                     requestedHardware: isHardwareReady ? null : s.requestedHardware,
