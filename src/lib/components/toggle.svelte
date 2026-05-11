@@ -45,7 +45,7 @@
       checked={version === 2}
       disabled={analyzing}
     />
-    <span class="slider round" style={blockSliderStyle} />
+    <span class="slider round" style={blockSliderStyle}></span>
   </label>
   <p
     class="text"
