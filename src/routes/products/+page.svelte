@@ -9,7 +9,10 @@
     import LighthouseLogo from '$lib/assets/LighthouseLogo.png';
     import SocratesLogo from '$lib/assets/socrates_logo.png';
     import Navbar from '$lib/components/navbar.svelte';
+    import LighthouseSetup from '$lib/components/LighthouseSetup.svelte';
     import { page } from '$app/stores';
+    import { onMount } from 'svelte';
+    import { browser } from '$app/environment';
     
     const currentPage = 'products';
 
@@ -67,14 +70,29 @@
       }
     ];
 
-    import { onMount } from 'svelte';
-    import { browser } from '$app/environment';
-    
     let secretKey = $state(null);
+    let showLighthouseSetup = $state(false);
 
     onMount(() => {
         secretKey = $page.url.searchParams.get('key');
+        checkSession();
     });
+
+    async function checkSession() {
+        try {
+            const lighthouseResp = await fetch(`${base}/api/v1/auth/lighthouse-status`, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'include'
+            });
+            const lighthouseData = await lighthouseResp.json();
+
+            if (lighthouseData.status === 'active') {
+                secretKey = "verified-session";
+            }
+        } catch (err) {
+            console.error("Session check failed:", err);
+        }
+    }
     
     // Derived projects list that appends the key to links if it exists
     let projectsWithAuth = $derived(current_project.map(p => {
@@ -113,13 +131,28 @@
   </style>
   
   <Navbar {currentPage} />
+
+  {#if showLighthouseSetup}
+    <LighthouseSetup 
+      onComplete={() => { 
+        showLighthouseSetup = false; 
+        window.location.href = `${base}/products/lighthouse`;
+      }}
+      onCancel={() => showLighthouseSetup = false}
+    />
+  {/if}
+
   <div class="a">
     <SectionTitle title="Latest Products" />
     <div class="horizontal-segment">
       {#if browser}
         {#each projectsWithAuth as project}
           {#if !project.experimental || (secretKey && secretKey.length > 5) || project.name === 'Lighthouse'}
-            <CurrProjCard {...project} isLocked={project.experimental && (!secretKey || secretKey.length < 5)} />
+            <CurrProjCard 
+              {...project} 
+              isLocked={project.experimental && (!secretKey || secretKey.length < 5)} 
+              onUnlock={project.name === 'Lighthouse' ? () => { showLighthouseSetup = true; } : null}
+            />
           {/if}
         {/each}
       {/if}

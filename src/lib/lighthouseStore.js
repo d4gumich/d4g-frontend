@@ -29,7 +29,9 @@ export const lighthouseStatus = writable({
     loading: false,
     isRefreshing: false,
     requestedHardware: null,
-    error: null
+    error: null,
+    sessionActive: false,
+    sessionRemaining: null // Seconds remaining in the 59-min window
 });
 
 // Settings Store (initialized from Environment Variable)
@@ -81,21 +83,15 @@ function formatError(err) {
 
 async function apiRequest(path, options = {}) {
     try {
-        // Get secret key from URL if available
-        let secretKey = null;
-        if (typeof window !== 'undefined') {
-            const urlParams = new URLSearchParams(window.location.search);
-            secretKey = urlParams.get('key');
-        }
+        // Resolve absolute vs relative paths
+        // Auth paths are top-level under api/v1
+        const fullPath = path.startsWith('/auth') 
+            ? `api/v1${path}` 
+            : `${BASE_PATH}${path}`;
 
-        const headers = {
-            ...options.headers,
-            'X-Experimental-API-Key': secretKey
-        };
-
-        const response = await fetch(`${HOST_URL}${BASE_PATH}${path}`, {
+        const response = await fetch(`${HOST_URL}${fullPath}`, {
             ...options,
-            headers
+            credentials: 'include'
         });
         
         if (!response.ok) {
@@ -118,22 +114,26 @@ export const lighthouseActions = {
         }
         
         try {
-            const status = await apiRequest('/status');
+            const statusData = await apiRequest('/status');
+            const sessionData = await apiRequest('/auth/lighthouse-status'); // Uses auth logic in apiRequest
+
             lighthouseStatus.update(s => {
-                const isHardwareReady = status.hardware && 
-                                      status.hardware !== 'UNKNOWN' && 
-                                      status.hardware !== 'NULL' && 
-                                      status.hardware !== 'None';
+                const isHardwareReady = statusData.hardware && 
+                                      statusData.hardware !== 'UNKNOWN' && 
+                                      statusData.hardware !== 'NULL' && 
+                                      statusData.hardware !== 'None';
                 
                 return {
-                    ...status,
+                    ...s,
+                    ...statusData,
+                    sessionActive: sessionData.status === 'active',
                     loading: false,
                     isRefreshing: false,
                     requestedHardware: isHardwareReady ? null : s.requestedHardware,
                     error: null
                 };
             });
-            return status;
+            return statusData;
         } catch (err) {
             lighthouseStatus.update(s => ({ 
                 ...s, 
@@ -148,7 +148,10 @@ export const lighthouseActions = {
         lighthouseStatus.update(s => ({ ...s, loading: true, requestedHardware: 'T4 Small' }));
         try {
             const status = await apiRequest('/wakeup', { method: 'POST' });
+            // Start the billing timer if wakeup was successful
+            this.startSessionTimer();
             lighthouseStatus.update(s => ({ 
+                ...s,
                 ...status, 
                 loading: false, 
                 requestedHardware: s.requestedHardware 
@@ -164,6 +167,7 @@ export const lighthouseActions = {
         try {
             const status = await apiRequest('/pause', { method: 'POST' });
             lighthouseStatus.update(s => ({ 
+                ...s,
                 ...status, 
                 loading: false,
                 error: null
@@ -179,6 +183,7 @@ export const lighthouseActions = {
         try {
             const status = await apiRequest('/stop', { method: 'POST' });
             lighthouseStatus.update(s => ({ 
+                ...s,
                 ...status, 
                 loading: false,
                 error: null
@@ -186,6 +191,46 @@ export const lighthouseActions = {
             return status;
         } catch (err) {
             lighthouseStatus.update(s => ({ ...s, loading: false, error: formatError(err) }));
+        }
+    },
+
+    startSessionTimer() {
+        // Clear any existing timer
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        
+        // 59 minutes in seconds
+        let remaining = 3540;
+        
+        lighthouseStatus.update(s => ({ ...s, sessionRemaining: remaining }));
+
+        this.timerInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(this.timerInterval);
+                this.logout();
+            }
+            lighthouseStatus.update(s => ({ ...s, sessionRemaining: remaining }));
+        }, 1000);
+    },
+
+    async logout() {
+        try {
+            await fetch(`${HOST_URL}api/v1/auth/logout`, { method: 'POST', credentials: 'include' });
+        } catch (err) {
+            console.error("Logout failed:", err);
+        } finally {
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            lighthouseStatus.update(s => ({ 
+                ...s, 
+                sessionActive: false, 
+                sessionRemaining: null,
+                stage: 'OFFLINE'
+            }));
+            if (typeof window !== 'undefined') {
+                import('$app/paths').then(({ base }) => {
+                    window.location.href = `${base}/products`;
+                });
+            }
         }
     },
 

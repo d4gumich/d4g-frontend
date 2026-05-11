@@ -3,7 +3,7 @@
     import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
     import LighthouseControl from "$lib/components/lighthouse/LighthouseControl.svelte";
     import Console from "$lib/components/lighthouse/Console.svelte";
-    import { lighthouseResults, lighthouseActions, lighthouseSettings } from "$lib/lighthouseStore.js";
+    import { lighthouseResults, lighthouseActions, lighthouseSettings, lighthouseStatus } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
     import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
     import { browser } from '$app/environment';
@@ -15,10 +15,12 @@
     const currentPage = 'products';
     
     let secretKey = $state(null);
+    let sessionActive = $derived($lighthouseStatus.sessionActive);
 
-    onMount(() => {
+    onMount(async () => {
         if (browser) {
             secretKey = $page.url.searchParams.get('key');
+            await lighthouseActions.fetchStatus(true);
         }
     });
 
@@ -67,19 +69,12 @@
 </div>
 
 {#if browser}
-    {#if !secretKey || secretKey.length < 5}
+    {#if (!secretKey || secretKey.length < 5) && !sessionActive}
         <div class="container-unauthorized">
             <div class="content-container-unauthorized">
                 <h2>🔒 Unauthorized Access</h2>
                 <p>You do not have permission to access this experimental feature.</p>
-                <div class="instructions">
-                    <h3>Access Guide:</h3>
-                    <ol>
-                        <li>Request an authorized key from the <strong>D4G team</strong>.</li>
-                        <li>Add <code>?key=YOUR_KEY</code> to the end of the address bar URL above.</li>
-                        <li>Press <strong>Enter</strong> to enable the analysis engine.</li>
-                    </ol>
-                </div>                <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
+                <p class="return-link">Return to the <a href="{base}/products">products page</a> to unlock the engine.</p>
             </div>
         </div>
     {:else}
@@ -175,28 +170,6 @@
     .content-container-unauthorized h2 {
         color: #d32f2f;
         margin-top: 0;
-    }
-
-    .instructions {
-        text-align: left;
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        margin: 1.5rem 0;
-        border-left: 4px solid var(--button-color);
-    }
-
-    .instructions h3 {
-        margin-top: 0;
-        font-size: 1rem;
-        color: var(--text-color-main);
-    }
-
-    .instructions ol {
-        padding-left: 1.2rem;
-        margin-bottom: 0;
-        font-size: 0.9rem;
-        line-height: 1.6;
     }
 
     .return-link {
@@ -335,7 +308,6 @@
     }
 
     .checkbox-container { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
-    .label-text { white-space: nowrap; }
 
     @media (max-width: 1100px) {
         .dashboard-grid { grid-template-columns: 1fr; }

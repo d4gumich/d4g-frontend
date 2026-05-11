@@ -7,6 +7,7 @@
   export let tryLink;
   export let isDemo = false;
   export let isLocked = false;
+  export let onUnlock = null;
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Button from "./button.svelte"
   import { onMount } from "svelte"
@@ -55,8 +56,9 @@
         </div>
         <div class="button">
           <Button
-            text={`Try ${name}`}
-            link={tryLink}
+            text={isLocked ? "Access Restricted" : `Try ${name}`}
+            link={isLocked ? null : tryLink}
+            click={isLocked ? onUnlock : null}
             styleAdjustment={isMobile ? `margin: 1rem 0 0 0;` : 'margin: 0 0 0 1rem;'}
           />
         </div>

@@ -5,5 +5,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
   build: {
     target: 'esnext'
+  },
+  ssr: {
+    noExternal: ['svelte-material-icons']
   }
 });

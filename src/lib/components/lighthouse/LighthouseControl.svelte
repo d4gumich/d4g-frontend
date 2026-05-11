@@ -14,6 +14,33 @@
 
     let isRunning = $derived($lighthouseStatus.stage === 'RUNNING');
     let isLoading = $derived($lighthouseStatus.stage.includes('BUILDING') || $lighthouseStatus.stage.includes('STARTING') || $lighthouseStatus.loading);
+
+    let hasStartedThisSession = $state(false);
+
+    // Automatically set started state if the engine is already running on load
+    $effect(() => {
+        if (isRunning) {
+            hasStartedThisSession = true;
+        }
+    });
+
+    async function handleStart() {
+        hasStartedThisSession = true;
+        await lighthouseActions.wakeup();
+    }
+
+    async function handleTerminate() {
+        await lighthouseActions.stop();
+        hasStartedThisSession = false;
+    }
+
+    function getStatusClass(stage) {
+        const s = stage?.toUpperCase() || '';
+        if (s === 'RUNNING') return 'status-active';
+        if (s === 'STOPPED' || s === 'PAUSED' || s === 'SLEEPING' || s === 'OFFLINE') return 'status-inactive';
+        if (s.includes('BUILDING') || s.includes('STARTING') || s.includes('INITIALIZING')) return 'status-loading';
+        return 'status-inactive';
+    }
 </script>
 
 <div class="card">
@@ -21,6 +48,11 @@
         <div class="title-group">
             <h3>Lighthouse Engine</h3>
             <p class="status-text">Status: <span class="badge {getStatusClass($lighthouseStatus.stage)}">{$lighthouseStatus.stage}</span></p>
+            {#if $lighthouseStatus.sessionActive && $lighthouseStatus.sessionRemaining !== null}
+                <p class="timer-text">
+                    🔒 Session ends in: <strong>{Math.floor($lighthouseStatus.sessionRemaining / 60)}:{$lighthouseStatus.sessionRemaining % 60 < 10 ? '0' : ''}{$lighthouseStatus.sessionRemaining % 60}</strong>
+                </p>
+            {/if}
         </div>
     </div>
     
@@ -49,44 +81,49 @@
     </div>
 
     <div class="control-actions">
-        <!-- Main Toggle Button -->
-        {#if isRunning}
-            <button 
-                class="btn-main btn-pause" 
-                onclick={lighthouseActions.pause}
-                disabled={isLoading}
-            >
-                Pause Engine
+        <!-- Dynamic Action Area -->
+        {#if isLoading}
+            <button class="btn-main btn-disabled" disabled>
+                Booting...
             </button>
-        {:else}
+        {:else if !hasStartedThisSession}
             <button 
                 class="btn-main btn-start" 
-                onclick={lighthouseActions.wakeup}
-                disabled={isLoading}
+                onclick={handleStart}
             >
-                {isLoading ? 'Booting...' : 'Start Engine'}
+                Start Engine
             </button>
+        {:else if isRunning}
+            <div class="split-actions">
+                <button 
+                    class="btn-main btn-pause" 
+                    onclick={lighthouseActions.pause}
+                >
+                    Pause Engine
+                </button>
+                <button 
+                    class="btn-main btn-danger" 
+                    onclick={handleTerminate}
+                >
+                    Terminate
+                </button>
+            </div>
+        {:else}
+            <div class="split-actions">
+                <button 
+                    class="btn-main btn-start" 
+                    onclick={lighthouseActions.wakeup}
+                >
+                    Restart
+                </button>
+                <button 
+                    class="btn-main btn-danger" 
+                    onclick={handleTerminate}
+                >
+                    Terminate
+                </button>
+            </div>
         {/if}
-
-        <!-- Secondary Utility Buttons -->
-        <div class="secondary-actions">
-            <button 
-                class="btn-sub" 
-                onclick={lighthouseActions.wakeup}
-                disabled={isLoading}
-                title="Force Restart"
-            >
-                Restart
-            </button>
-            <button 
-                class="btn-sub btn-danger-text" 
-                onclick={lighthouseActions.stop}
-                disabled={isLoading || $lighthouseStatus.stage === 'OFFLINE'}
-                title="Release GPU and Stop"
-            >
-                Shutdown
-            </button>
-        </div>
     </div>
 </div>
 
@@ -94,6 +131,17 @@
     .title-group h3 { margin: 0; font-size: 1.1rem; }
     .status-text { margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #666; }
     
+    .timer-text {
+        margin: 0.4rem 0 0 0;
+        font-size: 0.75rem;
+        color: #b71c1c;
+        background: #fff3f3;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        font-weight: 600;
+    }
+
     .badge {
         padding: 2px 8px;
         border-radius: 10px;
@@ -137,6 +185,12 @@
         gap: 0.75rem;
     }
 
+    .split-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
     .btn-main {
         width: 100%;
         padding: 0.8rem;
@@ -164,35 +218,12 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .btn-main:disabled {
+    .btn-main:disabled, .btn-disabled {
         background-color: #ccc;
         cursor: not-allowed;
         transform: none;
+        color: #666;
     }
-
-    .secondary-actions {
-        display: flex;
-        justify-content: space-between;
-        padding: 0 0.5rem;
-    }
-
-    .btn-sub {
-        background: none;
-        border: none;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #888;
-        cursor: pointer;
-        text-decoration: underline;
-        padding: 4px;
-    }
-
-    .btn-sub:hover:not(:disabled) {
-        color: var(--text-color-main);
-    }
-
-    .btn-danger-text { color: #d32f2f; }
-    .btn-danger-text:hover:not(:disabled) { color: #ff0000; }
 
     .requesting-text {
         color: #e65100;
