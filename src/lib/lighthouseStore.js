@@ -89,7 +89,11 @@ async function apiRequest(path, options = {}) {
             ? `api/v1${path}` 
             : `${BASE_PATH}${path}`;
 
-        const response = await fetch(`${HOST_URL}${fullPath}`, {
+        // Ensure we use the correct backend URL (no double slashes)
+        const baseUrl = HOST_URL.endsWith('/') ? HOST_URL : `${HOST_URL}/`;
+        const url = `${baseUrl}${fullPath}`;
+
+        const response = await fetch(url, {
             ...options,
             credentials: 'include'
         });
