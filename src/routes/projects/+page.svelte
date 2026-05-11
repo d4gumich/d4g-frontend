@@ -28,7 +28,7 @@
         name: 'Lighthouse',
         detail: 'Lighthouse provides high-fidelity automated extraction and comparison of professional profiles and job requirements.',
         logo: LighthouseLogo,
-        researchLink: 'https://github.com/d4gumich/hugging-face-space-connection-test',
+        researchLink: 'https://github.com/d4gumich/lighthouse',
         tryLink: `${base}/products/lighthouse`,
         experimental: true,
         isDemo: true
@@ -124,8 +124,8 @@
     <div class="horizontal-segment">
       {#if browser}
         {#each projectsWithAuth as project}
-          {#if !project.experimental || (secretKey && secretKey.length > 5)}
-            <CurrProjCard {...project} />
+          {#if !project.experimental || (secretKey && secretKey.length > 5) || project.name === 'Lighthouse'}
+            <CurrProjCard {...project} isLocked={project.experimental && (!secretKey || secretKey.length < 5)} />
           {/if}
         {/each}
       {/if}

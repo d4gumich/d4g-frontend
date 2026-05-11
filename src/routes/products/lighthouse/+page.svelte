@@ -73,15 +73,13 @@
                 <h2>🔒 Unauthorized Access</h2>
                 <p>You do not have permission to access this experimental feature.</p>
                 <div class="instructions">
-                    <h3>How to access:</h3>
+                    <h3>Access Guide:</h3>
                     <ol>
-                        <li>Obtain an <strong>Experimental Access Key</strong> from the D4G team.</li>
-                        <li>Go to the <a href="{base}/products">Products Page</a>.</li>
-                        <li>Append <code>?key=YOUR_KEY</code> to the URL.</li>
-                        <li>Click <strong>Try Lighthouse</strong>.</li>
+                        <li>Request an authorized key from the <strong>D4G team</strong>.</li>
+                        <li>Add <code>?key=YOUR_KEY</code> to the end of the address bar URL above.</li>
+                        <li>Press <strong>Enter</strong> to enable the analysis engine.</li>
                     </ol>
-                </div>
-                <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
+                </div>                <p class="return-link">Return to the <a href="{base}/products">products page</a>.</p>
             </div>
         </div>
     {:else}

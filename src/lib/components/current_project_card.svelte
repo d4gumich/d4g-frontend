@@ -6,6 +6,7 @@
   export let researchLink;
   export let tryLink;
   export let isDemo = false;
+  export let isLocked = false;
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Button from "./button.svelte"
   import { onMount } from "svelte"
@@ -37,6 +38,11 @@
       <div class="text">
         <h1>{name}</h1>
         <h3>{detail}</h3>
+        {#if isLocked}
+          <div class="locked-notice">
+            🔒 This product is in development. A <strong>D4G team</strong> security key is required to access the live engine.
+          </div>
+        {/if}
         <!-- two buttons from button component -->
       </div>
       <div class="button-container">
@@ -49,7 +55,7 @@
         </div>
         <div class="button">
           <Button
-            text="Try {name}"
+            text={`Try ${name}`}
             link={tryLink}
             styleAdjustment={isMobile ? `margin: 1rem 0 0 0;` : 'margin: 0 0 0 1rem;'}
           />
@@ -154,6 +160,20 @@
     font-weight: 400;
     line-height: 25px; /* 125% */
     width: auto;
+  }
+
+  .locked-notice {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: #fff3f3;
+    border-left: 4px solid #d32f2f;
+    color: #b71c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {

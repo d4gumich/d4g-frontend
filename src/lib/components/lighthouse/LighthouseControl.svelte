@@ -12,21 +12,16 @@
         // No interval to clear
     });
 
-    function getStatusClass(stage) {
-        const s = stage?.toUpperCase() || '';
-        if (s === 'RUNNING') return 'status-active';
-        if (s === 'STOPPED' || s === 'PAUSED' || s === 'SLEEPING' || s === 'OFFLINE') return 'status-inactive';
-        if (s.includes('BUILDING') || s.includes('STARTING') || s.includes('INITIALIZING') || s.includes('RUNNING_WITH_DEVIATIONS')) return 'status-loading';
-        return 'status-inactive'; // Default to inactive/gray instead of no color
-    }
+    let isRunning = $derived($lighthouseStatus.stage === 'RUNNING');
+    let isLoading = $derived($lighthouseStatus.stage.includes('BUILDING') || $lighthouseStatus.stage.includes('STARTING') || $lighthouseStatus.loading);
 </script>
 
 <div class="card">
     <div class="control-header">
-        <h3>Lighthouse Engine</h3>
-        <span class="status-badge {getStatusClass($lighthouseStatus.stage)}">
-            {$lighthouseStatus.stage}
-        </span>
+        <div class="title-group">
+            <h3>Lighthouse Engine</h3>
+            <p class="status-text">Status: <span class="badge {getStatusClass($lighthouseStatus.stage)}">{$lighthouseStatus.stage}</span></p>
+        </div>
     </div>
     
     <div class="status-details">
@@ -39,150 +34,178 @@
             {/if}
         </p>
         
-        {#if $lighthouseStatus.requestedHardware || $lighthouseStatus.stage === 'BUILDING' || $lighthouseStatus.stage === 'STARTING'}
-            <p class="estimate">
-                <span class="icon">⏱</span> 
-                Rough estimate: 3-5 minutes to boot
-            </p>
+        {#if isLoading}
+            <div class="boot-container">
+                <div class="progress-track">
+                    <div class="progress-fill"></div>
+                </div>
+                <p class="estimate">⏱ Est: 3-5 mins to boot</p>
+            </div>
         {/if}
 
-        {#if $lighthouseStatus.message}
+        {#if $lighthouseStatus.message && !isLoading}
             <p class="message">{$lighthouseStatus.message}</p>
         {/if}
     </div>
 
-    <div class="actions">
-        <button 
-            class="btn-primary" 
-            onclick={lighthouseActions.wakeup}
-            disabled={$lighthouseStatus.loading}
-        >
-            {$lighthouseStatus.loading ? 'Processing...' : ($lighthouseStatus.stage === 'RUNNING' ? 'Restart Engine' : 'Wake Up Space')}
-        </button>
-        
-        <button 
-            class="btn-accent" 
-            onclick={lighthouseActions.pause}
-            disabled={$lighthouseStatus.loading || $lighthouseStatus.stage === 'STOPPED' || $lighthouseStatus.stage === 'PAUSED'}
-        >
-            Pause Space
-        </button>
+    <div class="control-actions">
+        <!-- Main Toggle Button -->
+        {#if isRunning}
+            <button 
+                class="btn-main btn-pause" 
+                onclick={lighthouseActions.pause}
+                disabled={isLoading}
+            >
+                Pause Engine
+            </button>
+        {:else}
+            <button 
+                class="btn-main btn-start" 
+                onclick={lighthouseActions.wakeup}
+                disabled={isLoading}
+            >
+                {isLoading ? 'Booting...' : 'Start Engine'}
+            </button>
+        {/if}
 
-        <button 
-            class="btn-danger" 
-            onclick={lighthouseActions.stop}
-            disabled={$lighthouseStatus.loading || $lighthouseStatus.stage === 'OFFLINE'}
-        >
-            Stop Engine
-        </button>
-        
-        <button 
-            class="btn-refresh" 
-            onclick={() => lighthouseActions.fetchStatus(true)}
-            disabled={$lighthouseStatus.loading || $lighthouseStatus.isRefreshing}
-            title="Refresh Status"
-        >
-            <span class:spinning={$lighthouseStatus.isRefreshing}>↻</span>
-        </button>
+        <!-- Secondary Utility Buttons -->
+        <div class="secondary-actions">
+            <button 
+                class="btn-sub" 
+                onclick={lighthouseActions.wakeup}
+                disabled={isLoading}
+                title="Force Restart"
+            >
+                Restart
+            </button>
+            <button 
+                class="btn-sub btn-danger-text" 
+                onclick={lighthouseActions.stop}
+                disabled={isLoading || $lighthouseStatus.stage === 'OFFLINE'}
+                title="Release GPU and Stop"
+            >
+                Shutdown
+            </button>
+        </div>
     </div>
 </div>
 
 <style>
-    .control-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
+    .title-group h3 { margin: 0; font-size: 1.1rem; }
+    .status-text { margin: 0.2rem 0 0 0; font-size: 0.8rem; color: #666; }
+    
+    .badge {
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
     }
-
-    h3 { margin: 0; }
 
     .status-details {
-        font-size: 0.9rem;
-        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        margin: 1rem 0;
+        min-height: 60px;
     }
 
-    .status-details p { margin: 0.2rem 0; }
+    .boot-container { margin-top: 0.5rem; }
+    
+    .progress-track {
+        width: 100%;
+        height: 6px;
+        background: #eee;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 0.4rem;
+    }
 
-    .message { color: #666; font-style: italic; }
-    .error { color: var(--error-color); font-weight: 600; }
+    .progress-fill {
+        width: 40%;
+        height: 100%;
+        background: var(--blue-color-main);
+        animation: progress-slide 2s infinite ease-in-out;
+    }
+
+    @keyframes progress-slide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+    }
+
+    .control-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-main {
+        width: 100%;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-start {
+        background-color: var(--blue-color-main);
+        color: white;
+    }
+
+    .btn-pause {
+        background-color: var(--button-color);
+        color: var(--text-color-main);
+    }
+
+    .btn-main:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-main:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .secondary-actions {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 0.5rem;
+    }
+
+    .btn-sub {
+        background: none;
+        border: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #888;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 4px;
+    }
+
+    .btn-sub:hover:not(:disabled) {
+        color: var(--text-color-main);
+    }
+
+    .btn-danger-text { color: #d32f2f; }
+    .btn-danger-text:hover:not(:disabled) { color: #ff0000; }
 
     .requesting-text {
-        color: var(--warning-color);
-        font-weight: 600;
+        color: #e65100;
+        font-weight: 700;
         animation: pulse 2s infinite;
     }
 
-    .estimate {
-        background: #fff3e0;
-        padding: 0.4rem 0.8rem;
-        border-radius: 4px;
-        color: #e65100;
-        font-size: 0.8rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        margin: 0.5rem 0;
-    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
 
-    @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.6; }
-        100% { opacity: 1; }
-    }
+    .estimate { font-size: 0.75rem; color: #666; font-style: italic; margin: 0; }
+    .message { color: #666; font-style: italic; font-size: 0.8rem; margin: 0; }
 
-    .actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-        gap: 0.5rem;
-        align-items: stretch;
-    }
-
-    .btn-refresh {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        color: #6c757d;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 38px;
-        height: 38px;
-        border-radius: 6px;
-    }
-
-    .btn-primary, .btn-accent, .btn-danger {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        border-radius: 6px;
-    }
-
-    .btn-danger {
-        background-color: #ff5252;
-        color: white;
-        border: 1px solid #d32f2f;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-        background-color: #ff1744;
-    }
-
-    .btn-danger:disabled {
-        background-color: #ffcdd2;
-        border-color: #ef9a9a;
-        cursor: not-allowed;
-    }
-
-    .spinning {
-        display: inline-block;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
+    .status-active { background-color: #e8f5e9; color: #2e7d32; }
+    .status-inactive { background-color: #f5f5f5; color: #757575; }
+    .status-loading { background-color: #fff3e0; color: #e65100; }
 </style>
