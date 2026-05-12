@@ -14,7 +14,7 @@
     let aboutOwl= false;
     let answer = "";
     let documents = [];
-    let model = "gemini-1.5-flash";
+    let model = "gemini-2.5-flash-lite";
     let temperature = 0.5;
     let k = 5;
     let loading = false;
@@ -135,19 +135,15 @@
               style = "background-image: url({SearchLogo});"
               height="10px"
               on:click={submitQuestion}
-          />
+              aria-label="Submit Question"
+          ></button>
         {:else}
-            <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+            <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Submit disabled"></button>
         {/if}
       </div>
       {#if !showResults}
       <div class="param-container">
         <!-- Model Selection -->
-        <script>
-          // ✅ Set the default model here so Svelte uses it on load
-          let model = "gemini-2.5-flash-lite";
-        </script>
-        
         <div class="param-block">
           <label for="model" class="param-text">Select LLM Model for Answer</label>
           <select id="model" bind:value={model}>
@@ -294,17 +290,25 @@
         {/if}
     </div>
     {#if showModal}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="modal" on:click|self={() => (showModal = false)}>
-          <div class="modal-content">
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div 
+        class="modal" 
+        on:click|self={() => (showModal = false)} 
+        on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
+        role="button" 
+        aria-label="Close modal"
+        tabindex="0"
+      >
+          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal">
               <span
                   class="modal-close"
                   on:click|stopPropagation={() => (showModal = false)}
+                  role="button"
+                  tabindex="0"
+                  on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                  aria-label="Close modal"
                   >&times;</span
               >
-              <!-- svelte-ignore a11y-missing-attribute -->
-              <iframe src={formUrl} width="100%" height="100%" />
+              <iframe src={formUrl} width="100%" height="100%" title="Owl Feedback Form"></iframe>
           </div>
       </div>
     {/if}
@@ -524,6 +528,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        z-index: 1000;
     }
     .modal-content {
         width: 80%;

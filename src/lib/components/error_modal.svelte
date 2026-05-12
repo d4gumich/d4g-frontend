@@ -13,8 +13,15 @@
   }
 </script>
 
-<div class="modal-overlay">
-  <div class="modal">
+<div 
+  class="modal-overlay" 
+  on:click|self={handleClick} 
+  on:keydown={(e) => (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') && handleClick()}
+  role="button"
+  tabindex="0"
+  aria-label="Close error message"
+>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Error Modal">
     <p class="text-prompt">{text[errorType]}</p>
     <button class="small-button" on:click={handleClick}>OK</button>
   </div>

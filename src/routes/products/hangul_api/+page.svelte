@@ -436,28 +436,30 @@ function updateCheckbox(id, newValue) {
           <div style={'margin: 0 0 3rem 0;'}></div>
         </div>
       {:else}
-        <div
-          class="rectangle"
-          on:drop|preventDefault={handleFileSelect}
-          on:dragover|preventDefault={handleDragOver}
-        >
-          <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
-          <p class="drop-text">{dropText}</p>
-          <input
-            type="file"
-            accept="application/pdf"
-            id="file-input"
-            on:change={handleFileSelect}
+      <button
+        class="rectangle drop-zone-btn"
+        on:drop|preventDefault={handleFileSelect}
+        on:dragover|preventDefault={handleDragOver}
+        on:click={() => document.getElementById('file-input').click()}
+        aria-label="File upload drop zone. Click or drag and drop a PDF here."
+      >
+        <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
+        <p class="drop-text">{dropText}</p>
+        <input
+          type="file"
+          accept="application/pdf"
+          id="file-input"
+          on:change={handleFileSelect}
+        />
+        {#if showAnalyzeButton}
+          <Button
+            text="Analyze PDF"
+            click={handleAnalyzeClick}
+            styleAdjustment="margin-top: 1rem;"
           />
-          {#if showAnalyzeButton}
-            <Button
-              text="Analyze PDF"
-              click={handleAnalyzeClick}
-              styleAdjustment="margin-top: 1rem;"
-            />
-          {/if}
-        </div>
-      {/if}
+        {/if}
+      </button>
+    {/if}
   
       {#if !analyzing}
         <HangulButtonContainer bind:showModal {width} />
@@ -574,9 +576,20 @@ function updateCheckbox(id, newValue) {
     .pdf-icon {
       font-size: 48px;
     }
-  
-    .drop-text {
-      margin-top: 10px;
+
+    .drop-zone-btn {
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+    }
+
+    .drop-zone-btn:focus {
+      outline: 2px solid var(--button-color);
+      outline-offset: 2px;
+    }
+
+    .drop-text {      margin-top: 10px;
       color: rgba(0, 0, 0, 0.5);
       text-align: center;
       font-family: "Open Sans";

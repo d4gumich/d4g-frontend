@@ -364,14 +364,12 @@
         <div style={'margin: 0 0 3rem 0;'}></div>
       </div>
     {:else}
-      <div
-        class="rectangle"
+      <button
+        class="rectangle drop-zone-btn"
         on:drop|preventDefault={handleFileSelect}
         on:dragover|preventDefault={handleDragOver}
-        role="region"
-        aria-label="File upload drop zone"
-        tabindex="0"
-        on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && document.getElementById('file-input').click()}
+        on:click={() => document.getElementById('file-input').click()}
+        aria-label="File upload drop zone. Click or drag and drop a PDF here."
       >
         <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
         <p class="drop-text">{dropText}</p>
@@ -388,7 +386,7 @@
             styleAdjustment="margin-top: 1rem;"
           />
         {/if}
-      </div>
+      </button>
     {/if}
 
     {#if !analyzing}
@@ -473,6 +471,18 @@
 
   .pdf-icon {
     font-size: 48px;
+  }
+
+  .drop-zone-btn {
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .drop-zone-btn:focus {
+    outline: 2px solid var(--button-color);
+    outline-offset: 2px;
   }
 
   .drop-text {

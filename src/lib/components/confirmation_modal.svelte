@@ -11,8 +11,15 @@
   }
 </script>
 
-<div class="modal-overlay">
-  <div class="modal">
+<div 
+  class="modal-overlay" 
+  on:click|self={() => handleConfirmation(false)} 
+  on:keydown={(e) => (e.key === 'Escape') && handleConfirmation(false)}
+  role="button"
+  tabindex="0"
+  aria-label="Close modal"
+>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Confirmation Modal">
     <p class="text-prompt">
       The file will take an estimated 
       <span style={`border-bottom: 2px solid var(--button-color);`}>

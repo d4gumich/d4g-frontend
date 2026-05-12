@@ -20,8 +20,15 @@
     </p>
 
     {#if showModal}
-        <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Summary Modal">
-            <div class="modal-content">
+        <div 
+            class="modal" 
+            on:click|self={() => (showModal = false)} 
+            on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
+            role="button" 
+            aria-label="Close modal"
+            tabindex="0"
+        >
+            <div class="modal-content" role="dialog" aria-modal="true" aria-label="Summary Modal">
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
