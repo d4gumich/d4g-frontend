@@ -2,32 +2,29 @@
     import Navbar from "$lib/components/navbar.svelte";
     import Button from "$lib/components/button.svelte";
     import LoadingBar from "$lib/components/loading_bar.svelte";
-    import SocratesSetup from "$lib/components/SocratesSetup.svelte";
+    import AISetup from "$lib/components/AISetup.svelte";
     import { onMount } from "svelte";
     import { page } from '$app/stores';
     import { browser } from '$app/environment';
     import { base } from '$app/paths';
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
 
     const currentPage = 'socrates-test';
     
     let secretKey = $state(null);
-    let sessionActive = $state(false);
-    let sessionProvider = $state("");
-    let sessionModel = $state("");
     let showSetup = $state(true);
-    let initializing = $state(true);
 
     const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     onMount(async () => {
         secretKey = $page.url.searchParams.get('key');
-        await checkSession();
+        await aiActions.fetchStatus();
 
-        // Re-check session when user returns to tab to prevent UI state loss
+        // Re-check session when user returns to tab
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
-                checkSession();
+                aiActions.fetchStatus();
             }
         };
 
@@ -37,49 +34,17 @@
         };
     });
 
-    async function checkSession() {
-        try {
-            const response = await fetch(`${host_url}api/v1/auth/status`, {
-                headers: { 'Accept': 'application/json' },
-                credentials: 'include'
-            });
-            const data = await response.json();
-            if (data.status === 'active') {
-                sessionActive = true;
-                sessionProvider = data.provider;
-                sessionModel = data.model;
-                showSetup = false;
-            } else {
-                sessionActive = false;
-                showSetup = true;
-            }
-        } catch (err) {
-            console.error("Failed to check session status:", err);
-            showSetup = true;
-        } finally {
-            initializing = false;
-        }
-    }
-
-    async function handleLogout() {
-        try {
-            await fetch(`${host_url}api/v1/auth/logout`, {
-                method: "POST",
-                credentials: 'include'
-            });
-        } catch (err) {
-            console.error("Logout failed:", err);
-        } finally {
-            sessionActive = false;
+    $effect(() => {
+        if ($aiStatus.status === 'active') {
+            showSetup = false;
+        } else {
             showSetup = true;
         }
-    }
+    });
 
     let input = $state("");
     let loading = $state(false);
     let error = $state("");
-    let session_id = $state(null);
-    let run_id = $state(null);
 
     // Socrates State tracking
     let socratesState = $state({
@@ -118,7 +83,6 @@
         error = "";
         current_node = null;
 
-        // Reset state only on first attempt
         if (!isRetry) {
             socratesState = {
                 mode: null,
@@ -198,7 +162,6 @@
     }
 
     function handleEvent(event) {
-        // Check for backend-yielded errors
         if (event.error) {
             throw new Error(event.error);
         }
@@ -206,7 +169,6 @@
         const nodeName = Object.keys(event)[0];
         current_node = nodeName;
 
-        // De-noise the event log: only add if it's a new node OR a significant phase
         if (events.length === 0 || events[events.length - 1] !== nodeName) {
             events = [...events, nodeName];
         }
@@ -236,13 +198,10 @@
 </div>
 
 {#if showSetup}
-    <SocratesSetup 
-        onComplete={() => checkSession()} 
-        onCancel={sessionActive ? () => { showSetup = false; } : null}
-        onLogout={sessionActive ? handleLogout : null}
-        initialProvider={sessionActive ? sessionProvider : "google"}
-        initialModel={sessionActive ? sessionModel : "gemini-3.1-pro-preview"}
-        sessionActive={sessionActive}
+    <AISetup 
+        productName="Socrates"
+        onComplete={() => { showSetup = false; aiActions.fetchStatus(); }} 
+        onCancel={$aiStatus.status === 'active' ? () => { showSetup = false; } : null}
     />
 {/if}
 
@@ -251,11 +210,11 @@
         <div class="heading-container">
             <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
             <p class="info-text">Structured inquiry engine for refined thinking.</p>
-            {#if sessionActive}
+            {#if $aiStatus.status === 'active'}
                 <div class="session-info">
                     <button class="status-indicator interactive" onclick={() => { showSetup = true; }} title="Manage AI Session">
                         <span class="dot-green"></span>
-                        Connected: <strong class="model-name">{sessionModel}</strong>
+                        Connected: <strong class="model-name">{$aiStatus.model}</strong>
                     </button>
                 </div>
             {/if}
@@ -286,8 +245,6 @@
 
         {#if loading || events.length > 0}
             <div class="results-container">
-
-                <!-- PROGRESS LOG -->
                 <div class="progress-log">
                     <h3>Process Log</h3>
                     <ul>
@@ -303,7 +260,6 @@
                 </div>
 
                 <div class="dialectic-results">
-
                     {#if socratesState.mode}
                         <div class="result-section">
                             <h4>Classification</h4>
@@ -377,9 +333,7 @@
                             </ul>
                         </div>
                     {/if}
-
                 </div>
-
             </div>
         {/if}
     </div>
@@ -387,7 +341,6 @@
 
 <style>
     .container {
-
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -603,6 +556,19 @@
 
     .evaluation {
         background: #f0f7f0;
+    }
+
+    .demo-warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid #ffeeba;
+    }
+
+    .banner-link {
+        font-weight: 700;
+        text-decoration: underline;
     }
 
     @media (max-width: 800px) {

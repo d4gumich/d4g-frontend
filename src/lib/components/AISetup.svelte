@@ -2,17 +2,14 @@
     import { onMount } from 'svelte';
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import Button from './button.svelte';
+    import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
 
-    let { onComplete, onCancel = null, onLogout = null, initialProvider = "google", initialModel = "gemini-3.1-pro-preview", sessionActive = false } = $props();
+    let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
-    let provider = $state("google");
-    let model = $state("gemini-3.1-pro-preview");
+    let provider = $state($aiStatus.provider || "google");
+    let model = $state($aiStatus.model || "gemini-1.5-flash");
     let apiKey = $state("");
 
-    $effect(() => {
-        if (initialProvider) provider = initialProvider;
-        if (initialModel) model = initialModel;
-    });
     let loading = $state(false);
     let error = $state("");
 
@@ -20,34 +17,20 @@
 
     const models = {
         google: [
-            { id: "gemini-3.1-thinking-preview", name: "Gemini 3.1 Thinking (Highest Reasoning)" },
-            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro (Standard Reasoning)" },
-            { id: "gemini-3.1-flash-preview", name: "Gemini 3.1 Flash (Fast/Lite)" },
-            { id: "gemini-2.5-pro-preview", name: "Gemini 2.5 Pro (Standard Reasoning)" },
-            { id: "gemini-2.5-flash-preview", name: "Gemini 2.5 Flash (Fast/Lite)" },
+            { id: "gemini-2.0-flash-preview", name: "Gemini 2.0 Flash (Fast/Recommended)" },
             { id: "gemini-2.0-pro-preview", name: "Gemini 2.0 Pro" },
-            { id: "gemini-2.0-flash-preview", name: "Gemini 2.0 Flash" },
             { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
             { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash" }
         ],
         openai: [
-            { id: "gpt-5-reasoning", name: "GPT-5 Reasoning (Ultra)" },
-            { id: "gpt-5", name: "GPT-5 (Standard)" },
-            { id: "gpt-5-mini", name: "GPT-5 Mini (Fast)" },
-            { id: "o3-mini", name: "o3-mini (Thinking)" },
-            { id: "o1", name: "o1 (High Reasoning)" },
-            { id: "gpt-4o", name: "GPT-4o (Omni)" },
-            { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-            { id: "gpt-4-turbo", name: "GPT-4 Turbo" }
+            { id: "gpt-4o", name: "GPT-4o (High Quality)" },
+            { id: "gpt-4o-mini", name: "GPT-4o Mini (Fast)" },
+            { id: "o1-mini", name: "o1-mini (Reasoning)" }
         ],
         anthropic: [
-            { id: "claude-4-opus", name: "Claude 4 Opus (Deep Thinking)" },
-            { id: "claude-4-sonnet", name: "Claude 4 Sonnet (Reasoning)" },
-            { id: "claude-4-haiku", name: "Claude 4 Haiku (Fast)" },
-            { id: "claude-3-7-sonnet-latest", name: "Claude 3.7 Sonnet" },
-            { id: "claude-3-5-sonnet-latest", name: "Claude 3.5 Sonnet" },
-            { id: "claude-3-5-haiku-latest", name: "Claude 3.5 Haiku" },
-            { id: "claude-3-opus-latest", name: "Claude 3 Opus" }
+            { id: "claude-3-5-sonnet-latest", name: "Claude 3.5 Sonnet (Balanced)" },
+            { id: "claude-3-5-haiku-latest", name: "Claude 3.5 Haiku (Fast)" },
+            { id: "claude-3-opus-latest", name: "Claude 3 Opus (Reasoning)" }
         ]
     };
 
@@ -56,7 +39,7 @@
     }
 
     async function handleSubmit() {
-        if (!sessionActive && !apiKey.trim()) {
+        if ($aiStatus.status !== 'active' && !apiKey.trim()) {
             error = "Please provide your API key.";
             return;
         }
@@ -85,8 +68,8 @@
                 throw new Error(data.detail || "Failed to initialize session.");
             }
 
-            const data = await response.json();
-            // Session cookie is set automatically by the browser (HttpOnly)
+            // Update store
+            await aiActions.fetchStatus();
             onComplete();
         } catch (err) {
             error = err.message;
@@ -94,12 +77,17 @@
             loading = false;
         }
     }
+
+    async function handleLogout() {
+        await aiActions.logout();
+        onCancel && onCancel();
+    }
 </script>
 
-<div class="modal-overlay">
-    <div class="modal-content">
-        <h2>🛠️ Socrates Setup</h2>
-        <p>This prototype requires your own AI Agent API key to function. We never store your key persistently.</p>
+<div class="modal-overlay" onclick={onCancel} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onCancel && onCancel()} role="button" tabindex="0">
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="none">
+        <h2>🛠️ {productName} Setup</h2>
+        <p>This product requires your own AI API key to function securely. We never store your key persistently.</p>
 
         <div class="form-group">
             <label for="provider">AI Provider</label>
@@ -115,6 +103,8 @@
             <select id="model" bind:value={model}>
                 {#each models[provider] as m}
                     <option value={m.id}>{m.name}</option>
+                {:else}
+                    <option value="">No models available</option>
                 {/each}
             </select>
         </div>
@@ -125,10 +115,10 @@
                 type="password" 
                 id="api-key" 
                 bind:value={apiKey} 
-                placeholder={sessionActive ? "Keep current key or enter new one..." : "Paste your API key here..."} 
+                placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."} 
             />
             <div class="security-warning">
-                <strong>ATTENTION:</strong> Your key is encrypted in-memory and expires after 30 mins of inactivity.
+                <strong>SECURE SESSION:</strong> Your key is used for this session only and expires after 30 mins of inactivity.
             </div>
         </div>
 
@@ -141,14 +131,15 @@
                 <button class="btn-cancel" onclick={onCancel} disabled={loading}>Cancel</button>
             {/if}
             
-            {#if onLogout}
-                <button class="btn-cancel btn-danger-text" onclick={onLogout} disabled={loading}>Logout / Clear Session</button>
+            {#if $aiStatus.status === 'active'}
+                <button class="btn-cancel btn-danger-text" onclick={handleLogout} disabled={loading}>Clear Session</button>
             {/if}
 
             <Button 
-                text={loading ? "Validating Key..." : (onCancel ? "Update Settings" : "Configure Agent")} 
+                text={loading ? "Validating..." : ($aiStatus.status === 'active' ? "Update Settings" : "Configure Engine")} 
                 click={handleSubmit}
-                disabled={loading || !apiKey.trim()}
+                disabled={loading || ($aiStatus.status !== 'active' && !apiKey.trim())}
+                styleAdjustment="width: 10rem;"
             />
         </div>
     </div>
@@ -188,6 +179,7 @@
         color: #666;
         margin-bottom: 2rem;
         line-height: 1.5;
+        font-size: 0.95rem;
     }
 
     .form-group {
@@ -218,17 +210,9 @@
     .security-warning {
         display: block;
         margin-top: 0.75rem;
-        color: #ff0000;
-        font-size: 0.85rem;
-        font-weight: 800;
-        line-height: 1.4;
-        animation: pulse-red 2s infinite;
-    }
-
-    @keyframes pulse-red {
-        0% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.02); }
-        100% { opacity: 1; transform: scale(1); }
+        color: var(--blue-color-main);
+        font-size: 0.8rem;
+        font-weight: 600;
     }
 
     .error-msg {
@@ -244,14 +228,14 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 1rem;
+        gap: 1.5rem;
         margin-top: 1rem;
     }
 
     .btn-cancel {
         background: none;
         border: none;
-        color: #666;
+        color: #888;
         cursor: pointer;
         font-size: 0.9rem;
         text-decoration: underline;
@@ -263,9 +247,5 @@
 
     .btn-danger-text {
         color: #d32f2f;
-    }
-
-    .btn-danger-text:hover {
-        color: #ff0000;
     }
 </style>
