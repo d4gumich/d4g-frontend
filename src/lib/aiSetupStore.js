@@ -7,7 +7,10 @@ export const aiStatus = writable({
     status: 'inactive',
     provider: null,
     model: null,
-    loading: true
+    loading: true,
+    forceTeamKey: false,
+    hasError: false,
+    errorMessage: ""
 });
 
 export const aiActions = {
@@ -19,11 +22,18 @@ export const aiActions = {
             });
             if (response.ok) {
                 const data = await response.json();
-                aiStatus.set({ ...data, loading: false });
+                aiStatus.update(s => ({ 
+                    ...s, 
+                    ...data, 
+                    loading: false,
+                    // If we successfully get status, clear general connection errors
+                    // but keep the specific session status
+                }));
                 return data;
             }
         } catch (err) {
             console.error("Failed to fetch AI session status:", err);
+            aiStatus.update(s => ({ ...s, hasError: true, errorMessage: "Backend Connection Failed" }));
         } finally {
             aiStatus.update(s => ({ ...s, loading: false }));
         }
@@ -35,9 +45,24 @@ export const aiActions = {
                 method: 'POST',
                 credentials: 'include'
             });
-            aiStatus.set({ status: 'inactive', provider: null, model: null, loading: false });
+            aiStatus.update(s => ({ 
+                ...s,
+                status: 'inactive', 
+                provider: null, 
+                model: null, 
+                loading: false,
+                forceTeamKey: false
+            }));
         } catch (err) {
             console.error("Logout failed:", err);
         }
+    },
+
+    setForceTeamKey(value) {
+        aiStatus.update(s => ({ ...s, forceTeamKey: value }));
+    },
+
+    setError(hasError, message = "") {
+        aiStatus.update(s => ({ ...s, hasError, errorMessage: message }));
     }
 };

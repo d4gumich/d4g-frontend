@@ -7,7 +7,7 @@
     import ChevronDown from "$lib/assets/icons/chevron-down-solid.svelte";
     import ChevronUp from "$lib/assets/icons/angle-up-solid.svelte";
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
-    import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
+    import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from "$lib/components/AISetup.svelte";
     import AIBanner from "$lib/components/AIBanner.svelte";
 
@@ -47,7 +47,7 @@
         return;
       }
 
-      if ($aiStatus.status !== 'active') {
+      if ($aiStatus.status !== 'active' && !$aiStatus.forceTeamKey) {
         showAISetup = true;
         return;
       }
@@ -70,9 +70,14 @@
       const startTime = performance.now();
 
       try {
-        const response = await fetch(`${host_url}api/v1/products/owl`, {
+        const headers = { "Content-Type": "application/json" };
+        if ($aiStatus.forceTeamKey) {
+            headers['X-Force-Team-Key'] = 'true';
+        }
+
+        const response = await fetch(`${HOST_URL}api/v1/products/owl`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: headers,
           body: JSON.stringify({
             text: query,
             k,
@@ -97,6 +102,11 @@
         showResults = true;
       } catch (err) {
         error = err.message;
+        if (error.includes("API key expired") || error.includes("400") || error.includes("401")) {
+          aiActions.setError(true, "API Key Expired/Invalid");
+        } else {
+          aiActions.setError(true, "Connection Failed");
+        }
       } finally {
         clearInterval(progressInterval);
         setTimeout(() => {

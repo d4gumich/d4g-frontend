@@ -90,7 +90,7 @@
                     <select
                     class="version-select"
                     bind:value={version}
-                    on:change={handleVersionChange}
+                    onchange={handleVersionChange}
                     >
                         {#each versions as version}
                             <option value={version}>{version}</option>
@@ -106,14 +106,14 @@
                 type="text"
                 placeholder="Enter Queries"
                 bind:value={searchQuery}
-                on:keypress={filterEnter}
+                onkeypress={filterEnter}
             />
             {#if searchQuery && searchQuery != ""}
                 <button
                     class="search-button"
                     style = "background-image: url({SearchLogo});"
                     height="10px"
-                    on:click={search(searchQuery)}
+                    onclick={() => search(searchQuery)}
                     aria-label="Search"
                 ></button>
             {:else}
@@ -177,14 +177,22 @@
     </div>
 
     {#if showModal}
-        <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Feedback Modal">
-            <div class="modal-content">
+        <div 
+            class="modal" 
+            onclick={() => (showModal = false)} 
+            onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
+            role="dialog" 
+            aria-modal="true" 
+            aria-label="Feedback Modal"
+            tabindex="0"
+        >
+            <div class="modal-content" role="document" tabindex="0" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
                 <span
                     class="modal-close"
-                    on:click|stopPropagation={() => (showModal = false)}
+                    onclick={() => (showModal = false)}
                     role="button"
                     tabindex="0"
-                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    onkeydown={(e) => e.key === 'Enter' && (showModal = false)}
                     aria-label="Close modal"
                     >&times;</span
                 >

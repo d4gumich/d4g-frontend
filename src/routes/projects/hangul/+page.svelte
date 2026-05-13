@@ -12,8 +12,10 @@
   import { sleep, calculateEstimatedTime } from "$lib/components/utils/helper_functions.js";
   import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
   import { onMount } from "svelte";
+  import { browser } from "$app/environment";
   import { fetchDataWithTimeout } from "$lib/components/utils/fetch_hangul_data.js";
   import { writable } from "svelte/store";
+  import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
 
   import Button from "$lib/components/button.svelte";
   import HangulResult from "$lib/components/hangul_result.svelte";
@@ -27,44 +29,39 @@
   import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
   import TextCarousel from "$lib/components/text_carousel.svelte";
   import Navbar from "$lib/components/navbar.svelte";
+  import AIBanner from "$lib/components/AIBanner.svelte";
 
   const currentPage = 'hangul';
   const numberOfPages = writable(0);
   const size = writable(0);
 
-  GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
+  if (browser) {
+    GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC_URL;
+  }
 
-  let width;
-  let file;
-  let result;
-  let summary_result;
-  let errorType;
-  let showPopUp = false;
-  let confirmResult;
-  let showModal = false;
-  let loadingProgressMain = 0;
-  let verbose = true;
-  let hidden = true;
-  let version = 2;
-  let dropText = DEFAULT_DROP_TEXT;
-  let fileName = "N/A";
-  let showError = false;
-  let showAnalyzeButton = false;
-  let analyzing = false;
-  let showResults = false;
-  let loadingFastPass = false;
+  let width = $state(1000);
+  let file = $state(null);
+  let result = $state(null);
+  let summary_result = $state(null);
+  let errorType = $state(0);
+  let showPopUp = $state(false);
+  let resolveConfirm = $state(null);
+  let showModal = $state(false);
+  let loadingProgressMain = $state(0);
+  let verbose = $state(true);
+  let hidden = $state(true);
+  let version = $state(2);
+  let dropText = $state(DEFAULT_DROP_TEXT);
+  let fileName = $state("N/A");
+  let showError = $state(false);
+  let showAnalyzeButton = $state(false);
+  let analyzing = $state(false);
+  let showResults = $state(false);
+  let loadingFastPass = $state(false);
 
-  $: console.log("Size of file: ", $size, "MB");
-  $: console.log("Number of pages: ", $numberOfPages);
-
-  $: estimatedTimeToAnalyze = 60;
-  // $: estimatedTimeToAnalyze = calculateEstimatedTime($numberOfPages);
-  $: console.log("Estimated Time (s):", estimatedTimeToAnalyze);
-  $: loadingTimeRemaining = Math.round(
-    estimatedTimeToAnalyze - loadingProgressMain
-  );
-
-  $: console.log("version:", version);
+  // Use $derived for values that depend on other state
+  let loadingTimeRemaining = $derived(Math.round(60 - loadingProgressMain));
+  let estimatedTimeToAnalyze = 60;
 
   const updateShowError = (value) => {
     showError = value;
@@ -103,38 +100,34 @@
     }, INTERVAL);
   };
 
-  $: {
+  $effect(() => {
     if (analyzing) {
-      onMount(simulateLoadingMainBar());
+      simulateLoadingMainBar();
     }
-  }
+  });
 
   const handleDragOver = (event) => {
     event.preventDefault();
   };
 
   onMount(() => {
-    if (typeof window !== 'undefined') {
-      width = window.screen.width
+    if (browser) {
+      width = window.innerWidth;
     }
+    aiActions.fetchStatus();
   });
 
   async function handleButtonClick() {
     showPopUp = true;
-    confirmResult = await new Promise((resolve) => {
-      const modalInstance = new ConfirmationModal({
-        target: document.body,
-        props: {
-          estimatedTime: estimatedTimeToAnalyze,
-        },
-      });
-      modalInstance.$on("confirm", (event) => {
-        resolve(event.detail);
-        showPopUp = false;
-        modalInstance.$destroy(); // Destroy the modal instance when closing
-      });
+    return new Promise((resolve) => {
+      resolveConfirm = resolve;
     });
-    return confirmResult;
+  }
+
+  function onConfirm(resultValue) {
+    showPopUp = false;
+    if (resolveConfirm) resolveConfirm(resultValue);
+    resolveConfirm = null;
   }
 
   async function handleFileSelect(event) {
@@ -181,7 +174,12 @@
       const main_start_time = Date.now();
 
       try {
-        result = await fetchDataWithTimeout(file, version, (estimatedTimeToAnalyze*SECONDS_TO_MILLISECONDS + TIMEOUT_BUFFER));
+        result = await fetchDataWithTimeout(file, version, (estimatedTimeToAnalyze*SECONDS_TO_MILLISECONDS + TIMEOUT_BUFFER), false);
+        
+        if (result && result.error) {
+          throw new Error(result.error);
+        }
+
         if (result !== null) {
           console.log('Result:',result);
         }
@@ -202,103 +200,18 @@
 
       } catch (error) {
         console.error("Could not fetch from d4gumsi.pythonanywhere.com", error);
+        const errorMsg = error.message || "Engine Error";
+        if (errorMsg.includes("API key expired") || errorMsg.includes("400") || errorMsg.includes("401")) {
+          aiActions.setError(true, "API Key Expired/Invalid");
+        } else {
+          aiActions.setError(true, "Analysis Failed");
+        }
         goBack(true);
         errorType = 1;
         showError = true;
-
-        const emailParams = {
-            to_name: "Szymon",
-            file_name: result.fileName,
-            fail_stage: "main API call",
-            page_number: result.metadata["No.of Pages"],
-            version: result.version,
-            timestamp: new Date(Date.now()),
-            first_duration: result.hangul_time,
-            second_duration: "N/A",
-            document_language: result.document_language.language,
-            document_title: result.document_title,
-            document_author: result.document_author,
-            document_theme: result.document_theme,
-            report_type: result.report_type,
-        };
-
-        emailjs.send("default_service", "template_8r3xfwe", emailParams)
-              .then((response) => {
-                  console.log('SUCCESS!', response.status, response.text);
-              }, (error) => {
-                  console.log('FAILED...', error);
-        });
       }
       loadingProgressMain = 0;
       analyzing = false;
-
-      if (showResults && version === 2) {
-          console.log("fetching summary data");
-          result.fetchingSummaryData = true;
-          result.estimatedTimeToAnalyzeSummary = result.hangul_time * 1.5;
-          const summary_start_time = Date.now();
-          try {
-            console.log(`waiting ${SUMMARY_API_CALL_DELAY * MILLISECONDS_TO_SECONDS} seconds to call summary data`);
-            await sleep(SUMMARY_API_CALL_DELAY);
-            console.log("fetching summary data");
-            summary_result = await fetchSummary(result.document_summary_parameters,
-                                                version);
-            console.log("Document Summary:", summary_result);
-            result.summary_generation_time = Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100;
-            
-            result.document_summary = summary_result;
-
-            const emailParams = {
-              file_name: result.fileName,
-              page_number: result.metadata["No.of Pages"],
-              version: result.version,
-              timestamp: new Date(Date.now()),
-              first_duration: result.hangul_time,
-              second_duration: result.summary_generation_time,
-              document_language: result.document_language.language,
-              document_title: result.document_title,
-              document_author: result.document_author,
-              document_theme: result.document_theme,
-              report_type: result.report_type,
-              summary: result.document_summary,
-            };
-
-            emailjs.send("default_service", "template_x5kz5cs", emailParams)
-                  .then((response) => {
-                      console.log('SUCCESS!', response.status, response.text);
-                  }, (error) => {
-                      console.log('FAILED...', error);
-            });
-
-          } catch (error) {
-            console.error("Could not fetch summary data", error);
-            result.summary_generation_time = -1;
-            result.document_summary = null;
-
-            const emailParams = {
-              file_name: result.fileName,
-              fail_stage: "summary",
-              page_number: result.metadata["No.of Pages"],
-              version: result.version,
-              timestamp: new Date(Date.now()),
-              first_duration: result.hangul_time,
-              second_duration: Math.round((Date.now() - summary_start_time) * MILLISECONDS_TO_SECONDS * 100) / 100,
-              document_language: result.document_language.language,
-              document_title: result.document_title,
-              document_author: result.document_author,
-              document_theme: result.document_theme,
-              report_type: result.report_type,
-            };
-
-            emailjs.send("default_service", "template_8r3xfwe", emailParams)
-                  .then((response) => {
-                      console.log('SUCCESS Sending a summary fail!', response.status, response.text);
-                  }, (error) => {
-                      console.log('FAILED...', error);
-            });
-          }
-          result.fetchingSummaryData = false;
-        }
     } else {
       goBack(true);
     }
@@ -315,10 +228,11 @@
 </script>
 
 <svelte:head>
-  <title>Hangul {version}.0</title>
+  <title>Hangul {version}.2</title>
 </svelte:head>
 
 <Navbar {currentPage} />
+<AIBanner />
 <div class="container">
   {#if !showResults}
     <div class="content-container">
@@ -333,7 +247,7 @@
     </div>
 
     {#if showPopUp}
-      <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} />
+      <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} onConfirm={onConfirm} />
     {/if}
 
     {#if showError}
@@ -355,10 +269,16 @@
         <div style={'margin: 0 0 3rem 0;'}></div>
       </div>
     {:else}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
-        class="rectangle"
-        on:drop|preventDefault={handleFileSelect}
-        on:dragover|preventDefault={handleDragOver}
+        class="rectangle drop-zone-container"
+        ondrop={handleFileSelect}
+        ondragover={handleDragOver}
+        onclick={() => { if (browser) document.getElementById('file-input').click() }}
+        role="button"
+        tabindex="0"
+        aria-label="File upload drop zone. Click or drag and drop a PDF here."
       >
         <img src={PDFLogo} class="pdf-icon" alt="PDF icon" />
         <p class="drop-text">{dropText}</p>
@@ -366,14 +286,17 @@
           type="file"
           accept="application/pdf"
           id="file-input"
-          on:change={handleFileSelect}
+          onchange={handleFileSelect}
+          style="display: none;"
         />
         {#if showAnalyzeButton}
-          <Button
-            text="Analyze PDF"
-            click={handleAnalyzeClick}
-            styleAdjustment="margin-top: 1rem;"
-          />
+          <div onclick={(e) => e.stopPropagation()} role="none">
+            <Button
+              text="Analyze PDF"
+              click={handleAnalyzeClick}
+              styleAdjustment="margin-top: 1rem;"
+            />
+          </div>
         {/if}
       </div>
     {/if}
@@ -462,6 +385,18 @@
     font-size: 48px;
   }
 
+  .drop-zone-container {
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+  }
+
+  .drop-zone-container:focus {
+    outline: 2px solid var(--button-color);
+    outline-offset: 2px;
+  }
+
   .drop-text {
     margin-top: 10px;
     color: rgba(0, 0, 0, 0.5);
@@ -471,11 +406,6 @@
     font-style: normal;
     font-weight: 500;
     line-height: 30.857px; /* 154.285% */
-  }
-
-  #file-input {
-    font-size: 0.9rem;
-    width: 14rem;
   }
 
   /* loading icon */
@@ -490,29 +420,6 @@
   .analyzing-text {
     font-family: "Open Sans";
     margin: 0 0 1.5rem 0;
-  }
-
-  /* file upload button */
-  input[type="file"]::file-selector-button {
-    border-radius: 4px;
-    padding: 0 16px;
-    height: 40px;
-    cursor: pointer;
-    background-color: var(--background-color-light);
-    border: 1px solid rgba(0, 0, 0, 0.16);
-    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
-    margin-right: 16px;
-    transition: background-color 200ms;
-  }
-
-  /* file upload button hover state */
-  input[type="file"]::file-selector-button:hover {
-    background-color: #f3f4f6;
-  }
-
-  /* file upload button active state */
-  input[type="file"]::file-selector-button:active {
-    background-color: #e5e7eb;
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {
@@ -531,20 +438,6 @@
       font-size: 2rem;
       font-weight: 200;
       margin: 2rem 0;
-    }
-
-    #file-input {
-      font-size: 2rem;
-      width: 11rem;
-    }
-
-    input[type="file"]::file-selector-button {
-      border-radius: 4px;
-      padding: 0 1rem;
-      height: 4rem;
-      margin: 0 0.5rem 1rem 0;
-      font-size: 1.5rem;
-      width: 100%;
     }
 
     .text {

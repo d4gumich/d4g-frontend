@@ -6,43 +6,15 @@ import { get } from 'svelte/store';
 import { checkboxes } from "$lib/store.js";
 import { num_keywords } from "$lib/store.js";
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { aiStatus } from '$lib/aiSetupStore.js';
 
-// export async function fetchSummary(summary_parameters, version) {
-  
-//   let headers_ = new Headers();
-
-//   headers_.append('Content-Type', 'application/json');
-//   headers_.append('Accept', 'application/json');
-
-//   for (let fetch_attempt = 0; fetch_attempt < MAX_RETRIES; fetch_attempt++) {
-//     try {
-//       const response = await fetch(
-//         // `https://d4gumsi.pythonanywhere.com/api/v${version}/products/summary`,
-//         "http://127.0.0.1:5000/api/v2/products/summary",
-//         {
-//           method: "POST",
-//           headers: headers_,
-//           body: JSON.stringify(summary_parameters),
-//         }
-//       );
-//       if (!response.ok) {
-//         throw new Error('Network response was not ok');
-//       }
-
-//       return response.text();
-//     } catch (error) {
-//       console.log(`Attempt ${fetch_attempt + 1} to fetch the summary failed. Retrying...`);
-//       await sleep(getBackoffWaitTime(fetch_attempt));
-//     }
-//   }
-
-//   throw new Error('All attempts failed');
-// }
+// ... rest of code
 
 async function fetchData(file, version, timeout, isAPI) {
 
   let final_error;
   const api_data = get(checkboxes);
+  const ai_status = get(aiStatus);
 
   for (let fetch_attempt = 0; fetch_attempt < MAX_RETRIES; fetch_attempt++) {
     try {
@@ -65,12 +37,19 @@ async function fetchData(file, version, timeout, isAPI) {
       });
 
       const base_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+      
+      const headers = {};
+      if (ai_status.forceTeamKey) {
+        headers['X-Force-Team-Key'] = 'true';
+      }
+
       const response = await Promise.race([
         fetch(
           `${base_url}api/v${version}/products/hangul`,
         {
           method: "POST",
           body: form,
+          headers: headers,
           credentials: 'include'
         }),
         rejectOnTimeout()
@@ -97,6 +76,6 @@ export async function fetchDataWithTimeout(file, version, timeout, isAPI) {
 
   } catch (error) {
     console.error(error);
-    return null;
+    return { error: error.message || "Unknown Error" };
   }
 }

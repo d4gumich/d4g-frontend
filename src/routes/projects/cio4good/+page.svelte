@@ -1,8 +1,16 @@
 <script>
-	import { Tabs, Tab, TabList, TabPanel } from 'svelte-tabs';
 	import Navbar from '$lib/components/navbar.svelte';
+	import { base } from '$app/paths';
 
 	let currentPage = 'cio4good';
+	let activeTab = $state(0);
+
+	const tabs = [
+		{ label: 'Visualizations', id: 0 },
+		{ label: 'Benchmarking', id: 1 },
+		{ label: 'Survey Data', id: 2 },
+		{ label: 'Research', id: 3 }
+	];
 </script>
 
 <svelte:head>
@@ -14,52 +22,41 @@
 
 <Navbar {currentPage} />
 <div class="cio4good-container">
-	<Tabs>
-		<TabList>
-			<div class="tablist-container">
-			<div class="tablist">
-				<Tab>Visualizations</Tab>
-			</div>
-			<div class="tablist">
-				<Tab>Benchmarking</Tab>
-			</div>
-			<div class="tablist">
-				<Tab>Survey Data</Tab>
-			</div>
-			<div class="tablist">
-				<Tab>Research</Tab>
-			</div>
-			</div>
-		</TabList>
+	<div class="tablist-container">
+		{#each tabs as tab}
+			<button 
+				class="tab-button" 
+				class:active={activeTab === tab.id} 
+				onclick={() => activeTab = tab.id}
+			>
+				{tab.label}
+			</button>
+		{/each}
+	</div>
 
-		<TabPanel>
+	<div class="tab-content">
+		{#if activeTab === 0}
 			<div class="responsive-iframe-container">
 				<iframe
 					title="Visualizations"
 					src="https://tableau.dsc.umich.edu/t/UM-Academic/views/CIO4GOODVisualizationsV2/CountofOrganizationsResponded?:embed=y&:showVizHome=no&:host_url=https%3A%2F%2Ftableau.dsc.umich.edu%2F&:embed_code_version=3&:tabs=yes&:toolbar=yes&:showAppBanner=false&:display_spinner=no&:loadOrderID=0"
-				/>
+				></iframe>
 			</div>
-		</TabPanel>
-
-		<TabPanel>
+		{:else if activeTab === 1}
 			<div class="responsive-iframe-container">
 				<iframe
 					title="Benchmarking"
 					src="https://tableau.dsc.umich.edu/t/UM-Academic/views/V5Benchmarking/CIO4GOODSurveyBenchmarking?:embed=y&:showVizHome=no&:host_url=https%3A%2F%2Ftableau.dsc.umich.edu%2F&:embed_code_version=3&:tabs=no&:toolbar=yes&:device=desktop&:showAppBanner=false&:display_spinner=no&:loadOrderID=1"
-				/>
+				></iframe>
 			</div>
-		</TabPanel>
-
-		<TabPanel>
+		{:else if activeTab === 2}
 			<div class="responsive-iframe-container">
 				<iframe
 					title="Survey Data"
 					src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQyDHBTILuOdRgKr2YA7lOjGKjQINCpfTp-ptqOEUs7cwy-QTvpUS_9_ePXOI3tD6FdvNZbtpQIWvuk/pubhtml?gid=1528335567&amp;single=true&amp;widget=true&amp;headers=false"
-				/>
+				></iframe>
 			</div>
-		</TabPanel>
-
-		<TabPanel>
+		{:else if activeTab === 3}
 			<div class="research-tab">
 				<h2>What do NPO IT leaders say about investment over the past 17 years?</h2>
 				<h3>Description</h3>
@@ -76,7 +73,7 @@
 					Cycle where funders have unrealistic expectations, non-profits feel pressure to conform,
 					and non-profits neglect i nfrastructure and misrepresent data.
 				</p>
-				<h3 class>Findings</h3>
+				<h3>Findings</h3>
 				<ol>
 					<li>IT spending in NPOs is slightly growing.</li>
 					<li>
@@ -93,8 +90,8 @@
 					>.
 				</h3>
 			</div>
-		</TabPanel>
-	</Tabs>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -102,6 +99,37 @@
 		font-family: "Open Sans", sans-serif;
 		margin: 1rem 12rem 2rem 12rem;
 		background-color: var(--background-color-light);
+	}
+
+	.tablist-container {
+		display: flex;
+		justify-content: center;
+		border-bottom: 1px solid #ccc;
+		margin-bottom: 1rem;
+		gap: 1rem;
+	}
+
+	.tab-button {
+		padding: 0.8rem 1.5rem;
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-family: inherit;
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: #666;
+		border-bottom: 3px solid transparent;
+		transition: all 0.2s;
+	}
+
+	.tab-button:hover {
+		color: var(--blue-color-main);
+	}
+
+	.tab-button.active {
+		color: var(--blue-color-main);
+		border-bottom-color: var(--button-color);
+		font-weight: 700;
 	}
 
 	.research-tab {
@@ -123,15 +151,7 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-	}
-
-	.tablist-container {
-		display: flex;
-		justify-content: space-around;
-	}
-
-	.tablist {
-		font-size: 1rem
+			border: none;
 	}
 
 	@media (max-device-width: 912px) and (min-resolution: 2dppx) {
@@ -139,10 +159,9 @@
 			margin: 1rem 1rem 2rem 1rem;
 		}
 
-		.tablist {
+		.tab-button {
 			font-size: 0.85rem;
-			padding: 0;
-			margin: 0;
+			padding: 0.5rem;
 		}
 
 		.research-tab h2 {

@@ -191,6 +191,10 @@
 
       try {
         result = await fetchDataWithTimeout(file, version, (estimatedTimeToAnalyze*SECONDS_TO_MILLISECONDS + TIMEOUT_BUFFER), true);
+        if (result && result.error) {
+          throw new Error(result.error);
+        }
+
         if (result !== null) {
           console.log('Result:',result);
         }
@@ -211,6 +215,12 @@
 
       } catch (error) {
         console.error("Could not fetch from d4gumsi.pythonanywhere.com", error);
+        const errorMsg = error.message || "Engine Error";
+        if (errorMsg.includes("API key expired") || errorMsg.includes("400") || errorMsg.includes("401")) {
+          aiActions.setError(true, "API Key Expired/Invalid");
+        } else {
+          aiActions.setError(true, "Analysis Failed");
+        }
         goBack(true);
         errorType = 1;
         showError = true;
@@ -362,6 +372,7 @@ function updateCheckbox(id, newValue) {
           accept="application/pdf"
           id="file-input"
           onchange={handleFileSelect}
+          style="display: none;"
         />
         {#if showAnalyzeButton}
           <div onclick={(e) => e.stopPropagation()} role="none">

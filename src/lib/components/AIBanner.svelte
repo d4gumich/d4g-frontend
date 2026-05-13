@@ -4,6 +4,7 @@
     import Cog from 'svelte-material-icons/Cog.svelte';
     import AccountKey from 'svelte-material-icons/AccountKey.svelte';
     import ShieldCheck from 'svelte-material-icons/ShieldCheck.svelte';
+    import Alert from 'svelte-material-icons/Alert.svelte';
     import { browser } from '$app/environment';
 
     let showSetup = $state(false);
@@ -36,7 +37,6 @@
     });
 
     async function handleQuickUpdate() {
-        // If they just change the provider/model while session is active, we update it
         if ($aiStatus.status === 'active') {
             try {
                 const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
@@ -55,7 +55,6 @@
                 console.error("Failed to update AI settings:", err);
             }
         } else {
-            // If inactive, opening setup is required to provide key
             showSetup = true;
         }
     }
@@ -64,22 +63,36 @@
         selectedModel = models[selectedProvider][0].id;
         handleQuickUpdate();
     }
+
+    function toggleKeyType() {
+        if ($aiStatus.status === 'active') {
+            aiActions.setForceTeamKey(!$aiStatus.forceTeamKey);
+        } else if ($aiStatus.forceTeamKey) {
+            aiActions.setForceTeamKey(false);
+        }
+    }
 </script>
 
-<div class="ai-status-banner" class:byok={$aiStatus.status === 'active'}>
+<div 
+    class="ai-status-banner" 
+    class:byok={$aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+    class:has-error={$aiStatus.hasError}
+>
     <div class="banner-container">
         <div class="status-left">
-            {#if $aiStatus.status === 'active'}
-                <div class="badge byok-badge">
-                    <AccountKey size={16} />
-                    <span>Personal Key</span>
-                </div>
-            {:else}
-                <div class="badge team-badge">
-                    <ShieldCheck size={16} />
-                    <span>Team Key</span>
-                </div>
-            {/if}
+            <button class="mode-toggle" onclick={toggleKeyType} title="Click to toggle between Team and Personal key">
+                {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+                    <div class="badge byok-badge">
+                        <AccountKey size={16} />
+                        <span>Personal Key</span>
+                    </div>
+                {:else}
+                    <div class="badge team-badge">
+                        <ShieldCheck size={16} />
+                        <span>Team Key</span>
+                    </div>
+                {/if}
+            </button>
         </div>
 
         <div class="controls-center">
@@ -100,12 +113,19 @@
                     {/each}
                 </select>
             </div>
+            
+            {#if $aiStatus.hasError}
+                <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
+                    <Alert size={16} />
+                    <span>{$aiStatus.errorMessage || 'Engine Error'}</span>
+                </button>
+            {/if}
         </div>
 
         <div class="actions-right">
             <button class="setup-trigger" onclick={() => showSetup = true}>
                 <Cog size={18} />
-                <span>{$aiStatus.status === 'active' ? 'Update Key' : 'Connect Key'}</span>
+                <span>{$aiStatus.status === 'active' ? 'Manage Keys' : 'Connect Key'}</span>
             </button>
         </div>
     </div>
@@ -121,18 +141,30 @@
 <style>
     .ai-status-banner {
         width: 100%;
-        background: #f0f4f8;
-        border-bottom: 2px solid #d1d9e0;
+        background: #cedbe5;
+        border-bottom: 2px solid #a3b8c9;
         padding: 0.4rem 0;
         font-family: "Outfit", sans-serif;
         font-size: 0.85rem;
         z-index: 800;
         position: relative;
+        transition: all 0.3s ease;
     }
 
     .ai-status-banner.byok {
-        background: #c8e6c9;
+        background: #a5d6a7;
         border-bottom: 2px solid #81c784;
+    }
+
+    .ai-status-banner.has-error {
+        background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 15px,
+            rgba(211, 47, 47, 0.15) 15px,
+            rgba(211, 47, 47, 0.15) 30px
+        );
+        border-bottom: 2px solid #d32f2f;
     }
 
     .banner-container {
@@ -148,19 +180,32 @@
     .status-left {
         display: flex;
         align-items: center;
-        min-width: 120px;
+        min-width: 140px;
+    }
+
+    .mode-toggle {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+    .mode-toggle:hover {
+        transform: scale(1.05);
     }
 
     .badge {
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        padding: 0.2rem 0.6rem;
-        border-radius: 4px;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
         font-weight: 800;
         text-transform: uppercase;
         font-size: 0.65rem;
         letter-spacing: 0.05em;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .byok-badge {
@@ -188,15 +233,15 @@
 
     .control-item label {
         font-weight: 600;
-        color: #666;
+        color: var(--blue-color-main);
         white-space: nowrap;
     }
 
     select {
         padding: 0.2rem 0.5rem;
-        border: 1px solid #ccc;
+        border: 1px solid rgba(0,0,0,0.1);
         border-radius: 4px;
-        background: white;
+        background: rgba(255,255,255,0.9);
         font-family: inherit;
         font-size: 0.85rem;
         cursor: pointer;
@@ -205,6 +250,27 @@
     select:focus {
         outline: none;
         border-color: var(--blue-color-main);
+    }
+
+    .error-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #d32f2f;
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        animation: pulse 2s infinite;
+        border: none;
+        cursor: pointer;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.8; }
+        100% { opacity: 1; }
     }
 
     .actions-right {
@@ -242,6 +308,7 @@
         .controls-center {
             width: 100%;
             justify-content: center;
+            flex-wrap: wrap;
         }
     }
 </style>
