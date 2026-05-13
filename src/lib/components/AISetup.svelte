@@ -15,8 +15,7 @@
 
     const models = {
         google: [
-            { id: "gemini-2.0-flash-preview", name: "Gemini 2.0 Flash (Fast/Recommended)" },
-            { id: "gemini-2.0-pro-preview", name: "Gemini 2.0 Pro" },
+            { id: "gemini-2.0-flash", name: "Gemini 2.0 Flash" },
             { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
             { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash" }
         ],
@@ -134,10 +133,10 @@
             {/if}
 
             <Button 
-                text={loading ? "Validating..." : ($aiStatus.status === 'active' ? "Update Settings" : "Configure Engine")} 
+                text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")} 
                 click={handleSubmit}
                 disabled={loading || ($aiStatus.status !== 'active' && !apiKey.trim())}
-                styleAdjustment="width: 10rem;"
+                styleAdjustment="width: auto; min-width: 6rem; padding: 0.5rem 1rem;"
             />
         </div>
     </div>
