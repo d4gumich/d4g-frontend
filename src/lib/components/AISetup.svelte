@@ -15,9 +15,9 @@
 
     const models = {
         google: [
-            { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro (High Quality)" },
-            { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash (Fast)" },
-            { id: "gemini-1.5-flash-8b", name: "Gemini 1.5 Flash-8B (Lightweight)" }
+            { id: "gemini-3-flash", name: "Gemini 3 Flash" },
+            { id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite" },
+            { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" }
         ],
         openai: [
             { id: "gpt-4o", name: "GPT-4o (High Quality)" },
@@ -81,8 +81,8 @@
     }
 </script>
 
-<div class="modal-overlay" onclick={onCancel} onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && onCancel && onCancel()} role="button" tabindex="0">
-    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="none">
+<div class="modal-overlay" onclick={onCancel} onkeydown={(e) => (e.key === 'Escape') && onCancel && onCancel()} role="button" tabindex="0" aria-label="Close modal">
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="{productName} Setup" tabindex="-1">
         <h2>🛠️ {productName} Setup</h2>
         <p>This product requires your own AI API key to function securely. We never store your key persistently.</p>
 

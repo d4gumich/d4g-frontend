@@ -9,60 +9,6 @@
 
     let showSetup = $state(false);
 
-    const models = {
-        google: [
-            { id: "gemini-1.5-pro", name: "Gemini 1.5 Pro" },
-            { id: "gemini-1.5-flash", name: "Gemini 1.5 Flash" },
-            { id: "gemini-1.5-flash-8b", name: "Gemini 1.5 Flash-8B" }
-        ],
-        openai: [
-            { id: "gpt-4o", name: "GPT-4o" },
-            { id: "gpt-4o-mini", name: "GPT-4o Mini" },
-            { id: "o1-mini", name: "o1-mini" }
-        ],
-        anthropic: [
-            { id: "claude-3-5-sonnet-latest", name: "Claude 3.5 Sonnet" },
-            { id: "claude-3-5-haiku-latest", name: "Claude 3.5 Haiku" },
-            { id: "claude-3-opus-latest", name: "Claude 3 Opus" }
-        ]
-    };
-
-    let selectedProvider = $state($aiStatus.provider || "google");
-    let selectedModel = $state($aiStatus.model || "gemini-1.5-flash");
-
-    $effect(() => {
-        if ($aiStatus.provider) selectedProvider = $aiStatus.provider;
-        if ($aiStatus.model) selectedModel = $aiStatus.model;
-    });
-
-    async function handleQuickUpdate() {
-        if ($aiStatus.status === 'active') {
-            try {
-                const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        provider: selectedProvider,
-                        model: selectedModel
-                    }),
-                    credentials: 'include'
-                });
-                if (response.ok) {
-                    await aiActions.fetchStatus();
-                }
-            } catch (err) {
-                console.error("Failed to update AI settings:", err);
-            }
-        } else {
-            showSetup = true;
-        }
-    }
-
-    function onProviderChange() {
-        selectedModel = models[selectedProvider][0].id;
-        handleQuickUpdate();
-    }
-
     function toggleKeyType() {
         if ($aiStatus.status === 'active') {
             aiActions.setForceTeamKey(!$aiStatus.forceTeamKey);
@@ -92,27 +38,15 @@
                     </div>
                 {/if}
             </button>
+            
+            {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+                <div class="active-info">
+                    <strong>{$aiStatus.model}</strong>
+                </div>
+            {/if}
         </div>
 
         <div class="controls-center">
-            <div class="control-item">
-                <label for="banner-provider">Provider:</label>
-                <select id="banner-provider" bind:value={selectedProvider} onchange={onProviderChange}>
-                    <option value="google">Gemini</option>
-                    <option value="openai">OpenAI</option>
-                    <option value="anthropic">Claude</option>
-                </select>
-            </div>
-
-            <div class="control-item">
-                <label for="banner-model">Model:</label>
-                <select id="banner-model" bind:value={selectedModel} onchange={handleQuickUpdate}>
-                    {#each models[selectedProvider] as m}
-                        <option value={m.id}>{m.name}</option>
-                    {/each}
-                </select>
-            </div>
-            
             {#if $aiStatus.hasError}
                 <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
                     <Alert size={16} />
@@ -179,7 +113,14 @@
     .status-left {
         display: flex;
         align-items: center;
+        gap: 1.5rem;
         min-width: 140px;
+    }
+
+    .active-info {
+        font-size: 0.8rem;
+        color: #2e7d32;
+        font-weight: 600;
     }
 
     .mode-toggle {
@@ -220,35 +161,8 @@
     .controls-center {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        justify-content: center;
         flex: 1;
-    }
-
-    .control-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .control-item label {
-        font-weight: 600;
-        color: var(--blue-color-main);
-        white-space: nowrap;
-    }
-
-    select {
-        padding: 0.2rem 0.5rem;
-        border: 1px solid rgba(0,0,0,0.1);
-        border-radius: 4px;
-        background: rgba(255,255,255,0.9);
-        font-family: inherit;
-        font-size: 0.85rem;
-        cursor: pointer;
-    }
-
-    select:focus {
-        outline: none;
-        border-color: var(--blue-color-main);
     }
 
     .error-pill {
@@ -303,11 +217,6 @@
             flex-direction: column;
             gap: 1rem;
             padding: 0.5rem;
-        }
-        .controls-center {
-            width: 100%;
-            justify-content: center;
-            flex-wrap: wrap;
         }
     }
 </style>

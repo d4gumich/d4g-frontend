@@ -15,7 +15,7 @@
   tabindex="0"
   aria-label="Close modal"
 >
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Confirmation Modal" onclick={(e) => e.stopPropagation()}>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Confirmation Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
     <p class="text-prompt">
       The file will take an estimated 
       <span style={`border-bottom: 2px solid var(--button-color);`}>
