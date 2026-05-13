@@ -46,15 +46,8 @@
         </p>
 
         {#if showModal}
-            <div 
-                class="modal" 
-                on:click|self={() => (showModal = false)} 
-                on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
-                role="button" 
-                aria-label="Close modal"
-                tabindex="0"
-            >
-                <div class="modal-content" role="dialog" aria-modal="true" aria-label="Summary Modal">
+            <div class="modal" on:click|self={() => (showModal = false)} role="dialog" aria-modal="true" aria-label="Summary Modal">
+                <div class="modal-content">
                     <span
                         class="modal-close"
                         on:click|stopPropagation={() => (showModal = false)}
@@ -68,15 +61,8 @@
                 </div>
             </div>
         {/if}
-    </div>
-{/if}
-
-<style>
-    p {
-        font-family: Open Sans;
-        margin: 1%;
-    }
-    .result {
+        ...
+        .result {
         width: 70%;
         word-wrap: normal;
         margin: auto;
@@ -84,6 +70,13 @@
         margin-bottom: 1%;
         margin-top: 2%;
         border-radius: 3%;
+        }
+
+        /* modal */
+    
+
+    a:visited {
+        color: #4c2c92;
     }
 
     /* modal */
@@ -97,7 +90,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 1000;
     }
     .modal-content {
         width: 80%;
