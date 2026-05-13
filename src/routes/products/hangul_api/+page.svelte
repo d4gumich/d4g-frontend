@@ -31,7 +31,7 @@
   import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
   import TextCarousel from "$lib/components/text_carousel.svelte";
   import Navbar from "$lib/components/navbar.svelte";
-  import AISetup from "$lib/components/AISetup.svelte";
+  import AIBanner from "$lib/components/AIBanner.svelte";
 
   const currentPage = 'hangul_api';
   const numberOfPages = writable(0);
@@ -255,6 +255,7 @@ function updateCheckbox(id, newValue) {
   </svelte:head>
   
   <Navbar {currentPage} />
+  <AIBanner />
   <div class="container">
     {#if !showResults}
       <div class="content-container">
@@ -267,14 +268,6 @@ function updateCheckbox(id, newValue) {
           <Toggle bind:version {analyzing} {width} />
         </div>
       </div>
-
-      {#if showAISetup}
-        <AISetup 
-          productName="Hangul API" 
-          onComplete={() => { showAISetup = false; handleAnalyzeClick(); }} 
-          onCancel={() => showAISetup = false} 
-        />
-      {/if}
 
       <div class="param-container">
         <h1 class="text-container-heading">
@@ -329,7 +322,7 @@ function updateCheckbox(id, newValue) {
     </div>
 
       {#if showPopUp}
-        <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} on:confirm={(e) => onConfirm(e.detail)} />
+        <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} onConfirm={onConfirm} />
       {/if}
   
       {#if showError}

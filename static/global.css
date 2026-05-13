@@ -14,37 +14,27 @@
 }
 
 .demo-warning {
-  background: linear-gradient(90deg, #ff9800, #ffc107, #ff9800);
-  background-size: 200% auto;
+  background: var(--blue-color-main);
   color: white;
-  border-bottom: 3px solid rgba(0,0,0,0.1);
-  padding: 1.25rem 2rem;
+  border-bottom: 2px solid var(--button-color);
+  padding: 0.8rem 1.5rem;
   text-align: center;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  font-family: "Outfit", sans-serif;
   z-index: 1000;
-  text-transform: none;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  animation: shimmer 3s linear infinite;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .banner-link {
-  color: white;
+  color: var(--button-color);
   text-decoration: underline;
-  font-weight: 900;
-  margin: 0 0.5rem;
-  transition: all 0.2s ease;
+  font-weight: 700;
+  margin-left: 0.3rem;
+  transition: opacity 0.2s ease;
 }
 
 .banner-link:hover {
-  color: var(--blue-color-main);
-  opacity: 0.9;
-}
-
-@keyframes shimmer {
-  to {
-    background-position: 200% center;
-  }
+  opacity: 0.8;
 }

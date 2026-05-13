@@ -9,6 +9,7 @@
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
     import AISetup from "$lib/components/AISetup.svelte";
+    import AIBanner from "$lib/components/AIBanner.svelte";
 
     const currentPage = 'owl';
     const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
@@ -133,14 +134,7 @@
   </svelte:head>
 
   <Navbar {currentPage} />
-
-  {#if showAISetup}
-    <AISetup 
-      productName="Owl" 
-      onComplete={() => { showAISetup = false; submitQuestion(); }} 
-      onCancel={() => showAISetup = false} 
-    />
-  {/if}
+  <AIBanner />
 
   <div class="container">
     <div class="content-container">
@@ -333,7 +327,7 @@
         aria-label="Close modal"
         tabindex="0"
       >
-          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick|stopPropagation>
+          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()}>
               <span
                   class="modal-close"
                   onclick={() => (showModal = false)}

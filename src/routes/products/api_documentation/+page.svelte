@@ -49,11 +49,11 @@
     <p>To learn more about Hangul <a href="{base}/products/hangul">here</a>.</p>
     <h3>Jump to sections:</h3>
     <ol>
-        <li><a href="#docu_processing_endpoint">Document Processing Endpoint</li>
+        <li><a href="#docu_processing_endpoint">Document Processing Endpoint</a></li>
             <ul>
-                <li><a href="#payload_params">Payload Parameters</li>
-                <li><a href="#code_example">Code Example</li>
-                <li><a href="#response_keys">Response Keys</li>
+                <li><a href="#payload_params">Payload Parameters</a></li>
+                <li><a href="#code_example">Code Example</a></li>
+                <li><a href="#response_keys">Response Keys</a></li>
             </ul>
     </ol>
     <h2 id="endpoints" class="anchor">Endpoints</h2>

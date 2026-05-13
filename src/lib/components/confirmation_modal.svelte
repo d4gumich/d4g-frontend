@@ -1,25 +1,21 @@
 <!-- ConfirmationModal.svelte -->
 <script>
-  export let estimatedTime;
-
-  import { createEventDispatcher } from "svelte";
-
-  const dispatch = createEventDispatcher();
+  let { estimatedTime, onConfirm } = $props();
 
   function handleConfirmation(confirm) {
-    dispatch("confirm", confirm);
+    onConfirm && onConfirm(confirm);
   }
 </script>
 
 <div 
   class="modal-overlay" 
-  on:click|self={() => handleConfirmation(false)} 
-  on:keydown={(e) => (e.key === 'Escape') && handleConfirmation(false)}
+  onclick={() => handleConfirmation(false)} 
+  onkeydown={(e) => (e.key === 'Escape') && handleConfirmation(false)}
   role="button"
   tabindex="0"
   aria-label="Close modal"
 >
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Confirmation Modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Confirmation Modal" onclick={(e) => e.stopPropagation()}>
     <p class="text-prompt">
       The file will take an estimated 
       <span style={`border-bottom: 2px solid var(--button-color);`}>
@@ -28,10 +24,10 @@
     </p>
     <p class="text-prompt">Do you want to proceed?</p>
     <div class="button-section">
-      <button class="small-button" on:click={() => handleConfirmation(true)}
+      <button class="small-button" onclick={() => handleConfirmation(true)}
         >Yes</button
       >
-      <button class="small-button" on:click={() => handleConfirmation(false)}
+      <button class="small-button" onclick={() => handleConfirmation(false)}
         >No</button
       >
     </div>
@@ -78,6 +74,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    cursor: pointer;
   }
 
   .small-button:not(:disabled):hover,

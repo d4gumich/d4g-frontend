@@ -71,6 +71,7 @@ async function fetchData(file, version, timeout, isAPI) {
         {
           method: "POST",
           body: form,
+          credentials: 'include'
         }),
         rejectOnTimeout()
       ]);

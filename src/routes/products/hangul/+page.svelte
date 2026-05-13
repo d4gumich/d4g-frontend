@@ -30,7 +30,7 @@
   import HangulButtonContainer from "$lib/components/hangul_button_container.svelte";
   import TextCarousel from "$lib/components/text_carousel.svelte";
   import Navbar from "$lib/components/navbar.svelte";
-  import AISetup from "$lib/components/AISetup.svelte";
+  import AIBanner from "$lib/components/AIBanner.svelte";
 
   const currentPage = 'hangul';
   const numberOfPages = writable(0);
@@ -235,6 +235,7 @@
 </svelte:head>
 
 <Navbar {currentPage} />
+<AIBanner />
 <div class="container">
   {#if !showResults}
     <div class="content-container">
@@ -248,16 +249,8 @@
       </div>
     </div>
 
-    {#if showAISetup}
-      <AISetup 
-        productName="Hangul" 
-        onComplete={() => { showAISetup = false; handleAnalyzeClick(); }} 
-        onCancel={() => showAISetup = false} 
-      />
-    {/if}
-
     {#if showPopUp}
-      <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} on:confirm={(e) => onConfirm(e.detail)} />
+      <ConfirmationModal estimatedTime={estimatedTimeToAnalyze} onConfirm={onConfirm} />
     {/if}
 
     {#if showError}

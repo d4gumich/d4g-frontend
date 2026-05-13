@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import Button from './button.svelte';
-    import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
+    import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
 
     let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
@@ -12,8 +12,6 @@
 
     let loading = $state(false);
     let error = $state("");
-
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     const models = {
         google: [
@@ -56,7 +54,7 @@
                 body.api_key = apiKey;
             }
 
-            const response = await fetch(`${host_url}api/v1/auth/session`, {
+            const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),

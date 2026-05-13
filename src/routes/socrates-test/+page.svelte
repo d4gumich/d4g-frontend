@@ -3,6 +3,7 @@
     import Button from "$lib/components/button.svelte";
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import AISetup from "$lib/components/AISetup.svelte";
+    import AIBanner from "$lib/components/AIBanner.svelte";
     import { onMount } from "svelte";
     import { page } from '$app/stores';
     import { browser } from '$app/environment';
@@ -192,32 +193,17 @@
 </svelte:head>
 
 <Navbar {currentPage} />
+<AIBanner />
 
 <div class="demo-warning">
     ⚠️ ARCHIVED PROTOTYPE: This is an older version of the Socrates dialectic engine. For the current product, please visit <a href="{base}/products" class="banner-link">Socrates v2</a> on the Products page.
 </div>
-
-{#if showSetup}
-    <AISetup 
-        productName="Socrates"
-        onComplete={() => { showSetup = false; aiActions.fetchStatus(); }} 
-        onCancel={$aiStatus.status === 'active' ? () => { showSetup = false; } : null}
-    />
-{/if}
 
 <div class="container">
     <div class="content-container">
         <div class="heading-container">
             <h1 class="socrates-heading">🧠 Socrates v2 Test</h1>
             <p class="info-text">Structured inquiry engine for refined thinking.</p>
-            {#if $aiStatus.status === 'active'}
-                <div class="session-info">
-                    <button class="status-indicator interactive" onclick={() => { showSetup = true; }} title="Manage AI Session">
-                        <span class="dot-green"></span>
-                        Connected: <strong class="model-name">{$aiStatus.model}</strong>
-                    </button>
-                </div>
-            {/if}
         </div>
 
         <div class="input-container">
@@ -373,53 +359,6 @@
         margin-bottom: 0.5rem;
     }
 
-    .session-info {
-        font-size: 0.95rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .status-indicator {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #2e7d32;
-        font-weight: 600;
-        background: #e8f5e9;
-        padding: 0.4rem 1rem;
-        border-radius: 2rem;
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
-        font-family: inherit;
-    }
-
-    .status-indicator.interactive {
-        cursor: pointer;
-    }
-
-    .status-indicator.interactive:hover {
-        background: #c8e6c9;
-        border-color: #2e7d32;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    }
-
-    .dot-green {
-        width: 8px;
-        height: 8px;
-        background-color: #4caf50;
-        border-radius: 50%;
-        display: inline-block;
-        box-shadow: 0 0 5px #4caf50;
-    }
-
-    .model-name {
-        color: var(--text-color-main);
-    }
-
     .input-container {
         background: white;
         padding: 2rem;
@@ -556,19 +495,6 @@
 
     .evaluation {
         background: #f0f7f0;
-    }
-
-    .demo-warning {
-        background: #fff3cd;
-        color: #856404;
-        padding: 1rem;
-        text-align: center;
-        border-bottom: 1px solid #ffeeba;
-    }
-
-    .banner-link {
-        font-weight: 700;
-        text-decoration: underline;
     }
 
     @media (max-width: 800px) {
