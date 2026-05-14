@@ -248,6 +248,11 @@
         max-height: calc(100vh - 250px);
     }
 
+    .tab-content.analysis-tab {
+        overflow-y: visible;
+        max-height: none;
+    }
+
     .preview-controls {
         display: flex;
         justify-content: space-between;
@@ -302,7 +307,7 @@
 
     .analysis-column { display: flex; flex-direction: column; gap: 1.5rem; }
 
-    .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; }
+    .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
     .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; }
 
     .attribution-tag {
@@ -327,7 +332,7 @@
     }
 
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .scroll-box-sm { max-height: 200px; overflow-y: auto; padding-right: 0.25rem; }
+    .scroll-box-sm { max-height: none; overflow-y: visible; }
     .empty-msg-sm { font-size: 0.8rem; color: #888; font-style: italic; }
 
     .skill-tag { 
@@ -336,7 +341,7 @@
         border: 1px solid #d1d9e0;
         font-size: 0.7rem; 
         padding: 0.2rem 0.6rem; 
-        border-radius: 12px;
+        border-radius: 122px;
         white-space: nowrap;
         font-weight: 500;
     }
@@ -365,25 +370,25 @@
     /* Tooltip Styling */
     .tooltip-content {
         position: absolute;
-        left: calc(100% + 10px);
+        left: calc(100% - 20px);
         top: 0;
-        width: 300px;
+        width: 280px;
         background: white;
-        border: 1px solid #ddd;
+        border: 2px solid var(--blue-color-main);
         border-radius: 8px;
         padding: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        z-index: 1000;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        z-index: 2000;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events: none;
     }
 
     .job-item:hover .tooltip-content {
         opacity: 1;
         visibility: visible;
-        transform: translateX(5px);
+        transform: translateX(15px);
     }
 
     .tooltip-content h4 { 
@@ -396,8 +401,8 @@
 
     .tooltip-content p {
         margin: 0;
-        font-size: 0.85rem;
-        line-height: 1.5;
+        font-size: 0.8rem;
+        line-height: 1.4;
         color: #444;
     }
 
@@ -410,7 +415,7 @@
     }
 
     .recommendations-card { height: 100%; display: flex; flex-direction: column; }
-    .scroll-box { max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
+    .scroll-box { max-height: none; overflow-y: visible; }
 
     .recommendations { padding-left: 1.2rem; }
     .recommendations li { margin-bottom: 0.8rem; font-size: 0.9rem; line-height: 1.5; color: #444; }

@@ -193,12 +193,13 @@
 
     .btn-main {
         width: 100%;
-        padding: 0.8rem;
+        padding: 0.6rem;
         border: none;
         border-radius: 8px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
         cursor: pointer;
         transition: all 0.2s;
     }

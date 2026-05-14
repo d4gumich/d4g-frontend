@@ -128,6 +128,12 @@ export const lighthouseActions = {
             if (isAuth) {
                 try {
                     statusData = await apiRequest('/status');
+                    // Sync timer with actual engine state
+                    if (statusData.stage === 'RUNNING') {
+                        this.startSessionTimer();
+                    } else {
+                        this.clearSessionTimer();
+                    }
                 } catch (err) {
                     console.error("Failed to fetch engine status even though session is active", err);
                 }
@@ -182,6 +188,7 @@ export const lighthouseActions = {
         lighthouseStatus.update(s => ({ ...s, loading: true }));
         try {
             const status = await apiRequest('/pause', { method: 'POST' });
+            this.clearSessionTimer();
             lighthouseStatus.update(s => ({ 
                 ...s,
                 ...status, 
@@ -198,6 +205,7 @@ export const lighthouseActions = {
         lighthouseStatus.update(s => ({ ...s, loading: true }));
         try {
             const status = await apiRequest('/stop', { method: 'POST' });
+            this.clearSessionTimer();
             lighthouseStatus.update(s => ({ 
                 ...s,
                 ...status, 
@@ -210,23 +218,46 @@ export const lighthouseActions = {
         }
     },
 
-    startSessionTimer() {
+    startSessionTimer(durationSeconds = 3540) {
+        if (typeof window === 'undefined') return;
+        
         // Clear any existing timer
         if (this.timerInterval) clearInterval(this.timerInterval);
         
-        // 59 minutes in seconds
-        let remaining = 3540;
+        const now = Math.floor(Date.now() / 1000);
+        let expiry = localStorage.getItem('lighthouse_session_expiry');
         
-        lighthouseStatus.update(s => ({ ...s, sessionRemaining: remaining }));
-
-        this.timerInterval = setInterval(() => {
-            remaining--;
+        if (!expiry) {
+            expiry = now + durationSeconds;
+            localStorage.setItem('lighthouse_session_expiry', expiry);
+        } else {
+            expiry = parseInt(expiry);
+        }
+        
+        const updateRemaining = () => {
+            const currentNow = Math.floor(Date.now() / 1000);
+            const remaining = expiry - currentNow;
+            
             if (remaining <= 0) {
-                clearInterval(this.timerInterval);
+                if (this.timerInterval) clearInterval(this.timerInterval);
+                localStorage.removeItem('lighthouse_session_expiry');
+                lighthouseStatus.update(s => ({ ...s, sessionRemaining: 0 }));
                 this.logout();
+            } else {
+                lighthouseStatus.update(s => ({ ...s, sessionRemaining: remaining }));
             }
-            lighthouseStatus.update(s => ({ ...s, sessionRemaining: remaining }));
-        }, 1000);
+        };
+
+        updateRemaining();
+        this.timerInterval = setInterval(updateRemaining, 1000);
+    },
+
+    clearSessionTimer() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('lighthouse_session_expiry');
+        }
+        lighthouseStatus.update(s => ({ ...s, sessionRemaining: null }));
     },
 
     async logout() {
@@ -235,11 +266,10 @@ export const lighthouseActions = {
         } catch (err) {
             console.error("Logout failed:", err);
         } finally {
-            if (this.timerInterval) clearInterval(this.timerInterval);
+            this.clearSessionTimer();
             lighthouseStatus.update(s => ({ 
                 ...s, 
                 sessionActive: false, 
-                sessionRemaining: null,
                 stage: 'OFFLINE'
             }));
             if (typeof window !== 'undefined') {
