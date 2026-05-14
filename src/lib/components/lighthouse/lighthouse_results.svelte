@@ -127,7 +127,10 @@
                 <div class="analysis-grid">
                     <div class="analysis-column">
                         <div class="card compact-card">
-                            <h3>Extracted Skills</h3>
+                            <h3>
+                                Extracted Skills
+                                <span class="attribution-tag tag-extracted">Extracted</span>
+                            </h3>
                             <div class="skills-list scroll-box-sm">
                                 {#if results.extracted_skills?.length > 0}
                                     {#each results.extracted_skills as skill}
@@ -140,7 +143,10 @@
                         </div>
 
                         <div class="card compact-card">
-                            <h3>Top Job Matches</h3>
+                            <h3>
+                                Top Jobs
+                                <span class="attribution-tag tag-ai">AI Analysis</span>
+                            </h3>
                             <div class="jobs-list">
                                 {#each results.top_jobs as job}
                                     <div class="job-item tooltip-trigger">
@@ -163,7 +169,10 @@
 
                     <div class="analysis-column main-col">
                         <div class="card recommendations-card">
-                            <h3>AI Recommendations</h3>
+                            <h3>
+                                AI Recommendations
+                                <span class="attribution-tag tag-ai">AI Analysis</span>
+                            </h3>
                             <div class="scroll-box">
                                 <ul class="recommendations">
                                     {#each results.recommendations as rec}
@@ -294,7 +303,28 @@
     .analysis-column { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; }
-    .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; }
+    .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; }
+
+    .attribution-tag {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        letter-spacing: 0.02em;
+    }
+
+    .tag-extracted {
+        background: #f0f0f0;
+        color: #666;
+        border: 1px solid #ddd;
+    }
+
+    .tag-ai {
+        background: #eef2f8;
+        color: var(--blue-color-main);
+        border: 1px solid #c8d6e5;
+    }
 
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
     .scroll-box-sm { max-height: 200px; overflow-y: auto; padding-right: 0.25rem; }
@@ -350,7 +380,7 @@
         pointer-events: none;
     }
 
-    .tooltip-trigger:hover .tooltip-content {
+    .job-item:hover .tooltip-content {
         opacity: 1;
         visibility: visible;
         transform: translateX(5px);
