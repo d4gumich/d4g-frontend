@@ -2,11 +2,11 @@
   import SectionTitle from "../../lib/components/section_title.svelte";
   import TeamCard from "../../lib/components/team_card.svelte";
   import AlumniCard from "../../lib/components/alumni_card.svelte";
-  import SzymonProfile from "$lib/assets/profile-pics/szymon_sarnowicz.png";
-  import SaraProfile from "$lib/assets/profile-pics/sara_haptonstall.png";
+  import DefaultProfile from "$lib/assets/profile-pics/default_pfp.png";
+  import RomanusProfile from "$lib/assets/profile-pics/romanus_berg.png";
   import SudhaProfile from "$lib/assets/profile-pics/sudha_kannan.png";
-  import ReedProfile from "$lib/assets/profile-pics/reed_paskvan.png"
-  import YilinProfile from "$lib/assets/profile-pics/yilin_fang.jpeg"
+  import ReedProfile from "$lib/assets/profile-pics/reed_paskvan.png";
+  import FrankieProfile from "$lib/assets/profile-pics/frankie_pike.png";
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = "team";
@@ -14,32 +14,24 @@
   const execTeam = [
     {
       name: "Edward G. Happ",
-      position: "Executive Fellow Emeritus",
+      position: "Director",
       description:
-        "Edward G. Happ is an Executive Fellow at the University of Michigan School of Information, where he is teaching and conducting research. His 40 years of professional experience include all facets of managing information services and high technology businesses, including general management with P&L responsibility, operations, product management, sales, marketing, customer service, human resources management, technical consulting, manufacturing, and both software and hardware development.",
+        "Edward G. Happ is the founder and volunteer director of the Data4Good Center. He is a former Executive Fellow at the University of Michigan School of Information, where he taught and advised student research. He is the former Global CIO at The IFRC and Save the Children. He is Co-founder, former Chairman, and a Leadership Fellow of NetHope, a US based consortium of leading international relief, development and conservation nonprofits focused on ICT and collaboration. He has over 20 years of board experience at NetHope, NTEN and ecclesiastical organizations.",
       image:
         "https://pbs.twimg.com/profile_images/1653043667211370496/tsXMk4do_400x400.jpg",
       linkedin: "https://www.linkedin.com/in/edward-g-happ/",
     },
     {
-      name: "Sara Haptonstall",
-      position: "Project Manager",
+      name: "Romanus Berg",
+      position: "Advisor",
       description:
-        "Sara is a graduate of the Master's  in Applied Data Science program from the University of Michigan. She holds a Bachelor's degree in  Accounting. Sara has extensive experience in using analytical tools to enhance business operations and decision-making, optimizing productivity and reducing costs through innovative automation and data analytics solutions.  Her technical skills include advanced proficiency in Python, SQL, and various AI & machine learning frameworks.",
-      image: SaraProfile,
-      linkedin: "https://www.linkedin.com/in/sarahaptonstall/",
+        "Founder at <a href='https://1o1.org/about'>1o1.org</a> and Systems Architect with 20+ years scaling global NGOs, COO/CIO leadership across 90+ countries at a $65M operating scale. Former COO/CIO at Ashoka and VP Operations at Oceana, he has led large-scale global organizational transformation across highly decentralized, international environments.",
+      image: RomanusProfile,
+      linkedin: "https://www.linkedin.com/in/romanusberg/",
     },
   ];
 
   const dataTeam = [
-    {
-      name: "Sidra Effendi",
-      position: "Consultant and Data Scientist",
-      description:
-        "Sidra is a Master's student at the University of Michigan School of Information, specializing in Data Science. She has an undergraduate degree in Computer Engineering. She has previously worked as an Edge Hacker for Zenatix Solutions and also co-founded a company called Pixli, where she worked on Software Development, UX/UI and Marketing.",
-      image: "https://avatars.githubusercontent.com/u/5307694?v=4",
-      linkedin: "https://www.linkedin.com/in/sidraeffendi/",
-    },
     {
       name: "Sudha Kannan",
       position: "Data Scientist",
@@ -49,74 +41,76 @@
       linkedin: "http://www.linkedin.com/in/sudharsanakannan/",
     },
     {
-      name: "Xabier Urruchua",
-      position: "Systems Specialist",
-      description:
-        "TBA",
-    },
-    {
       name: "Reed Paskvan",
-      position: "Data Scientist",
+      position: "Data Scientist & FrontEnd Dev",
       description:
-        "TBA",
-      image: ReedProfile
+        "Masters of Applied Data Science from University of Michigan and a Bachelor's of Electrical Engineering from Kettering University. A senior technical specialist with 9 years of experience in consulting from both engineering & IT teams.",
+      image: ReedProfile,
+      linkedin: "https://www.linkedin.com/in/reedpaskvan/"
     },
     {
       name: "Sihyun Kyung",
+      position: "Data Scientist & FrontEnd Dev",
+      description:
+        "Sihyun graduated with a Master’s in Applied Data Science from the University of Michigan",
+      image: DefaultProfile,
+      linkedin: "https://www.linkedin.com/in/sihyun-kyung-682088240/"
+    },
+    {
+      name: "Frankie Pike",
       position: "Data Scientist",
       description:
-        "TBA",
-    }
-    // {
-    //   name: "Hina Joshua",
-    //   position: "Data Scientist",
-    //   description:
-    //     "Hina is a master's student at the University of Michigan School of Information, Master of Applied Data Science Program. She has a Master of Public Health degree from Michigan State University and has previously worked in the public health domain in government and corporate settings where she analyzed health data including state disease surveillance system data and medical insurance claims data for ad hoc and routine report compilation. Hina is interested in the application of NLP in the NGO domain to improve decision-making in development and relief programs.",
-    //   image:
-    //     "https://media.licdn.com/dms/image/C4E03AQHSs935QuzMhw/profile-displayphoto-shrink_800_800/0/1649256757363?e=2147483647&v=beta&t=THtp_Ris8Bt9DdFXiFedB7wxSsaMxqztomO_ZSE3yqU",
-    //   linkedin: "https://www.linkedin.com/in/hina-joshua-63013a10b/",
-    // },
-    // {
-    //   name: "Takao Kakegawa",
-    //   position: "Data Scientist",
-    //   description:
-    //     "Takao is a current Master's student at the University of Michigan School of Information, in the MADS program. He has an undergraduate degree in Applied Mathematics and Statistics, with a computer science specialisation. He has prior experience in statistical analysis research through the SURF Fellowship at UC Berkeley.",
-    //   image:
-    //     "https://media.licdn.com/dms/image/C5603AQE0TAUWH63lAw/profile-displayphoto-shrink_800_800/0/1552117070041?e=2147483647&v=beta&t=N5xI3dLQoCNVUA_Ui5kMEiaQEKmxsZsgdNR2snJUUwQ",
-    //   linkedin: "https://www.linkedin.com/in/takao-kakegawa/",
-    // },
-  ];
-
-  const webTeam = [
-    {
-      name: "Yilin Fang",
-      position: "Web Developer and UX Designer",
-      description:
-        "Yilin is a senior dual degree student studying Computer Science and User Experience Design at the University of Michigan. Yilin has 3x project and internship experience with product design and research. She has advanced proficiency working with Python, REST API, SQL JavaScript and other full-stack development tools and languages. She is also interested in learning more about AI, LLMs and ML frameworks. ",
-      image:
-        YilinProfile,
-      linkedin: "https://www.linkedin.com/in/yilin-fang/",
+        "Frankie is graduating from the University of Michigan with a Master's of Applied Data Science this April. They live in Chicago, IL, and lead the Lighthouse product. Frankie has been involved in everything from defining the project, to finding (and engineering) datasets, to building the models, to presenting Lighthouse to the public. They are proficient in Python, SQL, LLMs, and machine learning models and especially enjoy working on projects that advance equity and democracy.",
+      image: FrankieProfile,
+      linkedin: "https://www.linkedin.com/in/frankie-pike/",
     },
-    // {
-    //   name: "Prithvijit Dasgupta",
-    //   position: "Systems Specialist and Web Developer",
-    //   description:
-    //     "Prithvijit is a current Master's student in the University of Michigan School of Information aiming to specialize in the Big Data Analytics track. He has experience working on distributed cloud systems and building RESTful APIs. He has an undergraduate degree in Mechanical Engineering.",
-    //   image:
-    //     "https://pbs.twimg.com/profile_images/1594033657437736971/sL_utrNg_400x400.jpg",
-    //   linkedin: "https://www.linkedin.com/in/prithvijit-dasgupta/",
-    // },
-    // {
-    //   name: "Szymon Sarnowicz",
-    //   position: "Full Stack Developer",
-    //   description:
-    //     "Szymon is a current Master's student at the University of Michigan School of Information, in the MADS program. He is currently a Software Engineer at General Motors working on battery diagnostics as well as a previous Program Manager in Autonomous Systems. As a developer he has helped launch Hangul 2.1 which includes all new UI, improved API handling, and feature alerting.",
-    //   image: SzymonProfile,
-    //   linkedin: "https://www.linkedin.com/in/szymonsarnowicz/",
-    // },
+    {
+      name: "Matthew Ziminski",
+      position: "Systems Engineer",
+      description:
+        "Early-career Software Engineer combining AI Engineering and Systems Engineering to build reliable, production-ready AI solutions, bringing hands-on technical leadership experience to complex initiatives and excelling at delivering scalable end-to-end architectures that integrate generative AI, robust data pipelines, and cloud-native infrastructure. Eager to contribute these strengths to Data4Good while growing further as an AI Systems Engineer.",
+      image: DefaultProfile,
+      linkedin: "https://www.linkedin.com/in/matthewziminski/",
+    },
+    {
+      name: "Grecia Macias",
+      position: "Data Scientist",
+      description:
+        "Software Engineer with a diverse set of skills from an unconventional interdisciplinary background.",
+      image: DefaultProfile,
+      linkedin: "https://www.linkedin.com/in/greciamaci/",
+    }
   ];
 
   const alumni = [
+    {
+      name: "Xabier Urruchua",
+      position: "System Specialist",
+      startYear: 2024,
+      endYear: 2026,
+      linkedin: "https://www.linkedin.com/in/xabier-urruchua-garay-523364232/",
+    },
+    {
+      name: "Yilin Fang",
+      position: "Consultant and Data Scientist",
+      startYear: 2024,
+      endYear: 2025,
+      linkedin: "https://www.linkedin.com/in/yilin-fang/",
+    },
+    {
+      name: "Sidra Effendi",
+      position: "Consultant and Data Scientist",
+      startYear: 2022,
+      endYear: 2024,
+      linkedin: "https://www.linkedin.com/in/sidraeffendi/",
+    },
+    {
+      name: "Sara Haptonstall",
+      position: "Project Manager",
+      startYear: 2024,
+      endYear: 2025,
+      linkedin: "https://www.linkedin.com/in/sarahaptonstall/",
+    },
     {
       name: "Prithvijit Dasgupta",
       position: "Systems Specialist and Web Developer",
@@ -246,10 +240,6 @@
       {/each}
       <SectionTitle title="Data Science Team" />
       {#each dataTeam as member}
-        <TeamCard {...member} />
-      {/each}
-      <SectionTitle title="Web and Systems Team" />
-      {#each webTeam as member}
         <TeamCard {...member} />
       {/each}
       <SectionTitle title="Alumni" />
