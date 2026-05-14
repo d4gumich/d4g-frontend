@@ -125,63 +125,59 @@
         {:else if activeTab === 'analysis' && results}
             <div class="tab-content analysis-tab" in:fade>
                 <div class="analysis-grid">
-                    <!-- Column 1: Skills and Recommendations (Swapped Jobs out) -->
-                    <div class="analysis-column">
-                        <div class="card compact-card fixed-height">
-                            <h3>
-                                Extracted Skills
-                                <span class="attribution-tag tag-extracted">Extracted</span>
-                            </h3>
-                            <div class="skills-list scroll-box-sm">
-                                {#if results.extracted_skills?.length > 0}
-                                    {#each results.extracted_skills as skill}
-                                        <span class="skill-tag">{skill}</span>
-                                    {/each}
-                                {:else}
-                                    <p class="empty-msg-sm">No specific skills identified.</p>
-                                {/if}
-                            </div>
-                        </div>
-
-                        <div class="card recommendations-card">
-                            <h3>
-                                AI Recommendations
-                                <span class="attribution-tag tag-ai">AI Analysis</span>
-                            </h3>
-                            <div class="scroll-box">
-                                <ul class="recommendations">
-                                    {#each results.recommendations as rec}
-                                        <li>{@html rec}</li>
-                                    {/each}
-                                </ul>
-                            </div>
+                    <!-- Top Row: Skills (Favor width) and Jobs -->
+                    <div class="card compact-card fixed-height skills-card">
+                        <h3>
+                            Extracted Skills
+                            <span class="attribution-tag tag-extracted">Extracted</span>
+                        </h3>
+                        <div class="skills-list scroll-box-sm">
+                            {#if results.extracted_skills?.length > 0}
+                                {#each results.extracted_skills as skill}
+                                    <span class="skill-tag">{skill}</span>
+                                {/each}
+                            {:else}
+                                <p class="empty-msg-sm">No specific skills identified.</p>
+                            {/if}
                         </div>
                     </div>
 
-                    <!-- Column 2: Top Jobs (Swapped Recommendations out) -->
-                    <div class="analysis-column main-col">
-                        <div class="card compact-card fixed-height">
-                            <h3>
-                                Top Jobs
-                                <span class="attribution-tag tag-ai">AI Analysis</span>
-                            </h3>
-                            <div class="jobs-list">
-                                {#each results.top_jobs as job}
-                                    <div class="job-item tooltip-trigger">
-                                        <div class="job-main">
-                                            <strong>{job.title}</strong>
-                                            <span class="score">{Math.round(job.score * 100)}%</span>
-                                        </div>
-                                        
-                                        {#if job.skills}
-                                            <div class="tooltip-content">
-                                                <h4>Matched Skills:</h4>
-                                                <p>{job.skills}</p>
-                                            </div>
-                                        {/if}
+                    <div class="card compact-card fixed-height jobs-card">
+                        <h3>
+                            Top Jobs
+                            <span class="attribution-tag tag-ai">AI Analysis</span>
+                        </h3>
+                        <div class="jobs-list">
+                            {#each results.top_jobs as job}
+                                <div class="job-item tooltip-trigger">
+                                    <div class="job-main">
+                                        <strong>{job.title}</strong>
+                                        <span class="score">{Math.round(job.score * 100)}%</span>
                                     </div>
+                                    
+                                    {#if job.skills}
+                                        <div class="tooltip-content">
+                                            <h4>Matched Skills:</h4>
+                                            <p>{job.skills}</p>
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Recommendations (Full Width) -->
+                    <div class="card recommendations-card full-width">
+                        <h3>
+                            AI Recommendations
+                            <span class="attribution-tag tag-ai">AI Analysis</span>
+                        </h3>
+                        <div class="scroll-box">
+                            <ul class="recommendations">
+                                {#each results.recommendations as rec}
+                                    <li>{@html rec}</li>
                                 {/each}
-                            </div>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -302,17 +298,19 @@
 
     .analysis-grid {
         display: grid;
-        grid-template-columns: 350px 1fr;
+        grid-template-columns: 1.4fr 1fr; /* favoring Skills (approx 58/42 split) */
         gap: 1.5rem;
         align-items: start;
     }
 
-    .analysis-column { display: flex; flex-direction: column; gap: 1.5rem; }
+    .full-width {
+        grid-column: span 2;
+    }
 
     .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
     .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; }
 
-    /* Fix height consistency */
+    /* Fix height consistency for top row */
     .fixed-height { height: 350px; }
 
     .attribution-tag {
@@ -396,7 +394,6 @@
         pointer-events: none;
     }
 
-    /* Adjust tooltip to show on the LEFT of Top Jobs since Jobs is now on the right */
     .job-item:hover .tooltip-content {
         opacity: 1;
         visibility: visible;
@@ -429,7 +426,7 @@
         }
     }
 
-    .recommendations-card { height: 100%; display: flex; flex-direction: column; }
+    .recommendations-card { height: auto; display: flex; flex-direction: column; }
     .scroll-box { max-height: none; overflow-y: visible; }
 
     .recommendations { padding-left: 1.2rem; }
@@ -478,5 +475,6 @@
     @media (max-width: 1000px) {
         .analysis-grid { grid-template-columns: 1fr; }
         .fixed-height { height: auto; max-height: 400px; }
+        .full-width { grid-column: span 1; }
     }
 </style>
