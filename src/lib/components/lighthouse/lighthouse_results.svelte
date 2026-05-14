@@ -125,8 +125,9 @@
         {:else if activeTab === 'analysis' && results}
             <div class="tab-content analysis-tab" in:fade>
                 <div class="analysis-grid">
+                    <!-- Column 1: Skills and Recommendations (Swapped Jobs out) -->
                     <div class="analysis-column">
-                        <div class="card compact-card">
+                        <div class="card compact-card fixed-height">
                             <h3>
                                 Extracted Skills
                                 <span class="attribution-tag tag-extracted">Extracted</span>
@@ -142,7 +143,24 @@
                             </div>
                         </div>
 
-                        <div class="card compact-card">
+                        <div class="card recommendations-card">
+                            <h3>
+                                AI Recommendations
+                                <span class="attribution-tag tag-ai">AI Analysis</span>
+                            </h3>
+                            <div class="scroll-box">
+                                <ul class="recommendations">
+                                    {#each results.recommendations as rec}
+                                        <li>{@html rec}</li>
+                                    {/each}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Top Jobs (Swapped Recommendations out) -->
+                    <div class="analysis-column main-col">
+                        <div class="card compact-card fixed-height">
                             <h3>
                                 Top Jobs
                                 <span class="attribution-tag tag-ai">AI Analysis</span>
@@ -163,22 +181,6 @@
                                         {/if}
                                     </div>
                                 {/each}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="analysis-column main-col">
-                        <div class="card recommendations-card">
-                            <h3>
-                                AI Recommendations
-                                <span class="attribution-tag tag-ai">AI Analysis</span>
-                            </h3>
-                            <div class="scroll-box">
-                                <ul class="recommendations">
-                                    {#each results.recommendations as rec}
-                                        <li>{@html rec}</li>
-                                    {/each}
-                                </ul>
                             </div>
                         </div>
                     </div>
@@ -300,7 +302,7 @@
 
     .analysis-grid {
         display: grid;
-        grid-template-columns: 300px 1fr;
+        grid-template-columns: 350px 1fr;
         gap: 1.5rem;
         align-items: start;
     }
@@ -309,6 +311,9 @@
 
     .compact-card { padding: 1rem; margin-bottom: 0; border: 1px solid #eee; display: flex; flex-direction: column; position: relative; }
     .compact-card h3 { font-size: 0.9rem; margin-top: 0; margin-bottom: 0.8rem; border-bottom: 1px solid #eee; padding-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between; }
+
+    /* Fix height consistency */
+    .fixed-height { height: 350px; }
 
     .attribution-tag {
         font-size: 0.6rem;
@@ -332,8 +337,14 @@
     }
 
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .scroll-box-sm { max-height: none; overflow-y: visible; }
+    
+    /* Re-enable internal scroll for skills within the fixed height card */
+    .scroll-box-sm { flex: 1; overflow-y: auto; padding-right: 0.5rem; }
     .empty-msg-sm { font-size: 0.8rem; color: #888; font-style: italic; }
+
+    /* Scrollbar styling */
+    .scroll-box-sm::-webkit-scrollbar { width: 4px; }
+    .scroll-box-sm::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 
     .skill-tag { 
         background: #f0f4f8; 
@@ -370,9 +381,9 @@
     /* Tooltip Styling */
     .tooltip-content {
         position: absolute;
-        left: calc(100% - 20px);
+        right: calc(100% + 15px);
         top: 0;
-        width: 280px;
+        width: 300px;
         background: white;
         border: 2px solid var(--blue-color-main);
         border-radius: 8px;
@@ -385,10 +396,11 @@
         pointer-events: none;
     }
 
+    /* Adjust tooltip to show on the LEFT of Top Jobs since Jobs is now on the right */
     .job-item:hover .tooltip-content {
         opacity: 1;
         visibility: visible;
-        transform: translateX(15px);
+        transform: translateX(-15px);
     }
 
     .tooltip-content h4 { 
@@ -408,9 +420,12 @@
 
     @media (max-width: 1300px) {
         .tooltip-content {
-            left: auto;
-            right: 0;
+            left: 0;
+            right: auto;
             top: calc(100% + 5px);
+        }
+        .job-item:hover .tooltip-content {
+            transform: translateY(5px);
         }
     }
 
@@ -462,5 +477,6 @@
 
     @media (max-width: 1000px) {
         .analysis-grid { grid-template-columns: 1fr; }
+        .fixed-height { height: auto; max-height: 400px; }
     }
 </style>
