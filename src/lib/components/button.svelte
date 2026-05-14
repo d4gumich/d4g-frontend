@@ -19,8 +19,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: auto 0.5rem;
-    padding: 0.5rem 1rem;
+    margin: 0;
+    padding: 0.8rem 1.8rem;
     border-radius: 0.5rem;
     text-decoration: none;
     cursor: pointer;
@@ -29,6 +29,10 @@
     font-family: "Open Sans";
     height: fit-content;
     transition: all 0.2s ease;
+    width: auto;
+    min-width: 9rem;
+    box-sizing: border-box;
+    white-space: nowrap;
   }
 
   .global-button:hover {

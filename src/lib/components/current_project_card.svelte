@@ -149,8 +149,6 @@
 
   .button{
     text-align: center;
-    display:table-cell;
-    vertical-align:middle;
   }
 
   h3 {

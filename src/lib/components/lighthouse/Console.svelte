@@ -95,21 +95,21 @@
         color: #d4d4d4;
         font-family: 'Courier New', Courier, monospace;
         z-index: 1000;
-        border-top: 1px solid #333;
-        transition: transform 0.3s ease;
+        border-top: 2px solid var(--blue-color-main);
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
     }
 
     .console-header {
         width: 100%;
-        background: #252526;
+        background: var(--blue-color-main);
         border: none;
         color: #fff;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 1rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 1px;
         box-sizing: border-box;

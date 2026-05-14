@@ -136,7 +136,6 @@
                 text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")} 
                 click={handleSubmit}
                 disabled={loading || ($aiStatus.status !== 'active' && !apiKey.trim())}
-                styleAdjustment="width: auto; min-width: 6rem; padding: 0.5rem 1rem;"
             />
         </div>
     </div>

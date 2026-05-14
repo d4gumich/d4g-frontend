@@ -14,6 +14,8 @@
 
     let isRunning = $derived($lighthouseStatus.stage === 'RUNNING');
     let isLoading = $derived($lighthouseStatus.stage.includes('BUILDING') || $lighthouseStatus.stage.includes('STARTING') || $lighthouseStatus.loading);
+    let bootElapsed = $derived($lighthouseStatus.elapsed_seconds || 0);
+    let bootRemaining = $derived(Math.max(0, 180 - bootElapsed));
 
     let hasStartedThisSession = $state(false);
 
@@ -69,9 +71,9 @@
         {#if isLoading}
             <div class="boot-container">
                 <div class="progress-track">
-                    <div class="progress-fill"></div>
+                    <div class="progress-fill" style="width: {Math.min(100, (bootElapsed / 180) * 100)}%"></div>
                 </div>
-                <p class="estimate">⏱ Est: 3-5 mins to boot</p>
+                <p class="estimate">⏱ {Math.floor(bootRemaining / 60)}:{(bootRemaining % 60).toString().padStart(2, '0')} remaining to boot</p>
             </div>
         {/if}
 
@@ -168,16 +170,12 @@
     }
 
     .progress-fill {
-        width: 40%;
         height: 100%;
         background: var(--blue-color-main);
-        animation: progress-slide 2s infinite ease-in-out;
+        transition: width 1s linear;
     }
 
-    @keyframes progress-slide {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(250%); }
-    }
+    /* @keyframes progress-slide removed */
 
     .control-actions {
         display: flex;

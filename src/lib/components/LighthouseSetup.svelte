@@ -94,7 +94,6 @@
                 text={loading ? "Verifying..." : "Unlock"} 
                 click={handleSubmit}
                 disabled={loading || !apiKey.trim()}
-                styleAdjustment="width: 8rem; padding: 0.6rem; font-size: 0.9rem;"
             />
         </div>
     </div>
