@@ -275,6 +275,7 @@
         border-radius: 4px;
         border: 1px solid transparent;
         transition: all 0.2s;
+        padding-right: 0.5rem;
     }
 
     .history-item:hover { background: #f0f0f0; border-color: #ddd; }
@@ -300,11 +301,19 @@
         background: none;
         border: none;
         color: #ccc;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s;
     }
 
-    .delete-doc:hover { color: var(--error-color); }
+    .delete-doc:hover { 
+        color: var(--error-color); 
+        background: rgba(211, 47, 47, 0.1);
+    }
 
     .btn-loading {
         background-color: #778899 !important;
