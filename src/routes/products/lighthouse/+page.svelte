@@ -25,10 +25,13 @@
     });
 
     let file = $state(null);
+    let fileInput = $state(null);
     let shouldSanitize = $state(false);
 
     function handleFileChange(event) {
         file = event.target.files[0];
+        // Reset input value so the same file can be selected again
+        if (fileInput) fileInput.value = "";
     }
 
     async function handleUpload() {
@@ -103,6 +106,7 @@
                                 accept="application/pdf" 
                                 onchange={handleFileChange} 
                                 class="file-input"
+                                bind:this={fileInput}
                             />
                             <label for="pdf-upload" class="file-label">
                                 {file ? file.name : "Choose PDF..."}
