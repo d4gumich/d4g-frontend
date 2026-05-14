@@ -29,9 +29,14 @@
     let shouldSanitize = $state(false);
 
     function handleFileChange(event) {
-        file = event.target.files[0];
-        // Reset input value so the same file can be selected again
-        if (fileInput) fileInput.value = "";
+        const selectedFile = event.target.files[0];
+        if (selectedFile) {
+            file = selectedFile;
+            // Short delay to ensure browser handles the selection before we clear for next time
+            setTimeout(() => {
+                if (fileInput) fileInput.value = "";
+            }, 50);
+        }
     }
 
     async function handleUpload() {

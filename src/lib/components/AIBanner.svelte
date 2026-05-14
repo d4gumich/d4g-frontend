@@ -74,8 +74,8 @@
 <style>
     .ai-status-banner {
         width: 100%;
-        background: #cedbe5;
-        border-bottom: 2px solid #a3b8c9;
+        background: #b0c4de; /* Darker grey-blue for team */
+        border-bottom: 2px solid #778899;
         padding: 0.4rem 0;
         font-family: "Outfit", sans-serif;
         font-size: 0.85rem;
@@ -85,8 +85,8 @@
     }
 
     .ai-status-banner.byok {
-        background: #a5d6a7;
-        border-bottom: 2px solid #81c784;
+        background: #93c47d; /* Darker green for personal */
+        border-bottom: 2px solid #6aa84f;
     }
 
     .ai-status-banner.has-error {
@@ -94,8 +94,8 @@
             45deg,
             transparent,
             transparent 15px,
-            rgba(211, 47, 47, 0.15) 15px,
-            rgba(211, 47, 47, 0.15) 30px
+            rgba(211, 47, 47, 0.2) 15px,
+            rgba(211, 47, 47, 0.2) 30px
         );
         border-bottom: 2px solid #d32f2f;
     }
@@ -119,7 +119,7 @@
 
     .active-info {
         font-size: 0.8rem;
-        color: #2e7d32;
+        color: #1b3350;
         font-weight: 600;
     }
 
