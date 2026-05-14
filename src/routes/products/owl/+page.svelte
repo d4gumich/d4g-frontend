@@ -337,7 +337,7 @@
         aria-label="Close modal"
         tabindex="0"
       >
-          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()}>
+          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
               <span
                   class="modal-close"
                   onclick={() => (showModal = false)}

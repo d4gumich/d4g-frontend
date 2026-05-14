@@ -48,12 +48,12 @@
             <div 
                 class="modal" 
                 onclick={() => (showModal = false)} 
-                onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
+                onkeydown={(e) => (e.key === 'Escape') && (showModal = false)}
                 role="button" 
                 aria-label="Close modal"
                 tabindex="0"
             >
-                <div class="modal-content" role="dialog" aria-modal="true" aria-label="Summary Modal" onclick={(e) => e.stopPropagation()} tabindex="0">
+                <div class="modal-content" role="dialog" aria-modal="true" aria-label="Summary Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
                     <span
                         class="modal-close"
                         onclick={() => (showModal = false)}

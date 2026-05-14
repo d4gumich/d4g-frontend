@@ -1,60 +1,44 @@
 <script>
-  export let text;
-  export let link = null;
-  export let click = null;
-  export let styleAdjustment = null;
+  let { text, link = null, click = null, styleAdjustment = null } = $props();
 </script>
 
-<a href={link} class="global-button" role="button" on:click={click} style={styleAdjustment}>
-  <div class="text">{text}</div>
-</a>
+{#if link}
+  <a href={link} class="global-button" role="button" style={styleAdjustment}>
+    <p class="text">{text}</p>
+  </a>
+{:else}
+  <button class="global-button" onclick={click} style={styleAdjustment} type="button">
+    <p class="text">{text}</p>
+  </button>
+{/if}
 
 <style>
-.global-button {
-  appearance: none;
-  background-color: var(--button-color);
-  border: 1px solid var(--text-color-main);
-  border-radius: 0.5rem;
-  box-sizing: border-box;
-  color: var(--text-color-main);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: normal;
-  outline: none;
-  padding: 1rem 1.5rem;
-  text-align: center;
-  text-decoration: none;
-  transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  width: 11rem;
-  will-change: transform;
-  margin: 0 1rem;
-}
+  .global-button {
+    background-color: var(--button-color);
+    color: var(--text-color-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+    border: none;
+    font-family: "Open Sans";
+    height: fit-content;
+    transition: all 0.2s ease;
+  }
 
-.global-button:disabled {
-  pointer-events: none;
-}
-
-.global-button:hover {
-  color: var(--text-color-main);
-  background-color: var(--button-color);
-  box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
-  transform: translateY(-2px);
-}
-
-.global-button:active {
-  box-shadow: none;
-  transform: translateY(0);
-}
+  .global-button:hover {
+    background-color: var(--button-color-hover, #d4a76a);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
 
   .text {
-    font-family: "Open Sans";
-    font-size: 1rem;
-    font-style: normal;
+    margin: 0;
     font-weight: 500;
   }
 

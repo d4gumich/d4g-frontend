@@ -129,7 +129,7 @@
                             aria-label="Close UN Clusters modal"
                             tabindex="0"
                         >
-                            <div class="modal-content" role="dialog" aria-modal="true" aria-label="UN Clusters Selection" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="0">
+                            <div class="modal-content" role="dialog" aria-modal="true" aria-label="UN Clusters Selection" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
                                 <span 
                                     class="modal-close" 
                                     onclick={() => (showUNClustersModal = false)}
@@ -192,7 +192,7 @@
             aria-label="Close Feedback modal"
             tabindex="0"
         >
-            <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Form" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="0">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Form" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
                 <span
                     class="modal-close"
                     onclick={() => (showModal = false)}

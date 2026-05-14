@@ -180,13 +180,12 @@
         <div 
             class="modal" 
             onclick={() => (showModal = false)} 
-            onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
-            role="dialog" 
-            aria-modal="true" 
-            aria-label="Feedback Modal"
+            onkeydown={(e) => (e.key === 'Escape') && (showModal = false)}
+            role="button" 
+            aria-label="Close modal"
             tabindex="0"
         >
-            <div class="modal-content" role="document" tabindex="0" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
+            <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
                 <span
                     class="modal-close"
                     onclick={() => (showModal = false)}

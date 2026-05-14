@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { HOST_URL } from '$lib/aiSetupStore.js';
     import Button from './button.svelte';
     import Eye from 'svelte-material-icons/Eye.svelte';
     import EyeOff from 'svelte-material-icons/EyeOff.svelte';
@@ -12,8 +13,6 @@
     let loading = $state(false);
     let error = $state("");
 
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
-
     async function handleSubmit() {
         if (!apiKey.trim()) {
             error = "Please provide the experimental access key.";
@@ -24,7 +23,7 @@
         error = "";
 
         try {
-            const response = await fetch(`${host_url}api/v1/auth/lighthouse-session`, {
+            const response = await fetch(`${HOST_URL}api/v1/auth/lighthouse-session`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -49,8 +48,15 @@
     }
 </script>
 
-<div class="modal-overlay">
-    <div class="modal-content">
+<div 
+    class="modal-overlay" 
+    onclick={onCancel} 
+    onkeydown={(e) => (e.key === 'Escape') && onCancel && onCancel()} 
+    role="button" 
+    tabindex="0" 
+    aria-label="Close modal"
+>
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Lighthouse Unlock" tabindex="-1">
         <h2>🔒 Lighthouse Unlock</h2>
         <p>This product is in development. A team security key is required to access the live engine and manage Hugging Face resources.</p>
 
