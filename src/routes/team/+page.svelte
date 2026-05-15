@@ -5,8 +5,8 @@
   import DefaultProfile from "$lib/assets/profile-pics/default_pfp.png";
   import RomanusProfile from "$lib/assets/profile-pics/romanus_berg.png";
   import SudhaProfile from "$lib/assets/profile-pics/sudha_kannan.png";
-  import ReedProfile from "$lib/assets/profile-pics/reed_paskvan.png"
-  import FrankieProfile from "$lib/assets/profile-pics/frankie_pike.png"
+  import ReedProfile from "$lib/assets/profile-pics/reed_paskvan.png";
+  import FrankieProfile from "$lib/assets/profile-pics/frankie_pike.png";
   import Navbar from "$lib/components/navbar.svelte";
 
   const currentPage = "team";
@@ -81,18 +81,6 @@
       linkedin: "https://www.linkedin.com/in/greciamaci/",
     }
   ];
-
-  // const webTeam = [
-  //   // {
-  //   //   name: "Yilin Fang",
-  //   //   position: "Web Developer and UX Designer",
-  //   //   description:
-  //   //     "Yilin is a senior dual degree student studying Computer Science and User Experience Design at the University of Michigan. Yilin has 3x project and internship experience with product design and research. She has advanced proficiency working with Python, REST API, SQL JavaScript and other full-stack development tools and languages. She is also interested in learning more about AI, LLMs and ML frameworks. ",
-  //   //   image:
-  //   //     YilinProfile,
-  //   //   linkedin: "https://www.linkedin.com/in/yilin-fang/",
-  //   // },
-  // ];
 
   const alumni = [
     {
@@ -254,10 +242,6 @@
       {#each dataTeam as member}
         <TeamCard {...member} />
       {/each}
-      <!-- <SectionTitle title="Web and Systems Team" />
-      {#each webTeam as member}
-        <TeamCard {...member} />
-      {/each} -->
       <SectionTitle title="Alumni" />
       <div class="alumni-container">
         {#each alumni as member}

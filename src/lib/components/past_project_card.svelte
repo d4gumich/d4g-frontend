@@ -28,6 +28,7 @@
   /* Add any styles specific to the card component */
 
   .card {
+    position: relative;
     display: flex;
     /* padding: 0px 86px; */
     flex-direction: column;

@@ -111,18 +111,18 @@
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
       <a href={`${base}/joinus`}>Join Us</a>
-      <div class="dot" />
-    </nav>
-  {/if}
+      <div class="dot"></div>
+      </nav>
+      {/if}
 
   {#if isMobile}
     <section class="p-menu1">
       <nav id="navbar" class="navigation">
         <input id="toggle1" type="checkbox" bind:checked={isHambugerChecked} on:click={handleHamburgerClick}/>
         <label class="hamburger1" for="toggle1">
-          <div class="top" style={hamburgerColor}/>
-          <div class="meat" style={hamburgerColor}/>
-          <div class="bottom" style={hamburgerColor}/>
+          <div class="top" style={hamburgerColor}></div>
+          <div class="meat" style={hamburgerColor}></div>
+          <div class="bottom" style={hamburgerColor}></div>
         </label>
 
         <nav class="menu1">

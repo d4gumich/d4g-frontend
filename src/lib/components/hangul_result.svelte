@@ -690,14 +690,6 @@
 		transition: opacity 0.5s, visibility 0.5s;
 	}
 
-	.loading-bar-container {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		text-align: center;
-		justify-content: flex-start;
-	}
-
 	.text-content-result-display {
 		display: flex;
 		width: max-content;

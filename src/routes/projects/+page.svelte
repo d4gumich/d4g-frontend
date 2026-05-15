@@ -5,11 +5,36 @@
     import { base } from '$app/paths';
     import HangulLogo from '$lib/assets/hangul2 copy 2.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
+    import OwlLogo from '$lib/assets/owl_logo.jpg';
+    import LighthouseLogo from '$lib/assets/LighthouseLogo.png';
+    import SocratesLogo from '$lib/assets/socrates_logo.png';
     import Navbar from '$lib/components/navbar.svelte';
+    import LighthouseSetup from '$lib/components/LighthouseSetup.svelte';
+    import { lighthouseActions, lighthouseStatus } from '$lib/lighthouseStore.js';
+    import { page } from '$app/stores';
+    import { onMount } from 'svelte';
+    import { browser } from '$app/environment';
     
     const currentPage = 'projects';
 
     const current_project = [
+      {
+        name: 'Socrates v2',
+        detail: 'Socrates is a structured inquiry system designed to improve question quality, surface hidden assumptions, and generate action-oriented synthesis through a disciplined dialectic process.',
+        logo: SocratesLogo,
+        buttonText: "View Documentation",
+        researchLink: 'https://github.com/1O1-ORG/socrateos-platform/tree/main',
+        tryLink: 'https://1o1.org/'
+      },
+      {
+        name: 'Lighthouse',
+        detail: 'Lighthouse provides high-fidelity automated extraction and comparison of professional profiles and job requirements.',
+        logo: LighthouseLogo,
+        researchLink: 'https://github.com/d4gumich/lighthouse',
+        tryLink: `${base}/products/lighthouse`,
+        experimental: true,
+        isDemo: true
+      },
       {
         name: 'Hangul',
         detail: 'Hangul is a tool that helps digital curators at ReliefWeb process more documents faster by extracting metadata such as title, date, language, and entities from text PDFs. It also aims to extract summaries and themes from the documents.',
@@ -26,7 +51,42 @@
       }
     ];
 
+    let secretKey = $state(null);
+    let showLighthouseSetup = $state(false);
+
+    onMount(() => {
+        secretKey = $page.url.searchParams.get('key');
+        checkSession();
+    });
+
+    async function checkSession() {
+        try {
+            const status = await lighthouseActions.fetchStatus(true);
+            // If Lighthouse session is active, we can treat the UI as "unlocked"
+            if (status && $lighthouseStatus.sessionActive) {
+                secretKey = "verified-session"; // Dummy value to trigger Svelte's reactivity and unlock the card
+            }
+        } catch (err) {
+            console.error("Failed to check session status:", err);
+        }
+    }
+
+    // Derived projects list that appends the key to links if it exists
+    let projectsWithAuth = $derived(current_project.map(p => {
+        if (p.experimental && secretKey) {
+            const separator = p.tryLink.includes('?') ? '&' : '?';
+            return { ...p, tryLink: `${p.tryLink}${separator}key=${secretKey}` };
+        }
+        return p;
+    }));
+
     const past_project = [
+      {
+        name: 'Socrates v1 (Archived Prototype)',
+        detail: 'Initial experimental prototype of the Socrates dialectic engine. This version explored structured inquiry using sequential LLM nodes.',
+        researchLink: `${base}/socrates-test`,
+        type: 'Prototype'
+      },
        {
         name: 'Chetah 1.0',
         detail: 'Chetah is a search engine that summarizes UN and NGOs reports using BERT, a deep learning algorithm. Users can search by UN Clusters and find evidence-based reports from IFRC, IWA and UNICEF.',
@@ -45,8 +105,7 @@
         researchLink: `${base}/projects/simex`,
         type: 'Project'
       }
-
-    ]
+    ];
   
   </script>
 
@@ -76,13 +135,31 @@
   </style>
   
   <Navbar {currentPage} />
+
+  {#if showLighthouseSetup}
+    <LighthouseSetup 
+      onComplete={() => { 
+        showLighthouseSetup = false; 
+        window.location.href = `${base}/products/lighthouse`;
+      }}
+      onCancel={() => showLighthouseSetup = false}
+    />
+  {/if}
+
   <div class="a">
     <SectionTitle title="Latest Projects" />
     <div class="horizontal-segment">
-        {#each current_project as project}
-        <!-- Use a separate component for each card -->
-          <CurrProjCard {...project} />
+      {#if browser}
+        {#each projectsWithAuth as project}
+          {#if !project.experimental || (secretKey && secretKey.length > 5) || project.name === 'Lighthouse'}
+            <CurrProjCard 
+              {...project} 
+              isLocked={project.experimental && (!secretKey || secretKey.length < 5)} 
+              onUnlock={project.name === 'Lighthouse' ? () => { showLighthouseSetup = true; } : null}
+            />
+          {/if}
         {/each}
+      {/if}
     </div>
 
     <SectionTitle title="Past Projects" />

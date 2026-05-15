@@ -1,0 +1,88 @@
+/* Specific global styles for Lighthouse dashboard */
+:root {
+  --border-color: #ddd;
+  --error-color: #d32f2f;
+  --success-color: #388e3c;
+  --warning-color: #f57c00;
+}
+
+.lighthouse-body {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.6;
+}
+
+.lighthouse-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Lighthouse specific buttons */
+.btn-primary {
+  background-color: var(--blue-color-main);
+  color: white;
+  cursor: pointer;
+  font-family: "Outfit", sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2a4a70;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-accent {
+  background-color: var(--button-color);
+  color: var(--text-color-main);
+  cursor: pointer;
+  font-family: "Outfit", sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-accent:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active { background-color: #e8f5e9; color: #2e7d32; }
+.status-inactive { background-color: #ffebee; color: #c62828; }
+.status-loading { background-color: #fff3e0; color: #ef6c00; }
+
+/* Utilities */
+.w-full { width: 100%; }

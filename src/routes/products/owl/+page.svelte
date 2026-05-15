@@ -1,40 +1,57 @@
 <script>
+    import { onMount } from "svelte";
     import Navbar from "$lib/components/navbar.svelte";
     import Button from "$lib/components/button.svelte";
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import ChevronDown from "$lib/assets/icons/chevron-down-solid.svelte";
     import ChevronUp from "$lib/assets/icons/angle-up-solid.svelte";
+    import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
+    import AISetup from "$lib/components/AISetup.svelte";
+    import AIBanner from "$lib/components/AIBanner.svelte";
 
     const currentPage = 'owl';
+    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
-    let query = "";
-    let aboutOwl= false;
-    let answer = "";
-    let documents = [];
-    let model = "gemini-1.5-flash";
-    let temperature = 0.5;
-    let k = 5;
-    let loading = false;
-    let progress=0;
-    let retrievalTime = null;
-    let error = "";
-    let showResults = false;
+    let query = $state("");
+    let aboutOwl = $state(false);
+    let answer = $state("");
+    let documents = $state([]);
+    let model = $state("gemini-1.5-flash");
+    let temperature = $state(0.5);
+    let k = $state(5);
+    let loading = $state(false);
+    let progress = $state(0);
+    let retrievalTime = $state(null);
+    let error = $state("");
+    let showResults = $state(false);
+    let showAISetup = $state(false);
 
     let progressInterval;
   
-    // make this a component
-    let showModal = false;
+    // feedback modal
+    let showModal = $state(false);
     let formUrl = 'https://forms.gle/n51U4g2K9cafpZUu5';
     function handleFeedbackClick() {
         showModal = true;
     }
+
+    onMount(() => {
+        aiActions.fetchStatus();
+    });
   
     async function submitQuestion() {
       if (!query.trim()) {
         error = "Please enter a question.";
         return;
       }
+
+      if ($aiStatus.status !== 'active' && !$aiStatus.forceTeamKey) {
+        showAISetup = true;
+        return;
+      }
+
       loading = true;
       progress = 0;
       error = "";
@@ -43,25 +60,32 @@
       retrievalTime = null;
       showResults = false;
 
-       // Simulate loading bar (you could tie this to actual steps if desired)
+       // Simulate loading bar
       progressInterval = setInterval(() => {
         if (progress < 90) {
           progress += 1;
         }
-      }, 30); // adjust speed here
+      }, 30);
 
       const startTime = performance.now();
 
       try {
-        const response = await fetch('https://d4gumsi.pythonanywhere.com/api/owl', {
+        const headers = { "Content-Type": "application/json" };
+        if ($aiStatus.forceTeamKey) {
+            headers['X-Force-Team-Key'] = 'true';
+        }
+
+        const response = await fetch(`${HOST_URL}api/v1/products/owl`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: headers,
           body: JSON.stringify({
-            query,
+            text: query,
             k,
             temperature,
-            model
-          })
+            gemini_model: model,
+            max_docs: k
+          }),
+          credentials: 'include'
         });
 
         const result = await response.json();
@@ -70,45 +94,58 @@
           throw new Error(result.error || "Something went wrong.");
         }
 
-        answer = result.answer;
-        documents = result.documents;
+        answer = result.gemini?.answer || "";
+        documents = result.data || [];
 
-        const endTime = performance.now(); // ⏱️ End timer
+        const endTime = performance.now();
         retrievalTime = ((endTime - startTime) / 1000).toFixed(2);
         showResults = true;
       } catch (err) {
         error = err.message;
+        if (error.includes("API key expired") || error.includes("400") || error.includes("401")) {
+          aiActions.setError(true, "API Key Expired/Invalid");
+        } else {
+          aiActions.setError(true, "Connection Failed");
+        }
       } finally {
         clearInterval(progressInterval);
         setTimeout(() => {
           loading = false;
           progress = 0;
-        }, 800); // allow user to see 100% before reset
+        }, 800);
       }
     }
+
     function filterEnter(event) {
       if (event.key === "Enter" && query.trim().length > 0) {
         event.preventDefault();
-        submitQuestion(event);
+        submitQuestion();
       }
     }
+
     const goBack = () => {
       loading = false;
       showResults = false;
       progress = 0;
-      window.location.reload();
+      query = "";
+      answer = "";
+      documents = [];
     };
 
-    let expandedDocs = [];
+    let expandedDocs = $state([]);
 
     function toggleDoc(index) {
       expandedDocs[index] = !expandedDocs[index];
     }
   </script>
+
   <svelte:head>
     <title>Owl Q&A</title>
   </svelte:head>
+
   <Navbar {currentPage} />
+  <AIBanner />
+
   <div class="container">
     <div class="content-container">
         <div class="heading-container">
@@ -125,33 +162,30 @@
           type="text"
           placeholder="Ask a question about nonprofits reports..."
           bind:value={query}
-          on:keypress={filterEnter}
+          onkeypress={filterEnter}
         />
         {#if query && query != ""}
           <button
               class="search-button"
               style = "background-image: url({SearchLogo});"
               height="10px"
-              on:click={submitQuestion}
-          />
+              onclick={submitQuestion}
+              aria-label="Submit Question"
+          ></button>
         {:else}
-            <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+            <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Submit disabled"></button>
         {/if}
       </div>
+
       {#if !showResults}
       <div class="param-container">
         <!-- Model Selection -->
-        <script>
-          // ✅ Set the default model here so Svelte uses it on load
-          let model = "gemini-2.5-flash-lite";
-        </script>
-        
         <div class="param-block">
           <label for="model" class="param-text">Select LLM Model for Answer</label>
           <select id="model" bind:value={model}>
-            <option value="gemini-2.5-flash-lite">gemini-2.5-flash-lite (Free Tier)</option>
-            <option value="gemini-2.5-flash">gemini-2.5-flash</option>
-            <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
           </select>
         </div>
 
@@ -190,8 +224,8 @@
             min="1"
             max="10"
             bind:value={k}
-            on:input={() => {
-              if (k < 0) k = 0;
+            oninput={() => {
+              if (k < 1) k = 1;
               if (k > 10) k = 10;
             }}
           />
@@ -200,7 +234,7 @@
       {/if}
 
       {#if error}
-        <p style="color: red;">❌ {error}</p>
+        <p style="color: red; margin: 1rem 0;">❌ {error}</p>
       {/if}
 
       {#if loading}
@@ -212,29 +246,32 @@
       {/if}
 
       {#if showResults}
-        <p>📊 Retrieved {documents.length} documents in {retrievalTime} seconds.</p>
+        <p style="margin: 1rem 0;">📊 Retrieved {documents.length} documents in {retrievalTime} seconds.</p>
       {/if}
+
       {#if showResults}
       <div class="owl-container">
         {#if answer}
-          <h2>🧠 Answer</h2>
-          <p>{answer}</p>
+          <div class="answer-box">
+            <h2>🧠 Answer</h2>
+            <p>{answer}</p>
+          </div>
         {/if}
 
         {#if documents.length}
           <h2>📑 Retrieved Documents</h2>
           {#each documents as doc, i}
-            <div style="margin-bottom: 1em;">
+            <div class="doc-card">
               <h3>Document {i + 1}</h3>
               <p><strong>Title:</strong> {doc.title}</p>
               <p><strong>Source:</strong> {doc.source}</p>
               <p><strong>Page:</strong> {doc.page_label}</p>
-              <p><strong>URL:</strong> <a href={doc.URL} target="_blank">{doc.URL}</a></p>
-               <!-- Toggle Row -->
+              <p><strong>URL:</strong> <a href={doc.URL} target="_blank" rel="noopener noreferrer">{doc.URL}</a></p>
+               
               <div class="doc-toggle-line">
                 <button
                   class="arrow"
-                  on:click={() => toggleDoc(i)}
+                  onclick={() => toggleDoc(i)}
                   title={expandedDocs[i] ? "Collapse" : "Expand"}
                   aria-label={expandedDocs[i] ? "Collapse document" : "Expand document"}
                 >
@@ -251,28 +288,28 @@
                 </span>
               </div>
 
-              <!-- Content -->
               <div class="doc-text">
                 {#if expandedDocs[i]}
-                  <p>{doc.document}</p>
+                  <p>{doc.combined_details}</p>
                 {:else}
-                  <p>{doc.document.slice(0, 500)}...</p>
+                  <p>{doc.combined_details?.slice(0, 500)}...</p>
                 {/if}
               </div>
-                    </div>
-                  {/each}
-                  <div class="button-container">
-                    <Button
-                      text="Go back"
-                      click={() => goBack()}
-                      styleAdjustment="margin: 2rem auto;"
-                    />
+            </div>
+          {/each}
+          <div class="button-container">
+            <Button
+              text="Go back"
+              click={() => goBack()}
+              styleAdjustment="margin: 2rem auto;"
+            />
           </div>
         {/if}
       </div>
       {/if}
     </div>
-    {#if !answer}
+
+    {#if !showResults && !loading}
       <div class="button-container">
           <Button
               text="About Owl"
@@ -282,7 +319,6 @@
           <Button text="Provide Feedback" click={handleFeedbackClick} />
       </div>
     {/if}
-    <!-- until here -->
 
     <div class="about-chetah-text">
         {#if aboutOwl}
@@ -291,18 +327,27 @@
             </p>
         {/if}
     </div>
+
     {#if showModal}
-      <!-- svelte-ignore a11y-click-events-have-key-events -->
-      <div class="modal" on:click|self={() => (showModal = false)}>
-          <div class="modal-content">
-              <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div 
+        class="modal" 
+        onclick={() => (showModal = false)} 
+        onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
+        role="button" 
+        aria-label="Close modal"
+        tabindex="0"
+      >
+          <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
               <span
                   class="modal-close"
-                  on:click|stopPropagation={() => (showModal = false)}
+                  onclick={() => (showModal = false)}
+                  role="button"
+                  tabindex="0"
+                  onkeydown={(e) => e.key === 'Enter' && (showModal = false)}
+                  aria-label="Close modal"
                   >&times;</span
               >
-              <!-- svelte-ignore a11y-missing-attribute -->
-              <iframe src={formUrl} width="100%" height="100%" />
+              <iframe src={formUrl} width="100%" height="100%" title="Owl Feedback Form"></iframe>
           </div>
       </div>
     {/if}
@@ -312,279 +357,261 @@
     .container {
       margin: auto;
       display: flex;
-      padding: 7% 0;
+      padding: 5% 0;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 45px;
+      gap: 30px;
       background-color: var(--background-color-light);
+      min-height: 80vh;
     }
 
     .content-container {
       display: flex;
-      width: auto;
+      width: 100%;
+      max-width: 1000px;
       justify-content: center;
       align-items: center;
-      align-content: center;
-      gap: 0px 1%;
-      flex-wrap: wrap;
       flex-direction: column;
+      padding: 0 1rem;
     }
 
-    /* heading block */
     .owl-heading {
-      font-size: 3 rem;
+      font-size: 2.5rem;
       font-weight: bold;
+      color: var(--blue-color-main);
+      margin: 0;
     }
     .info-text {
         text-align: center;
-        margin-bottom: 10px;
+        margin: 0.5rem 0 1.5rem 0;
         color: rgba(0, 0, 0, 0.87);
         font-family: Open Sans;
-        font-size: 20px;
-        font-style: normal;
+        font-size: 1.2rem;
         font-weight: 600;
-        line-height: 25px;
     }
     .heading-container {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 3rem;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1rem;
     }
-    /* search container imported from chetah */
+
     .search-container {
       display: flex;
       align-items: center;
-      width: 50rem;
+      width: 100%;
+      max-width: 800px;
       height: 60px;
-      flex-shrink: 0;
-      fill: var(--white, #fff);
-      stroke-width: 0.5px;
-      stroke: #000;
+      background: white;
+      border: 1px solid #ccc;
       border-radius: 10px;
-      padding: 2%;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
     .search-input {
-        width: 100%;
-        /* padding: 10px 20px; */
-        font-size: 16px;
-        fill: var(--white, #fff);
-        stroke-width: 0.5px;
-        stroke: #000;
-        color: rgba(0, 0, 0, 0.5);
+        flex: 1;
+        border: none;
+        padding: 0 1.5rem;
         font-family: Open Sans;
-        font-size: 20px;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 30.857px;
-        height: 90%;
-        padding-left: 3%;
-        border-radius: 10px 0 0 10px;
+        font-size: 1.1rem;
+        height: 100%;
+    }
+    .search-input:focus {
+        outline: none;
     }
     .search-button {
-        width: 60px;
+        width: 70px;
         height: 100%;
-        border-radius: 0 10px 10px 0;
         border: none;
         background-color: #1b3350;
-        color: white;
-        font-size: 16px;
         cursor: pointer;
-        background-size: 65%;
+        background-size: 40%;
         background-repeat: no-repeat;
         background-position: center;
+        transition: background-color 0.2s;
     }
-    /* save this style */
-    .about-chetah-text {
-        width: 50%;
-        text-align: left;
-        /* margin-top: 1%; */
-        color: #000;
-        font-family: Open Sans;
-        font-size: 20px;
-        font-style: normal;
-        font-weight: 600;
-        line-height: 30px; /* 150% */
+    .search-button:hover:not(:disabled) {
+        background-color: #2c4a70;
+    }
+    .search-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
-    /* small texts for labels */
+    .about-chetah-text {
+        width: 80%;
+        max-width: 800px;
+        text-align: left;
+        color: #444;
+        font-family: Open Sans;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-top: 1rem;
+    }
+
     .param-text {
       margin: 0;
       color: var(--text-color-main);
       font-family: "Open Sans";
       font-size: 0.9rem;
-      font-weight: 400;
-      line-height: 25px;
-      transition: font-weight 300ms ease-in-out;
+      font-weight: 600;
     }
 
-    /* parameter input blocks */
     .param-container {
       display: flex;
-      gap: 1.5rem;
-      margin: 1rem 0;
-      flex-wrap: wrap; /* allows wrapping on smaller screens */
+      gap: 2rem;
+      margin: 2rem 0;
+      width: 100%;
+      max-width: 800px;
     }
 
     .param-block {
       display: flex;
       flex-direction: column;
       flex: 1;
-      min-width: 200px;
     }
 
     .param-block label {
-      font-weight: bold;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
     }
-    /* k input and model drop down style */
+
     .param-block select,
     .param-block input[type="number"] {
-      padding: 0.4rem;
+      padding: 0.6rem;
       font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
     }
-    /* slider style */
+
     .param-block input[type="range"] {
       width: 100%;
-      padding: 0;
-      margin: 0;
-      appearance: none;
-      background: transparent;
-    }
-
-    /* slider wasn't going all the way to the end, below webkit fixes this issue for different sizing on different browser */
-    /* WebKit (Chrome, Safari) */
-    .param-block input[type="range"]::-webkit-slider-runnable-track {
-      width: 100%;
-      height: 4px;
-      background: #ddd;
-      border-radius: 2px;
-    }
-
-    .param-block input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #333;
-      margin-top: -5px; /* align thumb center with track */
-      cursor: pointer;
-    }
-
-    /* Firefox */
-    .param-block input[type="range"]::-moz-range-track {
-      height: 4px;
-      background: #ddd;
-      border-radius: 2px;
-    }
-
-    .param-block input[type="range"]::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #333;
-      cursor: pointer;
-    }
-
-    /* parameter selection texts labels */
-    .param-block small {
-      font-weight: normal;
-      color: #555;
-      font-size: 0.85rem;
+      margin: 0.5rem 0;
     }
 
     .range-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 0.25rem;
-      padding: 0 2px;
-    }
-    .temp-value {
-      display: inline-block;
-      width: 3ch;              /* Fits up to "0.00" */
-      text-align: right;
-      font-family: Open Sans;
+      font-size: 0.8rem;
+      color: #888;
     }
 
-    /* modal */
     .modal {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.8);
         display: flex;
         justify-content: center;
         align-items: center;
+        z-index: 3000;
+        backdrop-filter: blur(4px);
     }
     .modal-content {
-        width: 80%;
-        height: 80%;
+        width: 90%;
+        max-width: 800px;
+        height: 80vh;
         background-color: white;
-        padding: 20px;
+        border-radius: 1rem;
+        position: relative;
+        padding: 2rem;
     }
     .modal-close {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 1rem;
+        right: 1.5rem;
         cursor: pointer;
+        font-size: 2rem;
+        color: #666;
     }
 
     .owl-container {
-      width: 80%;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 2rem;
     }
 
-    .loading-icon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+    .answer-box {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 1rem;
+        border-left: 5px solid var(--blue-color-main);
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    .button-container {
-      display: flex;
-      flex-direction: row;
-      align-items: stretch;
-      margin-bottom: 2rem;
+    .answer-box h2 {
+        margin-top: 0;
+        color: var(--blue-color-main);
+    }
+
+    .doc-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.8rem;
+        border: 1px solid #eee;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .doc-card h3 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .doc-toggle-line {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0;
+        padding-top: 1rem;
+        border-top: 1px solid #f0f0f0;
     }
 
     .arrow {
-      background: none;
+      background: #f0f0f0;
       border: none;
-      font-size: 1.2rem;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      padding: 0;
-      margin: 0;
-      line-height: 1;
-      color: inherit;
+      transition: background 0.2s;
+    }
+
+    .arrow:hover {
+        background: #e0e0e0;
     }
 
     .dropdown-arrow {
-      margin: 0;
-      padding: 0;
-      position: relative;
-      top: 1px;
       width: 1rem;
       height: 1rem;
     }
 
-    /* Stack everything vertically on small screens */
-    @media (max-width: 640px) {
-      .heading-container {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    .loading-icon {
+      width: 100%;
+      max-width: 400px;
+      margin: 2rem 0;
+    }
 
+    .button-container {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 640px) {
       .param-container {
         flex-direction: column;
+        gap: 1rem;
       }
-     
+      .search-container {
+          height: 50px;
+      }
     }
   </style>

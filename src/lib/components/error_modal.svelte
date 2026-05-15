@@ -1,7 +1,6 @@
 <!-- ErrorModal.svelte -->
 <script>
-  export let updateShowErrorFromParent;
-  export let errorType;
+  let { updateShowErrorFromParent, errorType } = $props();
 
   const text = [
     "File upload must be a PDF. Please try again.",
@@ -13,10 +12,17 @@
   }
 </script>
 
-<div class="modal-overlay">
-  <div class="modal">
+<div 
+  class="modal-overlay" 
+  onclick={handleClick} 
+  onkeydown={(e) => (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') && handleClick()}
+  role="button"
+  tabindex="0"
+  aria-label="Close error message"
+>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Error Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
     <p class="text-prompt">{text[errorType]}</p>
-    <button class="small-button" on:click={handleClick}>OK</button>
+    <button class="small-button" onclick={handleClick}>OK</button>
   </div>
 </div>
 
@@ -62,6 +68,7 @@
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+    cursor: pointer;
   }
 
   .small-button:not(:disabled):hover,

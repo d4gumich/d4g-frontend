@@ -5,11 +5,12 @@
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
+    import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
     const currentPage = 'chetah2.0';
 
-    // Set between dev and build, for url "https://d4gumsi.pythonanywhere.com/api/v1/products/chetah"
-    const host_url = 'https://d4gumsi.pythonanywhere.com/';
+    // Set between dev and build
+    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
     let searchQuery = '';
     let aboutChetah = false;
@@ -89,7 +90,7 @@
                     <select
                     class="version-select"
                     bind:value={version}
-                    on:change={handleVersionChange}
+                    onchange={handleVersionChange}
                     >
                         {#each versions as version}
                             <option value={version}>{version}</option>
@@ -105,17 +106,18 @@
                 type="text"
                 placeholder="Enter Queries"
                 bind:value={searchQuery}
-                on:keypress={filterEnter}
+                onkeypress={filterEnter}
             />
             {#if searchQuery && searchQuery != ""}
                 <button
                     class="search-button"
                     style = "background-image: url({SearchLogo});"
                     height="10px"
-                    on:click={search(searchQuery)}
-                />
+                    onclick={() => search(searchQuery)}
+                    aria-label="Search"
+                ></button>
             {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
@@ -175,17 +177,25 @@
     </div>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
-            <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div 
+            class="modal" 
+            onclick={() => (showModal = false)} 
+            onkeydown={(e) => (e.key === 'Escape') && (showModal = false)}
+            role="button" 
+            aria-label="Close modal"
+            tabindex="0"
+        >
+            <div class="modal-content" role="dialog" aria-modal="true" aria-label="Feedback Modal" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} tabindex="-1">
                 <span
                     class="modal-close"
-                    on:click|stopPropagation={() => (showModal = false)}
+                    onclick={() => (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    onkeydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    aria-label="Close modal"
                     >&times;</span
                 >
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <iframe src={formUrl} width="100%" height="100%" />
+                <iframe src={formUrl} width="100%" height="100%" title="Chetah Feedback Form"></iframe>
             </div>
         </div>
     {/if}

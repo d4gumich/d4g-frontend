@@ -2,9 +2,12 @@
   export let name;
   export let detail;
   export let logo;
-  export let buttonText;
+  export let buttonText = "View Research";
   export let researchLink;
   export let tryLink;
+  export let isDemo = false;
+  export let isLocked = false;
+  export let onUnlock = null;
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Button from "./button.svelte"
   import { onMount } from "svelte"
@@ -28,11 +31,19 @@
 
 <div class="card-container">
   <div class="card">
+    {#if isDemo}
+      <div class="demo-badge">DEMO!!</div>
+    {/if}
     <img src={logo} alt="logo" height="30%" />
     <div class="content">
       <div class="text">
         <h1>{name}</h1>
         <h3>{detail}</h3>
+        {#if isLocked}
+          <div class="locked-notice">
+            🔒 This product is in development. A <strong>D4G team</strong> security key is required to access the live engine.
+          </div>
+        {/if}
         <!-- two buttons from button component -->
       </div>
       <div class="button-container">
@@ -45,8 +56,9 @@
         </div>
         <div class="button">
           <Button
-            text="Try {name}"
-            link={tryLink}
+            text={isLocked ? "Access Restricted" : `Try ${name}`}
+            link={isLocked ? null : tryLink}
+            click={isLocked ? onUnlock : null}
             styleAdjustment={isMobile ? `margin: 1rem 0 0 0;` : 'margin: 0 0 0 1rem;'}
           />
         </div>
@@ -65,6 +77,7 @@
   }
 
   .card {
+    position: relative;
     display: flex;
     width: auto;
     max-width: 400px;
@@ -77,6 +90,26 @@
     flex-shrink: 0;
     border-radius: 15px;
     border: 1px solid #000;
+    overflow: hidden;
+  }
+
+  .demo-badge {
+    position: absolute;
+    top: 20px;
+    right: -40px;
+    background: #e3b878; /* Matching the site's button color */
+    color: #232323;
+    width: 150px;
+    text-align: center;
+    padding: 5px 0;
+    font-size: 0.75rem;
+    font-weight: 800;
+    transform: rotate(45deg);
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    pointer-events: none;
   }
 
   .content {
@@ -116,8 +149,6 @@
 
   .button{
     text-align: center;
-    display:table-cell;
-    vertical-align:middle;
   }
 
   h3 {
@@ -129,6 +160,20 @@
     font-weight: 400;
     line-height: 25px; /* 125% */
     width: auto;
+  }
+
+  .locked-notice {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: #fff3f3;
+    border-left: 4px solid #d32f2f;
+    color: #b71c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   @media (max-device-width: 912px) and (min-resolution: 2dppx) {

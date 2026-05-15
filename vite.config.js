@@ -3,12 +3,10 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({      
 	plugins: [sveltekit()],
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'esnext'
-    }
-  },
   build: {
     target: 'esnext'
+  },
+  ssr: {
+    noExternal: ['svelte-material-icons']
   }
 });

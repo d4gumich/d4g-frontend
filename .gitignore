@@ -130,7 +130,9 @@ dist
 .pnp.*
 
 .svelte-kit
+build/
 
 # macOS specific files
 .DS_Store
 */.DS_Store
+node_modules
