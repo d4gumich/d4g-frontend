@@ -1,6 +1,5 @@
 <script>
     import { onMount } from 'svelte';
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import Button from './button.svelte';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
 

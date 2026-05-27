@@ -26,11 +26,11 @@
 
 {#if !error}
     <div class="result">
-        {#each report_title.slice(0,3) as title,i}
+        {#each (Array.isArray(report_title) ? report_title : [report_title || "Untitled"]).slice(0,3) as title, i}
             <p style="font-size: {1.5-i*0.2}rem;">{title}</p>
         {/each}
         <p>
-            <strong>Year of Report: </strong>{year_of_report||"No identified Author"}<br/>
+            <strong>Year of Report: </strong>{year_of_report||"No identified Year"}<br/>
             <strong>Report Author: </strong>{report_author||"No identified Author"}<br/>
             <strong>Organization: </strong>{organization_name||"No identified Organization"}<br/>
             <strong>Themes: </strong>{themes||"No identified Themes"}<br/>
@@ -40,7 +40,7 @@
             <strong>Language: </strong>{language_of_doc||"Language of report not identified"}<br/>
             <strong>Document created: </strong>{doc_creation_date||"No identified creation date"}<br/>
             <strong>Report modified: </strong>{doc_modified_date||"No identified modified date"}<br/>
-            <strong>Report modified: </strong>{file_name||"No identified filename"}<br/>
+            <strong>File Name: </strong>{file_name||"No identified filename"}<br/>
             <strong>Hangul Summary: </strong>{summary?.substring(0, 350)||"No hangul summary available"} ... <button onclick={toggleModal}>+More</button><br/>
         </p>
 

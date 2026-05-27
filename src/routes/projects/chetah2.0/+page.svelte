@@ -5,12 +5,12 @@
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { HOST_URL } from '$lib/aiSetupStore.js';
 
     const currentPage = 'chetah2.0';
 
     // Set between dev and build
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+    const host_url = HOST_URL;
 
     let searchQuery = '';
     let aboutChetah = false;
@@ -114,9 +114,10 @@
                     style = "background-image: url({SearchLogo});"
                     height="10px"
                     on:click={search(searchQuery)}
-                />
+                    aria-label="Search"
+                ></button>
             {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
@@ -176,17 +177,25 @@
     </div>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
+        <div 
+            class="modal" 
+            on:click|self={() => (showModal = false)}
+            on:keydown={(e) => e.key === 'Escape' && (showModal = false)}
+            role="button"
+            tabindex="0"
+            aria-label="Close feedback modal"
+        >
             <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
+                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    aria-label="Close modal"
                     >&times;</span
                 >
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <iframe src={formUrl} width="100%" height="100%" />
+                <iframe src={formUrl} width="100%" height="100%" title="Feedback Form"></iframe>
             </div>
         </div>
     {/if}

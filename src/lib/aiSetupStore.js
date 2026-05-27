@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
-export const HOST_URL = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+export const HOST_URL = env.PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
 
 export const aiStatus = writable({
     status: 'inactive',

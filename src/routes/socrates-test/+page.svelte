@@ -8,15 +8,14 @@
     import { page } from '$app/stores';
     import { browser } from '$app/environment';
     import { base } from '$app/paths';
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
-    import { aiStatus, aiActions } from '$lib/aiSetupStore.js';
+    import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
 
     const currentPage = 'socrates-test';
     
     let secretKey = $state(null);
     let showSetup = $state(true);
 
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+    const host_url = HOST_URL;
 
     onMount(async () => {
         secretKey = $page.url.searchParams.get('key');

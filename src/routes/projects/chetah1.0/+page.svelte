@@ -6,7 +6,7 @@
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { HOST_URL } from '$lib/aiSetupStore.js';
 
     const currentPage = "chetah1.0";
 
@@ -32,7 +32,7 @@
     }
 
     async function doFetch(searchQuery) {
-        const base_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+        const base_url = HOST_URL;
         const url = `${base_url}api/v1/products/chetah`;
         const data = { query: searchQuery };
         const response = await fetch(url, {
@@ -135,9 +135,10 @@
                     style = "background-image: url({SearchLogo});"
                     height="10px"
                     on:click={search(searchQuery)}
-                />
+                    aria-label="Search"
+                ></button>
             {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled />
+                <button class="search-button" style="background-image: url({SearchLogo});" height="10px" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
@@ -192,7 +193,14 @@
                     {#if showUNClustersModal}
                         <div class="cluster-modal">
                             <div class="cluster-modal-content">
-                                <span class="modal-close" on:click={() => (showUNClustersModal = false)}>×</span>
+                                <span 
+                                    class="modal-close" 
+                                    on:click={() => (showUNClustersModal = false)}
+                                    on:keydown={(e) => e.key === 'Enter' && (showUNClustersModal = false)}
+                                    role="button"
+                                    tabindex="0"
+                                    aria-label="Close modal"
+                                >×</span>
                                 <div class="modal-header">
                                     <h2 class="selected">UN Clusters</h2>
                                 </div>
@@ -246,17 +254,25 @@
     </div>
 
     {#if showModal}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="modal" on:click|self={() => (showModal = false)}>
+        <div 
+            class="modal" 
+            on:click|self={() => (showModal = false)}
+            on:keydown={(e) => e.key === 'Escape' && (showModal = false)}
+            role="button"
+            tabindex="0"
+            aria-label="Close feedback modal"
+        >
             <div class="modal-content">
-                <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <span
                     class="modal-close"
                     on:click|stopPropagation={() => (showModal = false)}
+                    on:keydown={(e) => e.key === 'Enter' && (showModal = false)}
+                    role="button"
+                    tabindex="0"
+                    aria-label="Close modal"
                     >&times;</span
                 >
-                <!-- svelte-ignore a11y-missing-attribute -->
-                <iframe src={formUrl} width="100%" height="100%" />
+                <iframe src={formUrl} width="100%" height="100%" title="Feedback Form"></iframe>
             </div>
         </div>
     {/if}

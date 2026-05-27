@@ -76,24 +76,26 @@
                 </p>
             </div>
         </div>
+<div class="search-container">
+    <input
+        class="search-input"
+        type="text"
+        placeholder="Search..."
+        bind:value={searchQuery}
+        onkeypress={filterEnter}
+    />
+    {#if searchQuery && searchQuery !== ""}
+        <button
+            class="search-button"
+            style="background-image: url({SearchLogo});"
+            onclick={handleSearchClick}
+            aria-label="Submit Search"
+        ></button>
+    {:else}
+        <button class="search-button" style="background-image: url({SearchLogo});" disabled aria-label="Search disabled"></button>
+    {/if}
+</div>
 
-        <div class="search-container">
-            <input
-                class="search-input"
-                type="text"
-                placeholder="Search..."
-                bind:value={searchQuery}
-                onkeypress={filterEnter}
-            />
-            {#if searchQuery && searchQuery !== ""}
-                <button
-                    class="search-button"
-                    style="background-image: url({SearchLogo});"
-                    onclick={handleSearchClick}
-                    aria-label="Submit Search"
-                ></button>
-            {:else}
-                <button class="search-button" style="background-image: url({SearchLogo});" disabled aria-label="Search disabled"></button>
             {/if}
         </div>
 
