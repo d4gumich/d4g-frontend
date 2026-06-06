@@ -175,11 +175,9 @@
   }
 
   async function handleAnalyzeClick() {
-    if ($aiStatus.status !== 'active') {
-      showAISetup = true;
-      return;
-    }
-
+    // If not active, we default to Team Key unless they are in the middle of a setup
+    // The backend handles the fallback to the team key if session is inactive
+    
     let userProceedSelection;
     userProceedSelection = await handleButtonClick();
 
@@ -338,6 +336,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    min-height: 85vh;
     background-color: var(--background-color-light);
   }
 

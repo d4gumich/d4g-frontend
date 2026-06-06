@@ -18,7 +18,6 @@
     let aboutOwl = $state(false);
     let answer = $state("");
     let documents = $state([]);
-    let model = $state("gemini-1.5-flash");
     let temperature = $state(0.5);
     let k = $state(5);
     let loading = $state(false);
@@ -82,7 +81,7 @@
             text: query,
             k,
             temperature,
-            gemini_model: model,
+            gemini_model: $aiStatus.model,
             max_docs: k
           }),
           credentials: 'include'
@@ -179,17 +178,6 @@
 
       {#if !showResults}
       <div class="param-container">
-        <!-- Model Selection -->
-        <div class="param-block">
-          <label for="model" class="param-text">Select LLM Model for Answer</label>
-          <select id="model" bind:value={model}>
-            <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
-            <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep)</option>
-            <option value="gpt-4o-mini">GPT-4o Mini</option>
-          </select>
-        </div>
-
-      
         <!-- Temperature Slider -->
         <div class="param-block">
           <label for="temperature" class="param-text">
@@ -363,7 +351,7 @@
       align-items: center;
       gap: 30px;
       background-color: var(--background-color-light);
-      min-height: 80vh;
+      min-height: 85vh;
     }
 
     .content-container {

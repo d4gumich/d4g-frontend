@@ -7,17 +7,26 @@
     let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
     let provider = $state($aiStatus.provider || "google");
-    let model = $state($aiStatus.model || "gemini-1.5-flash");
+    let model = $state($aiStatus.model || "");
     let apiKey = $state("");
 
     let loading = $state(false);
+    let verifying = $state(false);
     let error = $state("");
+    let isVerified = $state($aiStatus.status === 'active');
+    let dynamicModels = $state($aiStatus.availableModels || []);
 
-    const models = {
+    onMount(async () => {
+        if ($aiStatus.status === 'active' && dynamicModels.length === 0) {
+            const models = await aiActions.fetchModels(provider);
+            dynamicModels = models || [];
+        }
+    });
+
+    const staticModels = {
         google: [
-            { id: "gemini-3-flash", name: "Gemini 3 Flash" },
-            { id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite" },
-            { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash" }
+            { id: "gemini-3.1-flash-preview", name: "Gemini 3.1 Flash" },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro" }
         ],
         openai: [
             { id: "gpt-4o", name: "GPT-4o (High Quality)" },
@@ -32,12 +41,55 @@
     };
 
     function handleProviderChange() {
-        model = models[provider][0].id;
+        isVerified = false;
+        dynamicModels = [];
+        model = "";
+    }
+
+    async function handleVerify() {
+        if (!apiKey.trim()) {
+            error = "Please provide your API key to verify.";
+            return;
+        }
+
+        verifying = true;
+        error = "";
+
+        try {
+            const response = await fetch(`${HOST_URL}api/v1/auth/models`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    provider: provider,
+                    api_key: apiKey
+                }),
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Failed to verify key.");
+            }
+
+            dynamicModels = data.models || [];
+            isVerified = true;
+            
+            // Auto-select first model if none selected
+            if (dynamicModels.length > 0 && !model) {
+                model = dynamicModels[0].id;
+            }
+        } catch (err) {
+            error = err.message;
+            isVerified = false;
+        } finally {
+            verifying = false;
+        }
     }
 
     async function handleSubmit() {
-        if ($aiStatus.status !== 'active' && !apiKey.trim()) {
-            error = "Please provide your API key.";
+        if (!isVerified && !apiKey.trim()) {
+            error = "Please verify your API key first.";
             return;
         }
 
@@ -77,6 +129,9 @@
 
     async function handleLogout() {
         await aiActions.logout();
+        isVerified = false;
+        dynamicModels = [];
+        apiKey = "";
         onCancel && onCancel();
     }
 </script>
@@ -96,24 +151,26 @@
         </div>
 
         <div class="form-group">
-            <label for="model">Model Variant</label>
-            <select id="model" bind:value={model}>
-                {#each models[provider] as m}
-                    <option value={m.id}>{m.name}</option>
-                {:else}
-                    <option value="">No models available</option>
-                {/each}
-            </select>
-        </div>
-
-        <div class="form-group">
             <label for="api-key">API Key</label>
-            <input 
-                type="password" 
-                id="api-key" 
-                bind:value={apiKey} 
-                placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."} 
-            />
+            <div class="input-with-button">
+                <input 
+                    type="password" 
+                    id="api-key" 
+                    bind:value={apiKey} 
+                    oninput={() => { isVerified = false; error = ""; }}
+                    placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."} 
+                />
+                <button 
+                    class="btn-verify" 
+                    onclick={handleVerify} 
+                    disabled={verifying || !apiKey.trim()}
+                >
+                    {verifying ? "..." : "Verify"}
+                </button>
+            </div>
+            {#if isVerified}
+                <div class="success-msg">✓ Key Verified</div>
+            {/if}
             <div class="security-warning">
                 <strong>SECURE SESSION:</strong> Your key is used for this session only and expires after 30 mins of inactivity.
             </div>
@@ -135,7 +192,7 @@
             <Button 
                 text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")} 
                 click={handleSubmit}
-                disabled={loading || ($aiStatus.status !== 'active' && !apiKey.trim())}
+                disabled={loading || (!isVerified && $aiStatus.status !== 'active')}
             />
         </div>
     </div>
@@ -201,6 +258,38 @@
     select:focus, input:focus {
         outline: none;
         border-color: var(--button-color);
+    }
+
+    select:disabled {
+        background: #f9f9f9;
+        cursor: not-allowed;
+    }
+
+    .input-with-button {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-verify {
+        background: var(--button-color);
+        color: white;
+        border: none;
+        padding: 0 1rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-verify:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .success-msg {
+        color: #2e7d32;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
     }
 
     .security-warning {

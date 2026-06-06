@@ -39,9 +39,31 @@
                 {/if}
             </button>
             
-            {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+            {#if $aiStatus.model}
                 <div class="active-info">
-                    <strong>{$aiStatus.model}</strong>
+                    <select class="banner-model-select" value={$aiStatus.model} onchange={(e) => aiActions.setModel(e.target.value)}>
+                        {#each $aiStatus.availableModels as m}
+                            <option value={m.id}>
+                                {m.name} {(() => {
+                                    // Robust check: use backend tier if available, otherwise check name
+                                    const isFree = m.tier === 'free' || 
+                                                  m.id.toLowerCase().includes('flash') || 
+                                                  m.id.toLowerCase().includes('lite') ||
+                                                  m.name.toLowerCase().includes('flash') ||
+                                                  m.name.toLowerCase().includes('lite');
+                                    return isFree ? '(Free Tier)' : '(Paid/Limited)';
+                                })()}
+                            </option>
+                        {:else}
+                            <!-- Fallback logic for when models are still loading -->
+                            <option value={$aiStatus.model}>
+                                {(() => {
+                                    const m = $aiStatus.model.toLowerCase();
+                                    return (m.includes('flash') || m.includes('lite') || m.includes('1.5')) ? `${$aiStatus.model} (Free Tier)` : `${$aiStatus.model} (Paid/Limited)`;
+                                })()}
+                            </option>
+                        {/each}
+                    </select>
                 </div>
             {/if}
         </div>
@@ -121,6 +143,26 @@
         font-size: 0.8rem;
         color: #1b3350;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .banner-model-select {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        padding: 0.1rem 0.3rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #1b3350;
+        cursor: pointer;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .banner-model-select:hover {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: var(--blue-color-main);
     }
 
     .mode-toggle {
