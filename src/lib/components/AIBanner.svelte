@@ -1,10 +1,7 @@
 <script>
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from './AISetup.svelte';
-    import Cog from 'svelte-material-icons/Cog.svelte';
-    import AccountKey from 'svelte-material-icons/AccountKey.svelte';
-    import ShieldCheck from 'svelte-material-icons/ShieldCheck.svelte';
-    import Alert from 'svelte-material-icons/Alert.svelte';
+    import Icon from '@iconify/svelte';
     import { browser } from '$app/environment';
 
     let showSetup = $state(false);
@@ -28,20 +25,42 @@
             <button class="mode-toggle" onclick={toggleKeyType} title="Click to toggle between Team and Personal key">
                 {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
                     <div class="badge byok-badge">
-                        <AccountKey size={16} />
+                        <Icon icon="mdi:account-key" width="16" height="16" />
                         <span>Personal Key</span>
                     </div>
                 {:else}
                     <div class="badge team-badge">
-                        <ShieldCheck size={16} />
+                        <Icon icon="mdi:shield-check" width="16" height="16" />
                         <span>Team Key</span>
                     </div>
                 {/if}
             </button>
             
-            {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+            {#if $aiStatus.model}
                 <div class="active-info">
-                    <strong>{$aiStatus.model}</strong>
+                    <select class="banner-model-select" value={$aiStatus.model} onchange={(e) => aiActions.setModel(e.target.value)}>
+                        {#each $aiStatus.availableModels as m}
+                            <option value={m.id}>
+                                {m.name} {(() => {
+                                    // Robust check: use backend tier if available, otherwise check name
+                                    const isFree = m.tier === 'free' || 
+                                                  m.id.toLowerCase().includes('flash') || 
+                                                  m.id.toLowerCase().includes('lite') ||
+                                                  m.name.toLowerCase().includes('flash') ||
+                                                  m.name.toLowerCase().includes('lite');
+                                    return isFree ? '(Free Tier)' : '(Paid/Limited)';
+                                })()}
+                            </option>
+                        {:else}
+                            <!-- Fallback logic for when models are still loading -->
+                            <option value={$aiStatus.model}>
+                                {(() => {
+                                    const m = $aiStatus.model.toLowerCase();
+                                    return (m.includes('flash') || m.includes('lite') || m.includes('1.5')) ? `${$aiStatus.model} (Free Tier)` : `${$aiStatus.model} (Paid/Limited)`;
+                                })()}
+                            </option>
+                        {/each}
+                    </select>
                 </div>
             {/if}
         </div>
@@ -49,7 +68,7 @@
         <div class="controls-center">
             {#if $aiStatus.hasError}
                 <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
-                    <Alert size={16} />
+                    <Icon icon="mdi:alert" width="16" height="16" />
                     <span>{$aiStatus.errorMessage || 'Engine Error'}</span>
                 </button>
             {/if}
@@ -57,7 +76,7 @@
 
         <div class="actions-right">
             <button class="setup-trigger" onclick={() => showSetup = true}>
-                <Cog size={18} />
+                <Icon icon="mdi:cog" width="18" height="18" />
                 <span>{$aiStatus.status === 'active' ? 'Manage Keys' : 'Connect Key'}</span>
             </button>
         </div>
@@ -121,6 +140,26 @@
         font-size: 0.8rem;
         color: #1b3350;
         font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .banner-model-select {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        padding: 0.1rem 0.3rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #1b3350;
+        cursor: pointer;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .banner-model-select:hover {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: var(--blue-color-main);
     }
 
     .mode-toggle {

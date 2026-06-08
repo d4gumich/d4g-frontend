@@ -6,7 +6,7 @@
     export let startYear;
     export let endYear;
 
-    import LinkedIn from "svelte-material-icons/LinkBox.svelte"
+    import Icon from '@iconify/svelte'
     import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
     import { onMount } from "svelte";
 
@@ -98,9 +98,9 @@
         <a href={linkedin} target="_blank">
             <h3>{name}</h3>
             {#if isMobile}
-                <LinkedIn size="3rem" color="#0077B5"/>
+                <Icon icon="mdi:linkedin" width="3rem" height="3rem" style="color: #0077B5" />
             {:else}
-                <LinkedIn size="1.5rem" color="#0077B5"/>
+                <Icon icon="mdi:linkedin" width="1.5rem" height="1.5rem" style="color: #0077B5" />
             {/if}
         </a>
         <h5>{position}</h5>

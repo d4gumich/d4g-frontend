@@ -29,8 +29,7 @@
 	import { onMount, afterUpdate } from "svelte";
 	import { sleep } from "$lib/components/utils/helper_functions.js";
 	import LoadingBar from "$lib/components/loading_bar.svelte";
-	import Check from "svelte-material-icons/CheckboxMarkedCircle.svelte";
-	import FailAlert from "svelte-material-icons/MessageAlert.svelte";
+	import Icon from '@iconify/svelte';
 	import SummaryTextCarousel from "./summary_text_carousel.svelte";
 	import {
     INTERVAL,
@@ -218,9 +217,9 @@
 	<div class="complete-results-display">
 		<p class="time-taken-text left">Results</p>
 		{#if isMobile}
-			<Check color="var(--button-color)" size="1.8rem"/>
+			<Icon icon="mdi:checkbox-marked-circle" width="1.8rem" height="1.8rem" style="color: var(--button-color)" />
 		{:else}
-			<Check color="var(--button-color)"/>
+			<Icon icon="mdi:checkbox-marked-circle" width="1em" height="1em" style="color: var(--button-color)" />
 		{/if}
 		<p class="time-taken-text right">({hangul_time}s)</p>
 	</div>
@@ -228,9 +227,9 @@
 		<div class="complete-results-display">
 			<p class="time-taken-text left">Summary</p>
 			{#if isMobile}
-				<Check color="var(--button-color)" size="1.8rem"/>
+				<Icon icon="mdi:checkbox-marked-circle" width="1.8rem" height="1.8rem" style="color: var(--button-color)" />
 			{:else}
-				<Check color="var(--button-color)"/>
+				<Icon icon="mdi:checkbox-marked-circle" width="1em" height="1em" style="color: var(--button-color)" />
 			{/if}
 			<p class="time-taken-text right">({summary_generation_time}s)</p>
 		</div>
@@ -238,9 +237,9 @@
 		<div class="complete-results-display">
 			<p class="time-taken-text left">Summary</p>
 			{#if isMobile}
-				<FailAlert color="tomato" size="1.8rem"/>
+				<Icon icon="mdi:message-alert" width="1.8rem" height="1.8rem" style="color: tomato" />
 			{:else}
-				<FailAlert color="tomato"/>
+				<Icon icon="mdi:message-alert" width="1em" height="1em" style="color: tomato" />
 			{/if}
 			<p class="time-taken-text right">(0.00s)</p>
 		</div>
