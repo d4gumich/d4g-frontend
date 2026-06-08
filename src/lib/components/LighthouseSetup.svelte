@@ -3,8 +3,7 @@
     import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import { HOST_URL } from '$lib/aiSetupStore.js';
     import Button from './button.svelte';
-    import Eye from 'svelte-material-icons/Eye.svelte';
-    import EyeOff from 'svelte-material-icons/EyeOff.svelte';
+    import Icon from '@iconify/svelte';
 
     let { onComplete, onCancel = null } = $props();
 
@@ -71,9 +70,9 @@
                 />
                 <button class="eye-toggle" onclick={() => showKey = !showKey} type="button" title={showKey ? "Hide key" : "Show key"}>
                     {#if showKey}
-                        <EyeOff size={20} />
+                        <Icon icon="mdi:eye-off" width="20" height="20" />
                     {:else}
-                        <Eye size={20} />
+                        <Icon icon="mdi:eye" width="20" height="20" />
                     {/if}
                 </button>
             </div>

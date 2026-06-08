@@ -3,15 +3,7 @@
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Collapsible from "$lib/components/collapsible.svelte"
   import { onMount } from "svelte"
-  import StudentIcon from "svelte-material-icons/AccountSchool.svelte"
-  import ChairIcon from "svelte-material-icons/ChairSchool.svelte"
-  import ChartIcon from "svelte-material-icons/ChartScatterPlot.svelte"
-  import ResumeIcon from "svelte-material-icons/FileAccount.svelte"
-  import BuildingIcon from "svelte-material-icons/TownHall.svelte"
-  import CashIcon from "svelte-material-icons/CashMultiple.svelte"
-  import PeopleIcon from "svelte-material-icons/AccountGroup.svelte"
-  import PersonIcon from "svelte-material-icons/Account.svelte"
-  import StartArrow from "svelte-material-icons/RayStartArrow.svelte"
+  import Icon from '@iconify/svelte'
   import Navbar from "$lib/components/navbar.svelte"
 
   const currentPage = 'faq';
@@ -92,7 +84,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <StudentIcon size={iconSize} />
+          <Icon icon="mdi:account-school" width={iconSize} height={iconSize} />
         {/if}
         
         <p class="team-bullets">
@@ -103,7 +95,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <ChairIcon size={iconSize} />
+          <Icon icon="mdi:chair-school" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Builds participatory, hands-on learning
@@ -113,7 +105,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <ChartIcon size={iconSize} />
+          <Icon icon="mdi:chart-scatter-plot" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Provides real-world experience in data science and analytics
@@ -123,7 +115,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <ResumeIcon size={iconSize} />
+          <Icon icon="mdi:file-account" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Contributes to student credential building
@@ -133,7 +125,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <BuildingIcon size={iconSize} />
+          <Icon icon="mdi:town-hall" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Contributes to UMSI brand
@@ -143,7 +135,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <CashIcon size={iconSize} />
+          <Icon icon="mdi:cash-multiple" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Will help attract students and potential new funding
@@ -153,7 +145,7 @@
         {#if isMobile}
           <p>></p>
         {:else}
-          <PeopleIcon size={iconSize} />
+          <Icon icon="mdi:account-group" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Provides a platform for students to engage with non-profits
@@ -163,7 +155,7 @@
         {#if isMobile}
          <p>></p>
         {:else}
-          <PersonIcon size={iconSize} />
+          <Icon icon="mdi:account" width={iconSize} height={iconSize} />
         {/if}
         <p class="team-bullets">
           Non-profits gain a potential IT staffing pipeline

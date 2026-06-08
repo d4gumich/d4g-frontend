@@ -1,10 +1,7 @@
 <script>
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from './AISetup.svelte';
-    import Cog from 'svelte-material-icons/Cog.svelte';
-    import AccountKey from 'svelte-material-icons/AccountKey.svelte';
-    import ShieldCheck from 'svelte-material-icons/ShieldCheck.svelte';
-    import Alert from 'svelte-material-icons/Alert.svelte';
+    import Icon from '@iconify/svelte';
     import { browser } from '$app/environment';
 
     let showSetup = $state(false);
@@ -28,12 +25,12 @@
             <button class="mode-toggle" onclick={toggleKeyType} title="Click to toggle between Team and Personal key">
                 {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
                     <div class="badge byok-badge">
-                        <AccountKey size={16} />
+                        <Icon icon="mdi:account-key" width="16" height="16" />
                         <span>Personal Key</span>
                     </div>
                 {:else}
                     <div class="badge team-badge">
-                        <ShieldCheck size={16} />
+                        <Icon icon="mdi:shield-check" width="16" height="16" />
                         <span>Team Key</span>
                     </div>
                 {/if}
@@ -71,7 +68,7 @@
         <div class="controls-center">
             {#if $aiStatus.hasError}
                 <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
-                    <Alert size={16} />
+                    <Icon icon="mdi:alert" width="16" height="16" />
                     <span>{$aiStatus.errorMessage || 'Engine Error'}</span>
                 </button>
             {/if}
@@ -79,7 +76,7 @@
 
         <div class="actions-right">
             <button class="setup-trigger" onclick={() => showSetup = true}>
-                <Cog size={18} />
+                <Icon icon="mdi:cog" width="18" height="18" />
                 <span>{$aiStatus.status === 'active' ? 'Manage Keys' : 'Connect Key'}</span>
             </button>
         </div>

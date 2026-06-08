@@ -6,8 +6,7 @@
   export let isValid = false;
   export let useCheckMark = false;
 
-  import CheckMark from "svelte-material-icons/CheckCircle.svelte";
-  import FailAlert from "svelte-material-icons/MessageAlert.svelte";
+  import Icon from '@iconify/svelte';
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js";
   import { onMount } from "svelte";
 
@@ -46,18 +45,18 @@
       {/if}
       {#if isValid && useCheckMark}
         {#if isMobile}
-          <CheckMark size={"2rem"} color="#34b233" />
+          <Icon icon="mdi:check-circle" width="2rem" height="2rem" style="color: #34b233" />
         {/if}
         {#if !isMobile}
-          <CheckMark size={"0.9rem"} color="#34b233" />
+          <Icon icon="mdi:check-circle" width="0.9rem" height="0.9rem" style="color: #34b233" />
         {/if}
       {/if}
       {#if !isValid && useCheckMark}
         {#if isMobile}
-          <FailAlert size={"2rem"} color="tomato" />
+          <Icon icon="mdi:message-alert" width="2rem" height="2rem" style="color: tomato" />
         {/if}
         {#if !isMobile}
-          <FailAlert size={"0.9rem"} color="tomato" />
+          <Icon icon="mdi:message-alert" width="0.9rem" height="0.9rem" style="color: tomato" />
         {/if}
       {/if}
     </div>
