@@ -5,7 +5,7 @@ import { sleep, getBackoffWaitTime } from "$lib/components/utils/helper_function
 import { get } from 'svelte/store';
 import { checkboxes } from "$lib/store.js";
 import { num_keywords } from "$lib/store.js";
-import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { HOST_URL } from '$lib/config.js';
 import { aiStatus } from '$lib/aiSetupStore.js';
 
 // ... rest of code
@@ -36,7 +36,7 @@ async function fetchData(file, version, timeout, isAPI) {
         }, timeout);
       });
 
-      const base_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+      const base_url = HOST_URL;
       
       const headers = {};
       if (ai_status.forceTeamKey) {
