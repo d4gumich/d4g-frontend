@@ -5,12 +5,12 @@
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { HOST_URL } from '$lib/aiSetupStore.js';
 
     const currentPage = 'chetah2.0';
 
     // Set between dev and build
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+    const host_url = HOST_URL;
 
     let searchQuery = '';
     let aboutChetah = false;

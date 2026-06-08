@@ -6,7 +6,7 @@
     import SearchLogo from '$lib/assets/icons8-search-100.png';
     import ChetahLogo from '$lib/assets/chetah_logo.png';
     import Navbar from "$lib/components/navbar.svelte";
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
+    import { HOST_URL } from '$lib/aiSetupStore.js';
 
     const currentPage = "chetah1.0";
 
@@ -32,7 +32,7 @@
     }
 
     async function doFetch(searchQuery) {
-        const base_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+        const base_url = HOST_URL;
         const url = `${base_url}api/v1/products/chetah`;
         const data = { query: searchQuery };
         const response = await fetch(url, {

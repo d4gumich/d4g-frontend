@@ -6,13 +6,12 @@
     import LoadingBar from "$lib/components/loading_bar.svelte";
     import ChevronDown from "$lib/assets/icons/chevron-down-solid.svelte";
     import ChevronUp from "$lib/assets/icons/angle-up-solid.svelte";
-    import { PUBLIC_BACKEND_URL } from '$env/static/public';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from "$lib/components/AISetup.svelte";
     import AIBanner from "$lib/components/AIBanner.svelte";
 
     const currentPage = 'owl';
-    const host_url = PUBLIC_BACKEND_URL || 'https://d4gumsi.pythonanywhere.com/';
+    const host_url = HOST_URL;
 
     let query = $state("");
     let aboutOwl = $state(false);
