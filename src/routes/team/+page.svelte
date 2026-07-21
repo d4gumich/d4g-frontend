@@ -79,6 +79,13 @@
         "Software Engineer with a diverse set of skills from an unconventional interdisciplinary background.",
       image: DefaultProfile,
       linkedin: "https://www.linkedin.com/in/greciamaci/",
+    },
+    {
+      name: "Sailesh Saravanan",
+      position: "Data Scientist Intern",
+      description: "Student Data Scientist developing skills in AI, machine learning, and data analysis.", 
+      image: DefaultProfile,
+      linkedin: "https://www.linkedin.com/in/sailesh-saravanan-b1688b245",
     }
   ];
 
