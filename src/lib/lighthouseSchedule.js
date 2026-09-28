@@ -81,6 +81,10 @@ export function highlightedDayNumbers(year, monthIndex, weekly, oneOff) {
 }
 
 export async function fetchSchedule(baseUrl) {
+  if (baseUrl == null) {
+    const { HOST_URL } = await import("$lib/config.js");
+    baseUrl = HOST_URL;
+  }
   const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   const response = await fetch(`${base}api/v1/products/lighthouse/schedule`, {
     credentials: "omit",
