@@ -12,9 +12,10 @@
     import LighthouseSetup from '$lib/components/LighthouseSetup.svelte';
     import { lighthouseActions, lighthouseStatus } from '$lib/lighthouseStore.js';
     import { page } from '$app/stores';
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { browser } from '$app/environment';
-    
+    import { clockSkewMs, fetchSchedule, scheduleLine } from "$lib/lighthouseSchedule.js";
+
     const currentPage = 'products';
 
     const current_project = [
@@ -73,10 +74,27 @@
 
     let secretKey = $state(null);
     let showLighthouseSetup = $state(false);
+    let lighthouseScheduleLine = $state("");
+    let schedulePoll;
 
     onMount(() => {
         secretKey = $page.url.searchParams.get('key');
         checkSession();
+        async function refreshLighthouseSchedule() {
+            try {
+                const payload = await fetchSchedule();
+                const skew = clockSkewMs(payload.server_time, Date.now());
+                lighthouseScheduleLine = scheduleLine(payload, Date.now(), skew);
+            } catch {
+                lighthouseScheduleLine = "";
+            }
+        }
+        refreshLighthouseSchedule();
+        schedulePoll = setInterval(refreshLighthouseSchedule, 60000);
+    });
+
+    onDestroy(() => {
+        clearInterval(schedulePoll);
     });
 
     async function checkSession() {
@@ -89,7 +107,7 @@
             console.error("Session check failed:", err);
         }
     }
-    
+
     // Derived projects list that appends the key to links if it exists
     let projectsWithAuth = $derived(current_project.map(p => {
         if (p.experimental && secretKey) {
@@ -98,13 +116,13 @@
         }
         return p;
     }));
-  
+
   </script>
 
 <svelte:head>
   <title>Products</title>
 </svelte:head>
-  
+
   <style>
     .a{
       display: flex;
@@ -125,13 +143,13 @@
         padding-bottom: 2%
     }
   </style>
-  
+
   <Navbar {currentPage} />
 
   {#if showLighthouseSetup}
-    <LighthouseSetup 
-      onComplete={() => { 
-        showLighthouseSetup = false; 
+    <LighthouseSetup
+      onComplete={() => {
+        showLighthouseSetup = false;
         window.location.href = `${base}/products/lighthouse`;
       }}
       onCancel={() => showLighthouseSetup = false}
@@ -144,14 +162,15 @@
       {#if browser}
         {#each projectsWithAuth as project}
           {#if !project.experimental || (secretKey && secretKey.length > 5) || project.name === 'Lighthouse'}
-            <CurrProjCard 
-              {...project} 
-              isLocked={project.experimental && (!secretKey || secretKey.length < 5)} 
-              onUnlock={project.name === 'Lighthouse' ? () => { showLighthouseSetup = true; } : null}
+            <CurrProjCard
+              {...project}
+              footnote={project.name === "Lighthouse" ? lighthouseScheduleLine : ""}
+              isLocked={project.experimental && (!secretKey || secretKey.length < 5)}
+              onUnlock={project.name === "Lighthouse" ? () => { showLighthouseSetup = true; } : null}
             />
           {/if}
         {/each}
       {/if}
     </div>
 
-  </div>  
+  </div>

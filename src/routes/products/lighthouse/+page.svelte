@@ -2,6 +2,7 @@
     import Navbar from "$lib/components/navbar.svelte";
     import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
     import LighthouseControl from "$lib/components/lighthouse/LighthouseControl.svelte";
+    import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
     import Console from "$lib/components/lighthouse/Console.svelte";
     import { lighthouseResults, lighthouseActions, lighthouseSettings, lighthouseStatus } from "$lib/lighthouseStore.js";
     import logo from "$lib/assets/D4G-Logo-2.png";
@@ -13,7 +14,7 @@
     import { page } from '$app/stores';
 
     const currentPage = 'products';
-    
+
     let secretKey = $state(null);
     let sessionActive = $derived($lighthouseStatus.sessionActive);
 
@@ -77,6 +78,7 @@
 </div>
 
 {#if browser}
+    <LighthouseCalendar />
     {#if (!secretKey || secretKey.length < 5) && !sessionActive}
         <div class="container-unauthorized">
             <div class="content-container-unauthorized">
@@ -91,11 +93,11 @@
             <div class="dashboard-grid">
                 <aside class="sidebar">
                     <LighthouseControl />
-                    
+
                     <div class="card upload-card">
                         <h3>Upload Document</h3>
                         <p>Analyze your PDF resume</p>
-                        
+
                         <div class="file-options">
                             <label class="checkbox-container">
                                 <input type="checkbox" bind:checked={shouldSanitize} />
@@ -105,11 +107,11 @@
                         </div>
 
                         <div class="file-input-group">
-                            <input 
-                                type="file" 
+                            <input
+                                type="file"
                                 id="pdf-upload"
-                                accept="application/pdf" 
-                                onchange={handleFileChange} 
+                                accept="application/pdf"
+                                onchange={handleFileChange}
                                 class="file-input"
                                 bind:this={fileInput}
                             />
@@ -117,8 +119,8 @@
                                 {file ? file.name : "Choose PDF..."}
                             </label>
                         </div>
-                        <button 
-                            class="btn-primary w-full" 
+                        <button
+                            class="btn-primary w-full"
                             class:btn-loading={$lighthouseResults.loading}
                             onclick={handleUpload}
                             disabled={!file || $lighthouseResults.loading}
@@ -236,10 +238,10 @@
     .sidebar::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
 
     .upload-card h3, .history-card h3 { margin-top: 0; font-size: 1rem; margin-bottom: 1rem; }
-    
-    .file-options { 
-        margin-bottom: 1rem; 
-        font-size: 0.85rem; 
+
+    .file-options {
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
         background: #f8f9fa;
         padding: 0.75rem;
         border-radius: 6px;
@@ -315,8 +317,8 @@
         transition: all 0.2s;
     }
 
-    .delete-doc:hover { 
-        color: var(--error-color); 
+    .delete-doc:hover {
+        color: var(--error-color);
         background: rgba(211, 47, 47, 0.1);
     }
 

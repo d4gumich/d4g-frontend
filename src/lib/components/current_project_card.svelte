@@ -8,6 +8,7 @@
   export let isDemo = false;
   export let isLocked = false;
   export let onUnlock = null;
+  export let footnote = "";
   import { PHONE_SCREEN_WIDTH } from "$lib/assets/constants/constants.js"
   import Button from "./button.svelte"
   import { onMount } from "svelte"
@@ -39,6 +40,9 @@
       <div class="text">
         <h1>{name}</h1>
         <h3>{detail}</h3>
+        {#if footnote}
+          <p class="schedule-footnote">{footnote}</p>
+        {/if}
         {#if isLocked}
           <div class="locked-notice">
             🔒 This product is in development. A <strong>D4G team</strong> security key is required to access the live engine.
@@ -160,6 +164,12 @@
     font-weight: 400;
     line-height: 25px; /* 125% */
     width: auto;
+  }
+
+  .schedule-footnote {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 
   .locked-notice {
