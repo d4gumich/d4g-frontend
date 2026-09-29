@@ -356,3 +356,26 @@ export async function claimSeat(token, sessionDate, baseUrl) {
   }
   return response.json();
 }
+
+export async function setDevSchedule(preset, sessionDate, baseUrl) {
+  if (baseUrl == null) {
+    const { HOST_URL } = await import("$lib/config.js");
+    baseUrl = HOST_URL;
+  }
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const body = { preset };
+  if (sessionDate) body.session = sessionDate;
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/dev`,
+    {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Dev schedule request failed: ${response.status}`);
+  }
+  return response.json();
+}

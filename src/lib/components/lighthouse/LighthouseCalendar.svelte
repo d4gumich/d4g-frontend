@@ -16,6 +16,7 @@
     sessionDateKey,
     sessionIcs,
     sessionInstants,
+    setDevSchedule,
   } from "$lib/lighthouseSchedule.js";
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -163,6 +164,42 @@
     sessionStorage.setItem(HELD_KEY, JSON.stringify(held));
   }
 
+  function showDevDate(date) {
+    if (!date) return;
+    const [year, month, day] = date.split("-").map(Number);
+    cursor = { year, monthIndex: month - 1 };
+    return { year, monthIndex: month - 1, day };
+  }
+
+  async function chooseDev(preset) {
+    const session =
+      focusDate || sessionDateKey(today.year, today.monthIndex, today.day);
+    try {
+      const next = await setDevSchedule(
+        preset,
+        preset === "fill_seats" ? session : undefined,
+      );
+      payload = next;
+      skew = clockSkewMs(next.server_time, Date.now());
+      failed = false;
+      if (preset === "reset_seats") {
+        held = [];
+        sessionStorage.removeItem(HELD_KEY);
+      }
+      const shown = showDevDate(next.dev_date);
+      if (shown && ["soon", "open", "drain"].includes(preset)) {
+        selected = shown;
+        zoneIndex = 0;
+        claimError = "";
+      } else if (preset === "ended" || preset === "clear") {
+        selected = null;
+      }
+    } catch (error) {
+      failed = true;
+      claimError = error?.message || "Could not change the dev schedule.";
+    }
+  }
+
   async function refresh() {
     try {
       const next = await fetchSchedule();
@@ -254,6 +291,45 @@
 <svelte:window onkeydown={onKeydown} />
 
 <section class="schedule-card" aria-label="Lighthouse Deep session schedule">
+  {#if payload?.dev}
+    <div class="dev-bar" role="region" aria-label="Schedule practice controls">
+      <p>
+        Practice schedule. Open a session on this machine to take a seat and add
+        a calendar reminder. This does not wake the GPU.
+      </p>
+      <div class="dev-actions">
+        <button
+          type="button"
+          aria-pressed={payload.dev_preset === "soon"}
+          onclick={() => chooseDev("soon")}>Starts in 10 min</button
+        >
+        <button
+          type="button"
+          aria-pressed={payload.dev_preset === "open"}
+          onclick={() => chooseDev("open")}>Open now</button
+        >
+        <button
+          type="button"
+          aria-pressed={payload.dev_preset === "drain"}
+          onclick={() => chooseDev("drain")}>Draining</button
+        >
+        <button
+          type="button"
+          aria-pressed={payload.dev_preset === "ended"}
+          onclick={() => chooseDev("ended")}>Ended</button
+        >
+        <button type="button" onclick={() => chooseDev("clear")}
+          >Real calendar</button
+        >
+        <button type="button" onclick={() => chooseDev("reset_seats")}
+          >Reset seats</button
+        >
+        <button type="button" onclick={() => chooseDev("fill_seats")}
+          >Fill seats</button
+        >
+      </div>
+    </div>
+  {/if}
   <div class="schedule-header">
     <h2>Deep sessions</h2>
     <p>{failed ? "Schedule unavailable." : line}</p>
@@ -364,6 +440,36 @@
 {/if}
 
 <style>
+  .dev-bar {
+    margin-bottom: 1rem;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid #e3b878;
+    border-radius: 8px;
+    background: #fff8ee;
+  }
+  .dev-bar p {
+    margin: 0;
+    color: #5c3b16;
+  }
+  .dev-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.7rem;
+  }
+  .dev-actions button {
+    font: inherit;
+    cursor: pointer;
+    border: 1px solid #5c3b16;
+    background: #fff;
+    color: #5c3b16;
+    border-radius: 4px;
+    padding: 0.4rem 0.65rem;
+  }
+  .dev-actions button[aria-pressed="true"] {
+    background: #5c3b16;
+    color: #fff;
+  }
   .schedule-card {
     margin: 1rem auto 2rem;
     max-width: 720px;
