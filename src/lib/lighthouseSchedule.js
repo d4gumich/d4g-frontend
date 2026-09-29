@@ -110,16 +110,13 @@ export function detroitDate(instant) {
   };
 }
 
-function compareDates(left, right) {
-  if (left.year !== right.year) return left.year - right.year;
-  if (left.monthIndex !== right.monthIndex)
-    return left.monthIndex - right.monthIndex;
-  return left.day - right.day;
-}
-
-export function clickableDayNumbers(year, monthIndex, weekly, oneOff, today) {
+export function clickableDayNumbers(year, monthIndex, weekly, oneOff, now) {
+  const instant = now instanceof Date ? now : new Date(now);
   return highlightedDayNumbers(year, monthIndex, weekly, oneOff).filter(
-    (day) => compareDates({ year, monthIndex, day }, today) > 0,
+    (day) => {
+      const session = sessionInstants(year, monthIndex, day, weekly, oneOff);
+      return session !== null && session.end.getTime() > instant.getTime();
+    },
   );
 }
 
@@ -245,42 +242,6 @@ export function formatSessionRange(start, end, timeZone) {
     return `${startMatch[1]}–${endMatch[1]} ${endMatch[2]} ${startZone}`;
   }
   return `${startText} – ${endText} ${startZone}`;
-}
-
-function shiftDate(date, deltaDays) {
-  const utc = new Date(
-    Date.UTC(date.year, date.monthIndex, date.day + deltaDays),
-  );
-  return {
-    year: utc.getUTCFullYear(),
-    monthIndex: utc.getUTCMonth(),
-    day: utc.getUTCDate(),
-  };
-}
-
-export function recentPastSessions(weekly, oneOff, today, limit = 8) {
-  const found = [];
-  let cursor = shiftDate(today, -1);
-  for (let step = 0; step < 120 && found.length < limit; step += 1) {
-    const window = windowForDay(
-      cursor.year,
-      cursor.monthIndex,
-      cursor.day,
-      weekly,
-      oneOff,
-    );
-    if (window) {
-      found.push({
-        year: cursor.year,
-        monthIndex: cursor.monthIndex,
-        day: cursor.day,
-        startTime: window.start,
-        endTime: window.end,
-      });
-    }
-    cursor = shiftDate(cursor, -1);
-  }
-  return found;
 }
 
 function pad(value) {

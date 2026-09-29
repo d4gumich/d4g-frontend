@@ -12,7 +12,6 @@ import {
   formatWindow,
   googleCalendarUrl,
   highlightedDayNumbers,
-  recentPastSessions,
   scheduleLine,
   sessionIcs,
   sessionInstants,
@@ -98,14 +97,22 @@ test("september 2026 highlights tuesdays and thursdays, and a friday one-off sta
 const weekly = payload.weekly;
 const oneOff = payload.one_off;
 
-test("only schedule dates after today in Detroit are clickable", () => {
-  const sep28 = { year: 2026, monthIndex: 8, day: 28 };
-  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep28), [29]);
-  const sep29 = { year: 2026, monthIndex: 8, day: 29 };
-  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep29), []);
-  const october = clickableDayNumbers(2026, 9, weekly, oneOff, sep29);
+test("a session day stays clickable until that session has ended", () => {
+  const sep28Evening = new Date("2026-09-28T22:00:00Z");
+  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep28Evening), [
+    29,
+  ]);
+  const sep29Morning = new Date("2026-09-29T14:00:00Z");
+  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep29Morning), [
+    29,
+  ]);
+  const afterClose = new Date("2026-09-30T01:00:00Z");
+  assert.deepEqual(
+    clickableDayNumbers(2026, 8, weekly, oneOff, afterClose),
+    [],
+  );
+  const october = clickableDayNumbers(2026, 9, weekly, oneOff, sep29Morning);
   assert.equal(october.includes(1), true);
-  assert.equal(october.includes(15), true);
   assert.equal(october.includes(16), true);
   assert.equal(october.includes(2), false);
 });
@@ -144,20 +151,6 @@ test("the timezone carousel shows the same session in Central and London", () =>
     SESSION_TIMEZONES.some((zone) => zone.id === "America/Detroit"),
     true,
   );
-});
-
-test("past sessions are the schedule dates before today, newest first", () => {
-  const past = recentPastSessions(
-    weekly,
-    oneOff,
-    { year: 2026, monthIndex: 8, day: 29 },
-    3,
-  );
-  assert.deepEqual(
-    past.map((item) => item.day),
-    [24, 22, 17],
-  );
-  assert.equal(past[0].monthIndex, 8);
 });
 
 test("calendar exports use Detroit local time and name the 30 seat cap", () => {

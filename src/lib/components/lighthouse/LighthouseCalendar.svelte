@@ -1,5 +1,10 @@
 <script>
   import { onDestroy, onMount } from "svelte";
+  import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
+  import {
+    lighthouseActions,
+    lighthouseResults,
+  } from "$lib/lighthouseStore.js";
   import {
     SEAT_CAP,
     SESSION_TIMEZONES,
@@ -12,7 +17,6 @@
     formatWindow,
     googleCalendarUrl,
     highlightedDayNumbers,
-    recentPastSessions,
     scheduleLine,
     sessionIcs,
     sessionInstants,
@@ -51,7 +55,7 @@
           cursor.monthIndex,
           payload.weekly,
           payload.one_off,
-          today,
+          new Date(now - skew),
         )
       : [],
   );
@@ -73,11 +77,9 @@
     new Date(Date.UTC(cursor.year, cursor.monthIndex + 1, 0)).getUTCDate(),
   );
   const previousEnabled = $derived(canGoToPreviousMonth(cursor, today));
-  const pastSessions = $derived(
-    payload
-      ? recentPastSessions(payload.weekly, payload.one_off, today, 8)
-      : [],
-  );
+  let resumeFile = $state(null);
+  let sanitizeResume = $state(false);
+  let resumeError = $state("");
   const selectedSession = $derived(
     selected && payload
       ? sessionInstants(
@@ -120,15 +122,16 @@
     calendarSession ? googleCalendarUrl(calendarSession) : "",
   );
 
-  function pastLabel(item) {
-    const instants = sessionInstants(
-      item.year,
-      item.monthIndex,
-      item.day,
-      payload.weekly,
-      payload.one_off,
-    );
-    return formatWindow(instants.start.toISOString(), "America/Detroit");
+  async function processResume(event) {
+    event.preventDefault();
+    if (!resumeFile) return;
+    resumeError = "";
+    try {
+      await lighthouseActions.uploadPdf(resumeFile, sanitizeResume);
+      resumeFile = null;
+    } catch (error) {
+      resumeError = error?.message || "Upload failed.";
+    }
   }
 
   async function refresh() {
@@ -262,20 +265,71 @@
         {/if}
       {/each}
     </div>
-  {:else if pastSessions.length}
-    <ul class="past-list">
-      {#each pastSessions as item}
-        <li>{pastLabel(item)}</li>
-      {/each}
-    </ul>
   {:else}
-    <p class="empty">No past sessions yet.</p>
+    <form class="resume-form" onsubmit={processResume}>
+      <label>
+        Resume
+        <input
+          type="file"
+          accept="application/pdf"
+          onchange={(event) => {
+            resumeFile = event.currentTarget.files?.[0] || null;
+          }}
+        />
+      </label>
+      <label class="sanitize">
+        <input type="checkbox" bind:checked={sanitizeResume} />
+        Sanitize PDF
+      </label>
+      <button
+        type="submit"
+        disabled={!resumeFile || $lighthouseResults.loading}
+      >
+        {$lighthouseResults.loading ? "Processing…" : "Process resume"}
+      </button>
+    </form>
+    {#if resumeError}
+      <p class="empty">{resumeError}</p>
+    {/if}
+    {#if $lighthouseResults.history.length === 0}
+      <p class="empty">No resumes processed in this tab yet.</p>
+    {:else}
+      <ul class="past-list">
+        {#each $lighthouseResults.history as doc (doc.id)}
+          <li>
+            <button
+              type="button"
+              class:selected={doc.id === $lighthouseResults.currentId}
+              onclick={() => lighthouseActions.selectDocument(doc.id)}
+            >
+              {doc.name}
+            </button>
+            <time datetime={doc.timestamp}
+              >{new Date(doc.timestamp).toLocaleString()}</time
+            >
+            <button
+              type="button"
+              class="remove"
+              aria-label="Remove {doc.name}"
+              onclick={() => lighthouseActions.deleteDocument(doc.id)}
+              >Remove</button
+            >
+          </li>
+        {/each}
+      </ul>
+      <LighthouseResults />
+    {/if}
   {/if}
 </section>
 
 {#if selectedSession}
   <div class="backdrop">
-    <button type="button" class="backdrop-dismiss" aria-label="Close session details" onclick={closeDialog}></button>
+    <button
+      type="button"
+      class="backdrop-dismiss"
+      aria-label="Close session details"
+      onclick={closeDialog}
+    ></button>
     <div
       class="dialog"
       role="dialog"
@@ -407,10 +461,67 @@
     border: 0;
     cursor: pointer;
   }
+  .resume-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 1rem;
+    color: #333;
+  }
+  .resume-form button,
+  .past-list button {
+    font: inherit;
+    cursor: pointer;
+  }
+  .resume-form button {
+    background: #1b3350;
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    padding: 0.55rem 0.8rem;
+  }
+  .resume-form button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .sanitize {
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+  }
   .past-list {
+    list-style: none;
     margin: 1rem 0 0;
-    padding-left: 1.1rem;
-    color: #555;
+    padding: 0;
+    color: #333;
+  }
+  .past-list li {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  .past-list li button:first-child {
+    border: 0;
+    background: transparent;
+    color: #1b3350;
+    font-weight: 600;
+    padding: 0;
+  }
+  .past-list li button.selected {
+    text-decoration: underline;
+  }
+  .past-list time {
+    color: #666;
+    font-size: 0.85rem;
+  }
+  .remove {
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: #888;
   }
   .empty {
     color: #777;
