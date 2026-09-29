@@ -80,6 +80,283 @@ export function highlightedDayNumbers(year, monthIndex, weekly, oneOff) {
   return [...new Set(days)].sort((a, b) => a - b);
 }
 
+export const SEAT_CAP = 30;
+
+export const SESSION_TIMEZONES = [
+  { id: "America/New_York", label: "Eastern" },
+  { id: "America/Chicago", label: "Central" },
+  { id: "America/Denver", label: "Mountain" },
+  { id: "America/Los_Angeles", label: "Pacific" },
+  { id: "America/Detroit", label: "Detroit" },
+  { id: "Europe/London", label: "London" },
+  { id: "UTC", label: "UTC" },
+];
+
+const SCHEDULE_ZONE = "America/Detroit";
+
+export function detroitDate(instant) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: SCHEDULE_ZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(instant);
+  const value = (type) =>
+    Number(parts.find((part) => part.type === type).value);
+  return {
+    year: value("year"),
+    monthIndex: value("month") - 1,
+    day: value("day"),
+  };
+}
+
+function compareDates(left, right) {
+  if (left.year !== right.year) return left.year - right.year;
+  if (left.monthIndex !== right.monthIndex)
+    return left.monthIndex - right.monthIndex;
+  return left.day - right.day;
+}
+
+export function clickableDayNumbers(year, monthIndex, weekly, oneOff, today) {
+  return highlightedDayNumbers(year, monthIndex, weekly, oneOff).filter(
+    (day) => compareDates({ year, monthIndex, day }, today) > 0,
+  );
+}
+
+export function canGoToPreviousMonth(cursor, today) {
+  return (
+    cursor.year > today.year ||
+    (cursor.year === today.year && cursor.monthIndex > today.monthIndex)
+  );
+}
+
+function windowForDay(year, monthIndex, day, weekly, oneOff) {
+  const iso = `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(
+    day,
+  ).padStart(2, "0")}`;
+  const extra = (oneOff || []).find((item) => item.date === iso);
+  if (extra) return { start: extra.start, end: extra.end };
+  const weekday = weekdayInDetroit(year, monthIndex, day);
+  const match = (weekly || []).find(
+    (item) => WEEKDAY_INDEX[item.weekday] === weekday,
+  );
+  if (!match) return null;
+  return { start: match.start, end: match.end };
+}
+
+function timeZoneOffsetMs(utcMs, timeZone) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(new Date(utcMs))
+      .map((part) => [part.type, part.value]),
+  );
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour) % 24,
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return asUtc - utcMs;
+}
+
+function zonedDateTimeToUtc(year, monthIndex, day, hours, minutes, timeZone) {
+  const guess = Date.UTC(year, monthIndex, day, hours, minutes);
+  const corrected =
+    guess -
+    timeZoneOffsetMs(guess - timeZoneOffsetMs(guess, timeZone), timeZone);
+  return new Date(corrected);
+}
+
+function parseClock(value) {
+  const [hours, minutes] = value.split(":").map(Number);
+  return { hours, minutes };
+}
+
+export function sessionInstants(
+  year,
+  monthIndex,
+  day,
+  weekly,
+  oneOff,
+  timeZone = SCHEDULE_ZONE,
+) {
+  const window = windowForDay(year, monthIndex, day, weekly, oneOff);
+  if (!window) return null;
+  const startClock = parseClock(window.start);
+  const endClock = parseClock(window.end);
+  return {
+    start: zonedDateTimeToUtc(
+      year,
+      monthIndex,
+      day,
+      startClock.hours,
+      startClock.minutes,
+      timeZone,
+    ),
+    end: zonedDateTimeToUtc(
+      year,
+      monthIndex,
+      day,
+      endClock.hours,
+      endClock.minutes,
+      timeZone,
+    ),
+    startTime: window.start,
+    endTime: window.end,
+  };
+}
+
+export function formatSessionRange(start, end, timeZone) {
+  const clock = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const zoneFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    timeZoneName: "short",
+  });
+  const zoneName = (date) =>
+    zoneFormatter
+      .formatToParts(date)
+      .find((part) => part.type === "timeZoneName").value;
+  const startZone = zoneName(start);
+  const endZone = zoneName(end);
+  const startText = clock.format(start);
+  const endText = clock.format(end);
+  if (startZone !== endZone) {
+    return `${startText} ${startZone} – ${endText} ${endZone}`;
+  }
+  const startMatch = startText.match(/^(.+?)\s*(AM|PM)$/);
+  const endMatch = endText.match(/^(.+?)\s*(AM|PM)$/);
+  if (startMatch && endMatch && startMatch[2] === endMatch[2]) {
+    return `${startMatch[1]}–${endMatch[1]} ${endMatch[2]} ${startZone}`;
+  }
+  return `${startText} – ${endText} ${startZone}`;
+}
+
+function shiftDate(date, deltaDays) {
+  const utc = new Date(
+    Date.UTC(date.year, date.monthIndex, date.day + deltaDays),
+  );
+  return {
+    year: utc.getUTCFullYear(),
+    monthIndex: utc.getUTCMonth(),
+    day: utc.getUTCDate(),
+  };
+}
+
+export function recentPastSessions(weekly, oneOff, today, limit = 8) {
+  const found = [];
+  let cursor = shiftDate(today, -1);
+  for (let step = 0; step < 120 && found.length < limit; step += 1) {
+    const window = windowForDay(
+      cursor.year,
+      cursor.monthIndex,
+      cursor.day,
+      weekly,
+      oneOff,
+    );
+    if (window) {
+      found.push({
+        year: cursor.year,
+        monthIndex: cursor.monthIndex,
+        day: cursor.day,
+        startTime: window.start,
+        endTime: window.end,
+      });
+    }
+    cursor = shiftDate(cursor, -1);
+  }
+  return found;
+}
+
+function pad(value) {
+  return String(value).padStart(2, "0");
+}
+
+function localStamp(year, monthIndex, day, time) {
+  const { hours, minutes } = parseClock(time);
+  return `${year}${pad(monthIndex + 1)}${pad(day)}T${pad(hours)}${pad(
+    minutes,
+  )}00`;
+}
+
+function seatDetails() {
+  return `First come, first served. ${SEAT_CAP} seats.`;
+}
+
+export function sessionIcs(session) {
+  const now = session.now || new Date();
+  const stamp = now
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z");
+  const uid = `lighthouse-${session.year}-${pad(session.monthIndex + 1)}-${pad(
+    session.day,
+  )}@data4good.center`;
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Data4Good//Lighthouse//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;TZID=America/Detroit:${localStamp(
+      session.year,
+      session.monthIndex,
+      session.day,
+      session.startTime,
+    )}`,
+    `DTEND;TZID=America/Detroit:${localStamp(
+      session.year,
+      session.monthIndex,
+      session.day,
+      session.endTime,
+    )}`,
+    "SUMMARY:Lighthouse Deep session",
+    `DESCRIPTION:${seatDetails()}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+    "",
+  ].join("\r\n");
+}
+
+export function googleCalendarUrl(session) {
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: "Lighthouse Deep session",
+    dates: `${localStamp(
+      session.year,
+      session.monthIndex,
+      session.day,
+      session.startTime,
+    )}/${localStamp(
+      session.year,
+      session.monthIndex,
+      session.day,
+      session.endTime,
+    )}`,
+    ctz: SCHEDULE_ZONE,
+    details: seatDetails(),
+  });
+  return `https://calendar.google.com/calendar/render?${params}`;
+}
+
 export async function fetchSchedule(baseUrl) {
   if (baseUrl == null) {
     const { HOST_URL } = await import("$lib/config.js");

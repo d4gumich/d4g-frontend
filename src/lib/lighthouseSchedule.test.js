@@ -2,10 +2,20 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  SEAT_CAP,
+  SESSION_TIMEZONES,
+  canGoToPreviousMonth,
+  clickableDayNumbers,
   clockSkewMs,
+  detroitDate,
+  formatSessionRange,
   formatWindow,
+  googleCalendarUrl,
   highlightedDayNumbers,
+  recentPastSessions,
   scheduleLine,
+  sessionIcs,
+  sessionInstants,
 } from "./lighthouseSchedule.js";
 
 const payload = {
@@ -83,4 +93,97 @@ test("september 2026 highlights tuesdays and thursdays, and a friday one-off sta
   assert.equal(october.includes(1), true);
   assert.equal(october.includes(16), true);
   assert.equal(september.includes(16), false);
+});
+
+const weekly = payload.weekly;
+const oneOff = payload.one_off;
+
+test("only schedule dates after today in Detroit are clickable", () => {
+  const sep28 = { year: 2026, monthIndex: 8, day: 28 };
+  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep28), [29]);
+  const sep29 = { year: 2026, monthIndex: 8, day: 29 };
+  assert.deepEqual(clickableDayNumbers(2026, 8, weekly, oneOff, sep29), []);
+  const october = clickableDayNumbers(2026, 9, weekly, oneOff, sep29);
+  assert.equal(october.includes(1), true);
+  assert.equal(october.includes(15), true);
+  assert.equal(october.includes(16), true);
+  assert.equal(october.includes(2), false);
+});
+
+test("the month control cannot move before the current Detroit month", () => {
+  const today = { year: 2026, monthIndex: 8, day: 29 };
+  assert.equal(
+    canGoToPreviousMonth({ year: 2026, monthIndex: 8 }, today),
+    false,
+  );
+  assert.equal(
+    canGoToPreviousMonth({ year: 2026, monthIndex: 9 }, today),
+    true,
+  );
+});
+
+test("a Detroit evening session is 10pm UTC in September and 11pm UTC in November", () => {
+  const september = sessionInstants(2026, 8, 29, weekly, oneOff);
+  assert.equal(september.start.toISOString(), "2026-09-29T22:00:00.000Z");
+  assert.equal(september.end.toISOString(), "2026-09-30T00:00:00.000Z");
+  const november = sessionInstants(2026, 10, 3, weekly, oneOff);
+  assert.equal(november.start.toISOString(), "2026-11-03T23:00:00.000Z");
+});
+
+test("the timezone carousel shows the same session in Central and London", () => {
+  const session = sessionInstants(2026, 8, 29, weekly, oneOff);
+  assert.equal(
+    formatSessionRange(session.start, session.end, "America/Chicago"),
+    "5:00–7:00 PM CDT",
+  );
+  assert.equal(
+    formatSessionRange(session.start, session.end, "Europe/London"),
+    "11:00 PM – 1:00 AM GMT+1",
+  );
+  assert.equal(
+    SESSION_TIMEZONES.some((zone) => zone.id === "America/Detroit"),
+    true,
+  );
+});
+
+test("past sessions are the schedule dates before today, newest first", () => {
+  const past = recentPastSessions(
+    weekly,
+    oneOff,
+    { year: 2026, monthIndex: 8, day: 29 },
+    3,
+  );
+  assert.deepEqual(
+    past.map((item) => item.day),
+    [24, 22, 17],
+  );
+  assert.equal(past[0].monthIndex, 8);
+});
+
+test("calendar exports use Detroit local time and name the 30 seat cap", () => {
+  const session = {
+    year: 2026,
+    monthIndex: 8,
+    day: 29,
+    startTime: "18:00",
+    endTime: "20:00",
+    now: new Date("2026-09-28T15:00:00Z"),
+  };
+  const ics = sessionIcs(session);
+  assert.match(ics, /DTSTART;TZID=America\/Detroit:20260929T180000/);
+  assert.match(ics, /DTEND;TZID=America\/Detroit:20260929T200000/);
+  assert.match(ics, new RegExp(`${SEAT_CAP} seats`));
+  const url = googleCalendarUrl(session);
+  assert.match(url, /calendar\.google\.com/);
+  assert.match(url, /ctz=America%2FDetroit/);
+  assert.match(url, /20260929T180000%2F20260929T200000/);
+  assert.match(url, /30\+seats|30%20seats/);
+});
+
+test("detroitDate reads the Detroit calendar day", () => {
+  assert.deepEqual(detroitDate(new Date("2026-09-29T03:30:00Z")), {
+    year: 2026,
+    monthIndex: 8,
+    day: 28,
+  });
 });
