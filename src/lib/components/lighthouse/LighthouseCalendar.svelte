@@ -8,22 +8,25 @@
     clickableDayNumbers,
     clockSkewMs,
     detroitDate,
+    fetchEngineStatus,
     fetchSchedule,
     formatSessionRange,
     googleCalendarUrl,
+    HELD_SEATS_KEY,
     highlightedDayNumbers,
     scheduleLine,
+    SEAT_TOKEN_KEY,
     sessionDateKey,
     sessionIcs,
     sessionInstants,
     setDevSchedule,
   } from "$lib/lighthouseSchedule.js";
+  import { lighthouseActions } from "$lib/lighthouseStore.js";
+  import EngineStatus from "$lib/components/lighthouse/EngineStatus.svelte";
 
   let { onUpload = () => {} } = $props();
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const SEAT_TOKEN_KEY = "lighthouse_seat_token";
-  const HELD_KEY = "lighthouse_seats_held";
   const PRACTICE_PRESETS = ["soon", "open", "drain", "ended"];
 
   let payload = $state(null);
@@ -38,7 +41,7 @@
   let claiming = $state(false);
   let claimError = $state("");
   let devNotice = $state("");
-  let devAction = $state("");
+  let engine = $state(null);
 
   const today = $derived(detroitDate(new Date(now - skew)));
   const line = $derived(payload ? scheduleLine(payload, now, skew) : "");
@@ -159,26 +162,37 @@
   const liveForSelected = $derived(
     holdingSelected && (selectedStage === "open" || selectedStage === "drain"),
   );
-  const liveSeatHeld = $derived(
+  const canUseSeat = $derived(
+    holdingSelected &&
+      (selectedStage === "pre_warm" ||
+        selectedStage === "open" ||
+        selectedStage === "drain"),
+  );
+  const canUseFocusSeat = $derived(
     focusDate !== "" &&
       held.includes(focusDate) &&
-      (payload?.phase === "open" || payload?.phase === "drain"),
+      (payload?.phase === "pre_warm" ||
+        payload?.phase === "open" ||
+        payload?.phase === "drain"),
   );
   const seatNextStep = $derived.by(() => {
     if (!holdingSelected) return "";
+    if (selectedStage === "pre_warm") {
+      return "You're in early. The engine is starting, and you can upload a resume now. Analysis waits until the engine is ready.";
+    }
     if (liveForSelected) {
-      return "You're in. Continue to resume upload. Process resume reads the PDF. Run AI Analysis stays off until the engine is running.";
+      return "You're in. Upload a resume from your seat. Analysis runs when the engine is ready.";
     }
     if (selectedStage === "ended") {
       return "You're in. This session has ended, so resume upload is closed.";
     }
-    return "You're in. Add this session to your calendar. Resume upload opens when the session is live.";
+    return "You're in. Add this session to your calendar. Resume upload opens when the engine starts.";
   });
 
   function readHeld() {
     if (typeof sessionStorage === "undefined") return [];
     try {
-      const parsed = JSON.parse(sessionStorage.getItem(HELD_KEY) || "[]");
+      const parsed = JSON.parse(sessionStorage.getItem(HELD_SEATS_KEY) || "[]");
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
@@ -197,12 +211,12 @@
   function rememberSeat(date) {
     if (held.includes(date)) return;
     held = [...held, date];
-    sessionStorage.setItem(HELD_KEY, JSON.stringify(held));
+    sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(held));
   }
 
   function releaseLocalSeats() {
     held = [];
-    sessionStorage.removeItem(HELD_KEY);
+    sessionStorage.removeItem(HELD_SEATS_KEY);
   }
 
   function showDevDate(date) {
@@ -213,7 +227,6 @@
   }
 
   async function chooseDev(preset) {
-    devAction = preset;
     const session =
       focusDate || sessionDateKey(today.year, today.monthIndex, today.day);
     try {
@@ -254,12 +267,22 @@
     onUpload();
   }
 
+  async function refreshEngine() {
+    try {
+      engine = await fetchEngineStatus();
+      lighthouseActions.rememberEngine(engine);
+    } catch {
+      engine = null;
+    }
+  }
+
   async function refresh() {
     try {
       const next = await fetchSchedule();
       payload = next;
       skew = clockSkewMs(next.server_time, Date.now());
       failed = false;
+      await refreshEngine();
     } catch {
       failed = true;
     }
@@ -327,16 +350,19 @@
 
   let tick;
   let poll;
+  let enginePoll;
   onMount(() => {
     refresh();
     tick = setInterval(() => {
       now = Date.now();
     }, 30000);
     poll = setInterval(refresh, 60000);
+    enginePoll = setInterval(refreshEngine, 15000);
   });
   onDestroy(() => {
     clearInterval(tick);
     clearInterval(poll);
+    clearInterval(enginePoll);
   });
 </script>
 
@@ -375,15 +401,11 @@
           aria-pressed={!payload.dev_preset}
           onclick={() => chooseDev("clear")}>Real calendar</button
         >
-        <button
-          type="button"
-          aria-pressed={devAction === "reset_seats"}
-          onclick={() => chooseDev("reset_seats")}>Reset seats</button
+        <button type="button" onclick={() => chooseDev("reset_seats")}
+          >Reset seats</button
         >
-        <button
-          type="button"
-          aria-pressed={devAction === "fill_seats"}
-          onclick={() => chooseDev("fill_seats")}>Fill seats</button
+        <button type="button" onclick={() => chooseDev("fill_seats")}
+          >Fill seats</button
         >
       </div>
       {#if devNotice}
@@ -397,12 +419,11 @@
     {#if payload}
       <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
     {/if}
-    {#if liveSeatHeld && !selected}
+    <EngineStatus {engine} />
+    {#if canUseFocusSeat && !selected}
       <p class="next-step">
         You have a seat.
-        <button type="button" onclick={continueToUpload}
-          >Continue to resume upload</button
-        >
+        <button type="button" onclick={continueToUpload}>Use your seat</button>
       </p>
     {/if}
   </div>
@@ -506,9 +527,9 @@
       {#if seatNextStep}
         <div class="next-step">
           <p>{seatNextStep}</p>
-          {#if liveForSelected}
+          {#if canUseSeat}
             <button type="button" class="primary" onclick={continueToUpload}
-              >Continue to resume upload</button
+              >Use your seat</button
             >
           {/if}
         </div>

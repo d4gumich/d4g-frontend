@@ -124,7 +124,21 @@ async function apiRequest(path, options = {}) {
   }
 }
 
+let scheduledSeat = null;
+
 export const lighthouseActions = {
+  useScheduledSeat(token, session) {
+    scheduledSeat = token && session ? { token, session } : null;
+  },
+
+  rememberEngine(snapshot) {
+    lighthouseStatus.update((s) => ({
+      ...s,
+      stage: snapshot?.stage || "OFFLINE",
+      hardware: snapshot?.hardware || "None",
+    }));
+  },
+
   async fetchStatus(isSilent = false) {
     if (isSilent) {
       lighthouseStatus.update((s) => ({ ...s, isRefreshing: true }));
@@ -327,10 +341,30 @@ export const lighthouseActions = {
     formData.append("sanitize", sanitize);
 
     try {
-      const result = await apiRequest("/parse-pdf", {
-        method: "POST",
-        body: formData,
-      });
+      let result;
+      if (scheduledSeat) {
+        formData.append("token", scheduledSeat.token);
+        formData.append("session", scheduledSeat.session);
+        const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+        const response = await fetch(
+          `${baseUrl}api/v1/products/lighthouse/schedule/parse`,
+          { method: "POST", credentials: "omit", body: formData },
+        );
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ detail: "Upload failed" }));
+          throw new Error(
+            errorData.detail || `Server error: ${response.status}`,
+          );
+        }
+        result = await response.json();
+      } else {
+        result = await apiRequest("/parse-pdf", {
+          method: "POST",
+          body: formData,
+        });
+      }
 
       const rawText = result.extracted_text;
       const sections = this.splitIntoSections(rawText);
@@ -430,11 +464,38 @@ export const lighthouseActions = {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         result = JSON.parse(JSON.stringify(MOCK_ANALYSIS));
       } else {
-        result = await apiRequest("/analyze-text", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ resume_text: text, sanitize }),
-        });
+        if (scheduledSeat) {
+          const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+          const response = await fetch(
+            `${baseUrl}api/v1/products/lighthouse/schedule/analyze`,
+            {
+              method: "POST",
+              credentials: "omit",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                token: scheduledSeat.token,
+                session: scheduledSeat.session,
+                resume_text: text,
+                sanitize,
+              }),
+            },
+          );
+          if (!response.ok) {
+            const errorData = await response
+              .json()
+              .catch(() => ({ detail: "Analysis failed" }));
+            throw new Error(
+              errorData.detail || `Server error: ${response.status}`,
+            );
+          }
+          result = await response.json();
+        } else {
+          result = await apiRequest("/analyze-text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resume_text: text, sanitize }),
+          });
+        }
       }
 
       const ensureArray = (input) => {

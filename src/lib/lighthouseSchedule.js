@@ -321,6 +321,9 @@ export function googleCalendarUrl(session) {
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
+export const SEAT_TOKEN_KEY = "lighthouse_seat_token";
+export const HELD_SEATS_KEY = "lighthouse_seats_held";
+
 export async function fetchSchedule(baseUrl) {
   if (baseUrl == null) {
     const { HOST_URL } = await import("$lib/config.js");
@@ -353,6 +356,22 @@ export async function claimSeat(token, sessionDate, baseUrl) {
   );
   if (!response.ok) {
     throw new Error(`Seat request failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function fetchEngineStatus(baseUrl) {
+  if (baseUrl == null) {
+    const { HOST_URL } = await import("$lib/config.js");
+    baseUrl = HOST_URL;
+  }
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/engine`,
+    { credentials: "omit" },
+  );
+  if (!response.ok) {
+    throw new Error(`Engine status request failed: ${response.status}`);
   }
   return response.json();
 }

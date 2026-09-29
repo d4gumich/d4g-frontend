@@ -1,28 +1,19 @@
 <script>
   import Navbar from "$lib/components/navbar.svelte";
-  import LighthouseControl from "$lib/components/lighthouse/LighthouseControl.svelte";
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
   import Console from "$lib/components/lighthouse/Console.svelte";
-  import { lighthouseActions, lighthouseStatus } from "$lib/lighthouseStore.js";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
-  import LighthousePastSessions from "$lib/components/lighthouse/LighthousePastSessions.svelte";
+  import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
   import { browser } from "$app/environment";
   import { onDestroy, onMount } from "svelte";
   import { base } from "$app/paths";
-  import { page } from "$app/stores";
 
   const currentPage = "products";
 
-  let secretKey = $state(null);
-  let sessionActive = $derived($lighthouseStatus.sessionActive);
   let view = $state("upcoming");
 
-  onMount(async () => {
+  onMount(() => {
     document.body.classList.add("has-system-console");
-    if (browser) {
-      secretKey = $page.url.searchParams.get("key");
-      await lighthouseActions.fetchStatus(true);
-    }
   });
 
   onDestroy(() => {
@@ -75,24 +66,13 @@
   {#if view === "upcoming"}
     <LighthouseCalendar onUpload={() => (view = "past")} />
   {:else}
-    <LighthousePastSessions />
-  {/if}
-  {#if (secretKey && secretKey.length >= 5) || sessionActive}
-    <div class="engine-wrap">
-      <LighthouseControl />
-    </div>
+    <LighthouseWorkspace />
   {/if}
 {/if}
 
 <Console />
 
 <style>
-  .engine-wrap {
-    max-width: 720px;
-    margin: 0 auto 2rem;
-    padding: 0 1rem;
-  }
-
   .navbar {
     background-color: white;
     border-bottom: 1px solid var(--border-color);
