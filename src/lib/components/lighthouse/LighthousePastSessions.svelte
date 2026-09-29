@@ -31,7 +31,11 @@
 <section class="past-card" aria-label="Past Lighthouse sessions">
   <div class="past-header">
     <h2>Past sessions</h2>
-    <p>Resumes processed in this tab stay here until the tab closes.</p>
+    <p>
+      Choose a PDF and press Process resume. That reads the document. Run AI
+      Analysis appears on the preview and stays off until the engine is running.
+      Processed resumes stay here until the tab closes.
+    </p>
   </div>
 
   <form class="resume-form" onsubmit={processResume}>

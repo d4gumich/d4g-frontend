@@ -73,7 +73,7 @@
 
 {#if browser}
   {#if view === "upcoming"}
-    <LighthouseCalendar />
+    <LighthouseCalendar onUpload={() => (view = "past")} />
   {:else}
     <LighthousePastSessions />
   {/if}

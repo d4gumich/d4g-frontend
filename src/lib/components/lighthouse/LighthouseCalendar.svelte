@@ -19,9 +19,12 @@
     setDevSchedule,
   } from "$lib/lighthouseSchedule.js";
 
+  let { onUpload = () => {} } = $props();
+
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const SEAT_TOKEN_KEY = "lighthouse_seat_token";
   const HELD_KEY = "lighthouse_seats_held";
+  const PRACTICE_PRESETS = ["soon", "open", "drain", "ended"];
 
   let payload = $state(null);
   let skew = $state(0);
@@ -34,6 +37,8 @@
   let held = $state(readHeld());
   let claiming = $state(false);
   let claimError = $state("");
+  let devNotice = $state("");
+  let devAction = $state("");
 
   const today = $derived(detroitDate(new Date(now - skew)));
   const line = $derived(payload ? scheduleLine(payload, now, skew) : "");
@@ -138,6 +143,37 @@
     selectedDate !== "" && held.includes(selectedDate),
   );
   const selectedFull = $derived(selectedTaken >= seatCap && !holdingSelected);
+  const selectedStage = $derived.by(() => {
+    if (!selectedSession) return "";
+    const instant = now - skew;
+    const start = selectedSession.start.getTime();
+    const end = selectedSession.end.getTime();
+    const preWake = Number(payload?.pre_wake_minutes ?? 12) * 60000;
+    const drain = Number(payload?.drain_minutes ?? 10) * 60000;
+    if (instant < start - preWake) return "upcoming";
+    if (instant < start) return "pre_warm";
+    if (instant < end - drain) return "open";
+    if (instant < end) return "drain";
+    return "ended";
+  });
+  const liveForSelected = $derived(
+    holdingSelected && (selectedStage === "open" || selectedStage === "drain"),
+  );
+  const liveSeatHeld = $derived(
+    focusDate !== "" &&
+      held.includes(focusDate) &&
+      (payload?.phase === "open" || payload?.phase === "drain"),
+  );
+  const seatNextStep = $derived.by(() => {
+    if (!holdingSelected) return "";
+    if (liveForSelected) {
+      return "You're in. Continue to resume upload. Process resume reads the PDF. Run AI Analysis stays off until the engine is running.";
+    }
+    if (selectedStage === "ended") {
+      return "You're in. This session has ended, so resume upload is closed.";
+    }
+    return "You're in. Add this session to your calendar. Resume upload opens when the session is live.";
+  });
 
   function readHeld() {
     if (typeof sessionStorage === "undefined") return [];
@@ -164,6 +200,11 @@
     sessionStorage.setItem(HELD_KEY, JSON.stringify(held));
   }
 
+  function releaseLocalSeats() {
+    held = [];
+    sessionStorage.removeItem(HELD_KEY);
+  }
+
   function showDevDate(date) {
     if (!date) return;
     const [year, month, day] = date.split("-").map(Number);
@@ -172,9 +213,14 @@
   }
 
   async function chooseDev(preset) {
+    devAction = preset;
     const session =
       focusDate || sessionDateKey(today.year, today.monthIndex, today.day);
     try {
+      if (PRACTICE_PRESETS.includes(preset)) {
+        await setDevSchedule("reset_seats");
+        releaseLocalSeats();
+      }
       const next = await setDevSchedule(
         preset,
         preset === "fill_seats" ? session : undefined,
@@ -182,22 +228,30 @@
       payload = next;
       skew = clockSkewMs(next.server_time, Date.now());
       failed = false;
-      if (preset === "reset_seats") {
-        held = [];
-        sessionStorage.removeItem(HELD_KEY);
-      }
+      if (preset === "reset_seats") releaseLocalSeats();
       const shown = showDevDate(next.dev_date);
-      if (shown && ["soon", "open", "drain"].includes(preset)) {
+      if (shown && PRACTICE_PRESETS.includes(preset)) {
         selected = shown;
         zoneIndex = 0;
         claimError = "";
-      } else if (preset === "ended" || preset === "clear") {
+        devNotice = "Seats are open. Use Take a seat in the session popup.";
+      } else if (preset === "clear") {
         selected = null;
+        devNotice = "Real Tuesday and Thursday calendar is on.";
+      } else if (preset === "reset_seats") {
+        devNotice = "Seats reset. Open a session, then take a seat.";
+      } else if (preset === "fill_seats") {
+        devNotice = "All 30 seats are filled. Reset seats to take one.";
       }
     } catch (error) {
       failed = true;
       claimError = error?.message || "Could not change the dev schedule.";
     }
+  }
+
+  function continueToUpload() {
+    closeDialog();
+    onUpload();
   }
 
   async function refresh() {
@@ -236,12 +290,10 @@
     }
   }
 
-  async function openDay(day) {
+  function openDay(day) {
     selected = { year: cursor.year, monthIndex: cursor.monthIndex, day };
     zoneIndex = 0;
     claimError = "";
-    const date = sessionDateKey(cursor.year, cursor.monthIndex, day);
-    if (held.includes(date)) await takeSeat(date);
   }
 
   function closeDialog() {
@@ -318,16 +370,25 @@
           aria-pressed={payload.dev_preset === "ended"}
           onclick={() => chooseDev("ended")}>Ended</button
         >
-        <button type="button" onclick={() => chooseDev("clear")}
-          >Real calendar</button
+        <button
+          type="button"
+          aria-pressed={!payload.dev_preset}
+          onclick={() => chooseDev("clear")}>Real calendar</button
         >
-        <button type="button" onclick={() => chooseDev("reset_seats")}
-          >Reset seats</button
+        <button
+          type="button"
+          aria-pressed={devAction === "reset_seats"}
+          onclick={() => chooseDev("reset_seats")}>Reset seats</button
         >
-        <button type="button" onclick={() => chooseDev("fill_seats")}
-          >Fill seats</button
+        <button
+          type="button"
+          aria-pressed={devAction === "fill_seats"}
+          onclick={() => chooseDev("fill_seats")}>Fill seats</button
         >
       </div>
+      {#if devNotice}
+        <p class="dev-notice">{devNotice}</p>
+      {/if}
     </div>
   {/if}
   <div class="schedule-header">
@@ -335,6 +396,14 @@
     <p>{failed ? "Schedule unavailable." : line}</p>
     {#if payload}
       <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
+    {/if}
+    {#if liveSeatHeld && !selected}
+      <p class="next-step">
+        You have a seat.
+        <button type="button" onclick={continueToUpload}
+          >Continue to resume upload</button
+        >
+      </p>
     {/if}
   </div>
 
@@ -434,6 +503,16 @@
       {#if claimError}
         <p class="claim-error">{claimError}</p>
       {/if}
+      {#if seatNextStep}
+        <div class="next-step">
+          <p>{seatNextStep}</p>
+          {#if liveForSelected}
+            <button type="button" class="primary" onclick={continueToUpload}
+              >Continue to resume upload</button
+            >
+          {/if}
+        </div>
+      {/if}
       <button type="button" class="text" onclick={closeDialog}>Close</button>
     </div>
   </div>
@@ -469,6 +548,41 @@
   .dev-actions button[aria-pressed="true"] {
     background: #5c3b16;
     color: #fff;
+  }
+  .dev-actions button:active {
+    transform: translateY(1px);
+    background: #5c3b16;
+    color: #fff;
+  }
+  .dev-notice {
+    margin: 0.7rem 0 0;
+    font-weight: 600;
+  }
+  .next-step {
+    margin: 0.85rem 0 0;
+    color: #1b3350;
+  }
+  .dialog .next-step {
+    padding: 0.75rem 0.85rem;
+    border-radius: 8px;
+    background: #f4f7fb;
+  }
+  .dialog .next-step p {
+    margin: 0;
+  }
+  .dialog .next-step .primary {
+    margin-top: 0.7rem;
+  }
+  .schedule-header .next-step button {
+    margin-left: 0.35rem;
+    border: 0;
+    background: transparent;
+    color: #1a4a86;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
   }
   .schedule-card {
     margin: 1rem auto 2rem;
