@@ -1,40 +1,38 @@
 <script>
   import { onDestroy, onMount } from "svelte";
-  import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
-  import {
-    lighthouseActions,
-    lighthouseResults,
-  } from "$lib/lighthouseStore.js";
   import {
     SEAT_CAP,
     SESSION_TIMEZONES,
     canGoToPreviousMonth,
+    claimSeat,
     clickableDayNumbers,
     clockSkewMs,
     detroitDate,
     fetchSchedule,
     formatSessionRange,
-    formatWindow,
     googleCalendarUrl,
     highlightedDayNumbers,
     scheduleLine,
+    sessionDateKey,
     sessionIcs,
     sessionInstants,
   } from "$lib/lighthouseSchedule.js";
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const SEAT_TOKEN_KEY = "lighthouse_seat_token";
+  const HELD_KEY = "lighthouse_seats_held";
 
   let payload = $state(null);
   let skew = $state(0);
   let now = $state(Date.now());
   let failed = $state(false);
   let cursor = $state(detroitDate(new Date()));
-  let tab = $state("upcoming");
   let selected = $state(null);
-  let zoneIndex = $state(
-    SESSION_TIMEZONES.findIndex((zone) => zone.id === "America/Detroit"),
-  );
+  let zoneIndex = $state(0);
   let dialogEl = $state(null);
+  let held = $state(readHeld());
+  let claiming = $state(false);
+  let claimError = $state("");
 
   const today = $derived(detroitDate(new Date(now - skew)));
   const line = $derived(payload ? scheduleLine(payload, now, skew) : "");
@@ -77,9 +75,6 @@
     new Date(Date.UTC(cursor.year, cursor.monthIndex + 1, 0)).getUTCDate(),
   );
   const previousEnabled = $derived(canGoToPreviousMonth(cursor, today));
-  let resumeFile = $state(null);
-  let sanitizeResume = $state(false);
-  let resumeError = $state("");
   const selectedSession = $derived(
     selected && payload
       ? sessionInstants(
@@ -121,17 +116,51 @@
   const googleUrl = $derived(
     calendarSession ? googleCalendarUrl(calendarSession) : "",
   );
+  const selectedDate = $derived(
+    selected
+      ? sessionDateKey(selected.year, selected.monthIndex, selected.day)
+      : "",
+  );
+  const seatCap = $derived(Number(payload?.seat_cap ?? SEAT_CAP));
+  const focusDate = $derived.by(() => {
+    if (!payload) return "";
+    const window = payload.current_window || payload.upcoming?.[0];
+    if (!window?.start) return payload.seat_session || "";
+    const date = detroitDate(new Date(window.start));
+    return sessionDateKey(date.year, date.monthIndex, date.day);
+  });
+  const focusTaken = $derived(
+    Number(payload?.seats?.[focusDate] ?? payload?.seats_taken ?? 0),
+  );
+  const selectedTaken = $derived(Number(payload?.seats?.[selectedDate] ?? 0));
+  const holdingSelected = $derived(
+    selectedDate !== "" && held.includes(selectedDate),
+  );
+  const selectedFull = $derived(selectedTaken >= seatCap && !holdingSelected);
 
-  async function processResume(event) {
-    event.preventDefault();
-    if (!resumeFile) return;
-    resumeError = "";
+  function readHeld() {
+    if (typeof sessionStorage === "undefined") return [];
     try {
-      await lighthouseActions.uploadPdf(resumeFile, sanitizeResume);
-      resumeFile = null;
-    } catch (error) {
-      resumeError = error?.message || "Upload failed.";
+      const parsed = JSON.parse(sessionStorage.getItem(HELD_KEY) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
     }
+  }
+
+  function seatToken() {
+    let token = sessionStorage.getItem(SEAT_TOKEN_KEY);
+    if (!token) {
+      token = crypto.randomUUID();
+      sessionStorage.setItem(SEAT_TOKEN_KEY, token);
+    }
+    return token;
+  }
+
+  function rememberSeat(date) {
+    if (held.includes(date)) return;
+    held = [...held, date];
+    sessionStorage.setItem(HELD_KEY, JSON.stringify(held));
   }
 
   async function refresh() {
@@ -151,15 +180,36 @@
     cursor = { year: date.getUTCFullYear(), monthIndex: date.getUTCMonth() };
   }
 
-  function openDay(day) {
+  async function takeSeat(date) {
+    if (!date || claiming) return;
+    claiming = true;
+    claimError = "";
+    try {
+      const result = await claimSeat(seatToken(), date);
+      payload = {
+        ...payload,
+        seat_cap: result.seat_cap,
+        seats: { ...(payload?.seats || {}), [date]: result.seats_taken },
+      };
+      if (result.accepted) rememberSeat(date);
+    } catch (error) {
+      claimError = error?.message || "Could not save a seat.";
+    } finally {
+      claiming = false;
+    }
+  }
+
+  async function openDay(day) {
     selected = { year: cursor.year, monthIndex: cursor.monthIndex, day };
-    zoneIndex = SESSION_TIMEZONES.findIndex(
-      (item) => item.id === "America/Detroit",
-    );
+    zoneIndex = 0;
+    claimError = "";
+    const date = sessionDateKey(cursor.year, cursor.monthIndex, day);
+    if (held.includes(date)) await takeSeat(date);
   }
 
   function closeDialog() {
     selected = null;
+    claimError = "";
   }
 
   function shiftZone(delta) {
@@ -207,119 +257,45 @@
   <div class="schedule-header">
     <h2>Deep sessions</h2>
     <p>{failed ? "Schedule unavailable." : line}</p>
+    {#if payload}
+      <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
+    {/if}
   </div>
 
-  <div class="tabs" role="tablist">
+  <div class="month-nav">
     <button
       type="button"
-      role="tab"
-      aria-selected={tab === "upcoming"}
-      onclick={() => (tab = "upcoming")}
+      onclick={() => shiftMonth(-1)}
+      aria-label="Previous month"
+      disabled={!previousEnabled}
     >
-      Upcoming
+      ‹
     </button>
-    <button
-      type="button"
-      role="tab"
-      aria-selected={tab === "past"}
-      onclick={() => (tab = "past")}
+    <strong>{monthLabel}</strong>
+    <button type="button" onclick={() => shiftMonth(1)} aria-label="Next month"
+      >›</button
     >
-      Past sessions
-    </button>
   </div>
-
-  {#if tab === "upcoming"}
-    <div class="month-nav">
-      <button
-        type="button"
-        onclick={() => shiftMonth(-1)}
-        aria-label="Previous month"
-        disabled={!previousEnabled}
-      >
-        ‹
-      </button>
-      <strong>{monthLabel}</strong>
-      <button
-        type="button"
-        onclick={() => shiftMonth(1)}
-        aria-label="Next month">›</button
-      >
-    </div>
-    <div class="month-grid">
-      {#each WEEKDAYS as name}
-        <span class="dow">{name}</span>
-      {/each}
-      {#each { length: leadingBlanks } as _}
-        <span aria-hidden="true"></span>
-      {/each}
-      {#each { length: daysInMonth } as _, index}
-        {@const day = index + 1}
-        {#if clickable.includes(day)}
-          <button type="button" class="day session" onclick={() => openDay(day)}
-            >{day}</button
-          >
-        {:else}
-          <span class="day" class:was-session={sessionDays.includes(day)}
-            >{day}</span
-          >
-        {/if}
-      {/each}
-    </div>
-  {:else}
-    <form class="resume-form" onsubmit={processResume}>
-      <label>
-        Resume
-        <input
-          type="file"
-          accept="application/pdf"
-          onchange={(event) => {
-            resumeFile = event.currentTarget.files?.[0] || null;
-          }}
-        />
-      </label>
-      <label class="sanitize">
-        <input type="checkbox" bind:checked={sanitizeResume} />
-        Sanitize PDF
-      </label>
-      <button
-        type="submit"
-        disabled={!resumeFile || $lighthouseResults.loading}
-      >
-        {$lighthouseResults.loading ? "Processing…" : "Process resume"}
-      </button>
-    </form>
-    {#if resumeError}
-      <p class="empty">{resumeError}</p>
-    {/if}
-    {#if $lighthouseResults.history.length === 0}
-      <p class="empty">No resumes processed in this tab yet.</p>
-    {:else}
-      <ul class="past-list">
-        {#each $lighthouseResults.history as doc (doc.id)}
-          <li>
-            <button
-              type="button"
-              class:selected={doc.id === $lighthouseResults.currentId}
-              onclick={() => lighthouseActions.selectDocument(doc.id)}
-            >
-              {doc.name}
-            </button>
-            <time datetime={doc.timestamp}
-              >{new Date(doc.timestamp).toLocaleString()}</time
-            >
-            <button
-              type="button"
-              class="remove"
-              aria-label="Remove {doc.name}"
-              onclick={() => lighthouseActions.deleteDocument(doc.id)}
-              >Remove</button
-            >
-          </li>
-        {/each}
-      </ul>
-      <LighthouseResults />
-    {/if}
-  {/if}
+  <div class="month-grid">
+    {#each WEEKDAYS as name}
+      <span class="dow">{name}</span>
+    {/each}
+    {#each { length: leadingBlanks } as _}
+      <span aria-hidden="true"></span>
+    {/each}
+    {#each { length: daysInMonth } as _, index}
+      {@const day = index + 1}
+      {#if clickable.includes(day)}
+        <button type="button" class="day session" onclick={() => openDay(day)}
+          >{day}</button
+        >
+      {:else}
+        <span class="day" class:was-session={sessionDays.includes(day)}
+          >{day}</span
+        >
+      {/if}
+    {/each}
+  </div>
 </section>
 
 {#if selectedSession}
@@ -339,7 +315,8 @@
       bind:this={dialogEl}
     >
       <h3 id="session-title">{selectedTitle}</h3>
-      <p class="seats">First come, first served · {SEAT_CAP} seats</p>
+      <p class="seats">{selectedTaken} of {seatCap} seats filled</p>
+      <p class="seats-note">First come, first served</p>
       <div class="carousel">
         <button
           type="button"
@@ -357,13 +334,30 @@
         >
       </div>
       <div class="dialog-actions">
-        <button type="button" class="primary" onclick={downloadCalendar}
+        <button
+          type="button"
+          class="primary"
+          disabled={holdingSelected || selectedFull || claiming}
+          onclick={() => takeSeat(selectedDate)}
+        >
+          {claiming
+            ? "Saving seat…"
+            : holdingSelected
+              ? "Seat saved"
+              : selectedFull
+                ? "Session full"
+                : "Take a seat"}
+        </button>
+        <button type="button" class="secondary" onclick={downloadCalendar}
           >Add to calendar</button
         >
         <a href={googleUrl} target="_blank" rel="noopener noreferrer"
           >Google Calendar</a
         >
       </div>
+      {#if claimError}
+        <p class="claim-error">{claimError}</p>
+      {/if}
       <button type="button" class="text" onclick={closeDialog}>Close</button>
     </div>
   </div>
@@ -386,24 +380,9 @@
     margin: 0.35rem 0 0;
     color: #333;
   }
-  .tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  .tabs button {
-    border: 0;
-    background: transparent;
-    color: #777;
-    font: inherit;
-    padding: 0.35rem 0.2rem;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-  }
-  .tabs button[aria-selected="true"] {
+  .seat-count {
     color: #1b3350;
-    border-bottom-color: #1b3350;
-    font-weight: 700;
+    font-weight: 600;
   }
   .month-nav,
   .month-grid,
@@ -454,77 +433,15 @@
     color: #9a9a9a;
   }
   button.session {
-    background: #e8f1ff;
+    background: #1a4a86;
     border-radius: 999px;
-    color: #1b3350;
+    color: #fff;
     font-weight: 700;
     border: 0;
     cursor: pointer;
   }
-  .resume-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: center;
-    margin-top: 1rem;
-    color: #333;
-  }
-  .resume-form button,
-  .past-list button {
-    font: inherit;
-    cursor: pointer;
-  }
-  .resume-form button {
-    background: #1b3350;
-    color: #fff;
-    border: 0;
-    border-radius: 4px;
-    padding: 0.55rem 0.8rem;
-  }
-  .resume-form button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  .sanitize {
-    display: flex;
-    gap: 0.35rem;
-    align-items: center;
-  }
-  .past-list {
-    list-style: none;
-    margin: 1rem 0 0;
-    padding: 0;
-    color: #333;
-  }
-  .past-list li {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    padding: 0.45rem 0;
-    border-bottom: 1px solid #eee;
-  }
-  .past-list li button:first-child {
-    border: 0;
-    background: transparent;
-    color: #1b3350;
-    font-weight: 600;
-    padding: 0;
-  }
-  .past-list li button.selected {
-    text-decoration: underline;
-  }
-  .past-list time {
-    color: #666;
-    font-size: 0.85rem;
-  }
-  .remove {
-    margin-left: auto;
-    border: 0;
-    background: transparent;
-    color: #888;
-  }
-  .empty {
-    color: #777;
+  button.session:hover {
+    background: #153d70;
   }
   .backdrop {
     position: fixed;
@@ -556,7 +473,16 @@
   }
   .seats {
     margin: 0.4rem 0 0;
-    color: #444;
+    color: #1b3350;
+    font-weight: 600;
+  }
+  .seats-note,
+  .claim-error {
+    margin: 0.2rem 0 0;
+    color: #555;
+  }
+  .claim-error {
+    color: #8a2a2a;
   }
   .carousel {
     grid-template-columns: 2rem 1fr 2rem;
@@ -571,22 +497,36 @@
   }
   .dialog-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
     margin-top: 1rem;
   }
   .primary,
+  .secondary,
   .dialog-actions a {
     font: inherit;
     text-decoration: none;
+  }
+  .primary,
+  .secondary {
+    border-radius: 4px;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
   }
   .primary {
     background: #1b3350;
     color: #fff;
     border: 0;
-    border-radius: 4px;
-    padding: 0.7rem 1rem;
-    cursor: pointer;
+  }
+  .primary:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+  .secondary {
+    background: #fff;
+    color: #1b3350;
+    border: 1px solid #1b3350;
   }
   .dialog-actions a {
     color: #1b3350;

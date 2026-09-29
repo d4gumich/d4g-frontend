@@ -5,8 +5,9 @@
   import Console from "$lib/components/lighthouse/Console.svelte";
   import { lighthouseActions, lighthouseStatus } from "$lib/lighthouseStore.js";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
+  import LighthousePastSessions from "$lib/components/lighthouse/LighthousePastSessions.svelte";
   import { browser } from "$app/environment";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { base } from "$app/paths";
   import { page } from "$app/stores";
 
@@ -14,12 +15,18 @@
 
   let secretKey = $state(null);
   let sessionActive = $derived($lighthouseStatus.sessionActive);
+  let view = $state("upcoming");
 
   onMount(async () => {
+    document.body.classList.add("has-system-console");
     if (browser) {
       secretKey = $page.url.searchParams.get("key");
       await lighthouseActions.fetchStatus(true);
     }
+  });
+
+  onDestroy(() => {
+    if (browser) document.body.classList.remove("has-system-console");
   });
 </script>
 
@@ -43,11 +50,33 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
+    <div class="session-tabs" role="tablist" aria-label="Lighthouse sessions">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "upcoming"}
+        onclick={() => (view = "upcoming")}
+      >
+        Upcoming
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "past"}
+        onclick={() => (view = "past")}
+      >
+        Past sessions
+      </button>
+    </div>
   </div>
 </div>
 
 {#if browser}
-  <LighthouseCalendar />
+  {#if view === "upcoming"}
+    <LighthouseCalendar />
+  {:else}
+    <LighthousePastSessions />
+  {/if}
   {#if (secretKey && secretKey.length >= 5) || sessionActive}
     <div class="engine-wrap">
       <LighthouseControl />
@@ -81,6 +110,29 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem 2rem;
+    flex-wrap: wrap;
+  }
+
+  .session-tabs {
+    display: flex;
+    gap: 1.25rem;
+  }
+
+  .session-tabs button {
+    border: 0;
+    background: transparent;
+    color: #777;
+    font: inherit;
+    padding: 0.35rem 0;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .session-tabs button[aria-selected="true"] {
+    color: #1b3350;
+    border-bottom-color: #1b3350;
+    font-weight: 700;
   }
 
   .brand {

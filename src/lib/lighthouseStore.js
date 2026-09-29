@@ -52,7 +52,7 @@ export const lighthouseSettings = writable({
 
 export const lighthouseResults = writable({
   currentId: null,
-  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized }
+  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized, provider }
   loading: false,
   error: null,
 });
@@ -343,6 +343,7 @@ export const lighthouseActions = {
         extractedText: rawText,
         sections: sections,
         isSanitized: sanitize,
+        provider: "in_house",
         analysis: null,
       };
 

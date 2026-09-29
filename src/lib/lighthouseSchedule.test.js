@@ -137,19 +137,31 @@ test("a Detroit evening session is 10pm UTC in September and 11pm UTC in Novembe
   assert.equal(november.start.toISOString(), "2026-11-03T23:00:00.000Z");
 });
 
-test("the timezone carousel shows the same session in Central and London", () => {
+test("the timezone carousel runs east to west across US time zones", () => {
   const session = sessionInstants(2026, 8, 29, weekly, oneOff);
-  assert.equal(
-    formatSessionRange(session.start, session.end, "America/Chicago"),
-    "5:00–7:00 PM CDT",
+  assert.deepEqual(
+    SESSION_TIMEZONES.map((zone) => [zone.label, zone.id]),
+    [
+      ["Eastern", "America/New_York"],
+      ["Central", "America/Chicago"],
+      ["Mountain", "America/Denver"],
+      ["Pacific", "America/Los_Angeles"],
+      ["Alaska", "America/Anchorage"],
+      ["Hawaii", "Pacific/Honolulu"],
+    ],
   );
-  assert.equal(
-    formatSessionRange(session.start, session.end, "Europe/London"),
-    "11:00 PM – 1:00 AM GMT+1",
-  );
-  assert.equal(
-    SESSION_TIMEZONES.some((zone) => zone.id === "America/Detroit"),
-    true,
+  assert.deepEqual(
+    SESSION_TIMEZONES.map((zone) =>
+      formatSessionRange(session.start, session.end, zone.id),
+    ),
+    [
+      "6:00–8:00 PM EDT",
+      "5:00–7:00 PM CDT",
+      "4:00–6:00 PM MDT",
+      "3:00–5:00 PM PDT",
+      "2:00–4:00 PM AKDT",
+      "12:00–2:00 PM HST",
+    ],
   );
 });
 

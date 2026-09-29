@@ -87,9 +87,8 @@ export const SESSION_TIMEZONES = [
   { id: "America/Chicago", label: "Central" },
   { id: "America/Denver", label: "Mountain" },
   { id: "America/Los_Angeles", label: "Pacific" },
-  { id: "America/Detroit", label: "Detroit" },
-  { id: "Europe/London", label: "London" },
-  { id: "UTC", label: "UTC" },
+  { id: "America/Anchorage", label: "Alaska" },
+  { id: "Pacific/Honolulu", label: "Hawaii" },
 ];
 
 const SCHEDULE_ZONE = "America/Detroit";
@@ -248,6 +247,10 @@ function pad(value) {
   return String(value).padStart(2, "0");
 }
 
+export function sessionDateKey(year, monthIndex, day) {
+  return `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
+}
+
 function localStamp(year, monthIndex, day, time) {
   const { hours, minutes } = parseClock(time);
   return `${year}${pad(monthIndex + 1)}${pad(day)}T${pad(hours)}${pad(
@@ -329,6 +332,27 @@ export async function fetchSchedule(baseUrl) {
   });
   if (!response.ok) {
     throw new Error(`Schedule request failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function claimSeat(token, sessionDate, baseUrl) {
+  if (baseUrl == null) {
+    const { HOST_URL } = await import("$lib/config.js");
+    baseUrl = HOST_URL;
+  }
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/seats`,
+    {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, session: sessionDate }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Seat request failed: ${response.status}`);
   }
   return response.json();
 }
