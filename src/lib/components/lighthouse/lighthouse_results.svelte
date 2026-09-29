@@ -32,7 +32,7 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
-        
+
         const placeholders = /\[(NAME|LOCATION|EMAIL|PHONE|POSTAL_CODE|IP_ADDRESS|URL|SOCIAL_LINK|PERSON|GPE|LOC|FAC)\]/g;
         return escaped.replace(placeholders, '<span class="pii-highlight">$&</span>');
     }
@@ -61,14 +61,14 @@
                 <span class="timestamp">{new Date(currentDoc.timestamp).toLocaleString()}</span>
             </div>
             <div class="tab-switcher">
-                <button 
-                    class:active={activeTab === 'preview'} 
+                <button
+                    class:active={activeTab === 'preview'}
                     onclick={() => activeTab = 'preview'}
                 >
                     Document Preview
                 </button>
-                <button 
-                    class:active={activeTab === 'analysis'} 
+                <button
+                    class:active={activeTab === 'analysis'}
                     disabled={!results}
                     onclick={() => activeTab = 'analysis'}
                 >
@@ -83,13 +83,13 @@
                     <div class="selection-summary">
                         <strong>{sections.filter(s => s.selected).length}</strong> of {sections.length} sections selected
                     </div>
-                    
+
                     <div class="action-group">
                         {#if !isEngineRunning}
                             <span class="warning-tag">Engine Offline</span>
                         {/if}
-                        <button 
-                            class="btn-primary btn-sm" 
+                        <button
+                            class="btn-primary btn-sm"
                             onclick={triggerAnalysis}
                             disabled={!isEngineRunning || $lighthouseResults.loading || selectedText.length === 0}
                         >
@@ -100,16 +100,16 @@
 
                 <div class="sections-container">
                     {#each sections as section, i}
-                        <div 
-                            class="section-block" 
+                        <div
+                            class="section-block"
                             class:unselected={!section.selected}
                             style="border-left: 4px solid {getSectionBorder(i)}"
                         >
                             <div class="section-header">
                                 <label class="checkbox-container">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={section.selected} 
+                                    <input
+                                        type="checkbox"
+                                        checked={section.selected}
                                         onchange={() => lighthouseActions.toggleSection(i)}
                                     />
                                     <span class="section-title">{section.title}</span>
@@ -154,7 +154,7 @@
                                         <strong>{job.title}</strong>
                                         <span class="score">{Math.round(job.score * 100)}%</span>
                                     </div>
-                                    
+
                                     {#if job.skills}
                                         <div class="tooltip-content">
                                             <h4>Matched Skills:</h4>
@@ -175,7 +175,7 @@
                         <div class="scroll-box">
                             <ul class="recommendations">
                                 {#each results.recommendations as rec}
-                                    <li>{@html rec}</li>
+                                    <li>{rec}</li>
                                 {/each}
                             </ul>
                         </div>
@@ -261,7 +261,7 @@
     }
 
     .selection-summary { font-size: 0.9rem; color: #555; }
-    
+
     .action-group {
         display: flex;
         align-items: center;
@@ -335,7 +335,7 @@
     }
 
     .skills-list { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    
+
     /* Re-enable internal scroll for skills within the fixed height card */
     .scroll-box-sm { flex: 1; overflow-y: auto; padding-right: 0.5rem; }
     .empty-msg-sm { font-size: 0.8rem; color: #888; font-style: italic; }
@@ -344,12 +344,12 @@
     .scroll-box-sm::-webkit-scrollbar { width: 4px; }
     .scroll-box-sm::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 
-    .skill-tag { 
-        background: #f0f4f8; 
+    .skill-tag {
+        background: #f0f4f8;
         color: var(--blue-color-main);
         border: 1px solid #d1d9e0;
-        font-size: 0.7rem; 
-        padding: 0.2rem 0.6rem; 
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
         border-radius: 122px;
         white-space: nowrap;
         font-weight: 500;
@@ -357,7 +357,7 @@
 
     .jobs-list { display: flex; flex-direction: column; gap: 0.5rem; }
 
-    .job-item { 
+    .job-item {
         position: relative;
         background: #f9f9f9;
         padding: 0.75rem;
@@ -400,11 +400,11 @@
         transform: translateX(-15px);
     }
 
-    .tooltip-content h4 { 
-        margin: 0 0 0.5rem 0; 
-        font-size: 0.8rem; 
-        text-transform: uppercase; 
-        color: #888; 
+    .tooltip-content h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: #888;
         letter-spacing: 0.5px;
     }
 

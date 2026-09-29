@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import Button from './button.svelte';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
+    import { csrfHeaders, rememberCsrf } from '$lib/byokSession.js';
 
     let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
@@ -57,7 +58,7 @@
         try {
             const response = await fetch(`${HOST_URL}api/v1/auth/models`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: csrfHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     provider: provider,
                     api_key: apiKey
@@ -73,7 +74,7 @@
 
             dynamicModels = data.models || [];
             isVerified = true;
-            
+
             // Auto-select first model if none selected
             if (dynamicModels.length > 0 && !model) {
                 model = dynamicModels[0].id;
@@ -106,15 +107,17 @@
 
             const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: csrfHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify(body),
                 credentials: 'include'
             });
 
+            const data = await response.json();
             if (!response.ok) {
-                const data = await response.json();
                 throw new Error(data.detail || "Failed to initialize session.");
             }
+            rememberCsrf("session", data.csrf_token);
+            apiKey = "";
 
             // Update store
             await aiActions.fetchStatus();
@@ -152,16 +155,16 @@
         <div class="form-group">
             <label for="api-key">API Key</label>
             <div class="input-with-button">
-                <input 
-                    type="password" 
-                    id="api-key" 
-                    bind:value={apiKey} 
+                <input
+                    type="password"
+                    id="api-key"
+                    bind:value={apiKey}
                     oninput={() => { isVerified = false; error = ""; }}
-                    placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."} 
+                    placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."}
                 />
-                <button 
-                    class="btn-verify" 
-                    onclick={handleVerify} 
+                <button
+                    class="btn-verify"
+                    onclick={handleVerify}
                     disabled={verifying || !apiKey.trim()}
                 >
                     {verifying ? "..." : "Verify"}
@@ -183,13 +186,13 @@
             {#if onCancel}
                 <button class="btn-cancel" onclick={onCancel} disabled={loading}>Cancel</button>
             {/if}
-            
+
             {#if $aiStatus.status === 'active'}
                 <button class="btn-cancel btn-danger-text" onclick={handleLogout} disabled={loading}>Clear Session</button>
             {/if}
 
-            <Button 
-                text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")} 
+            <Button
+                text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")}
                 click={handleSubmit}
                 disabled={loading || (!isVerified && $aiStatus.status !== 'active')}
             />

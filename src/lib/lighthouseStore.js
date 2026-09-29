@@ -1,5 +1,6 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
+import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
 
 const BASE_PATH = "api/v1/products/lighthouse";
 
@@ -108,6 +109,7 @@ async function apiRequest(path, options = {}) {
 
     const response = await fetch(url, {
       ...options,
+      headers: csrfHeaders(options.headers || {}),
       credentials: "include",
     });
 
@@ -135,6 +137,9 @@ export const lighthouseActions = {
     try {
       // 1. Check Auth status first (Unprotected endpoint)
       const sessionData = await apiRequest("/auth/lighthouse-status");
+      if (sessionData.status === "active" && sessionData.csrf_token) {
+        rememberCsrf("lighthouse", sessionData.csrf_token);
+      }
       const isAuth = sessionData.status === "active";
 
       let statusData = { stage: "OFFLINE", hardware: "None", message: "" };
@@ -300,8 +305,10 @@ export const lighthouseActions = {
     try {
       await fetch(`${HOST_URL}api/v1/auth/logout`, {
         method: "POST",
+        headers: csrfHeaders(),
         credentials: "include",
       });
+      clearCsrf("lighthouse");
     } catch (err) {
       console.error("Logout failed:", err);
     } finally {
@@ -317,6 +324,26 @@ export const lighthouseActions = {
         });
       }
     }
+  },
+
+  recordStandardResult(name, resumeText, analysis) {
+    const docId = Date.now().toString();
+    const newDoc = {
+      id: docId,
+      name: name || "Resume",
+      timestamp: new Date().toISOString(),
+      extractedText: resumeText,
+      sections: this.splitIntoSections(resumeText),
+      isSanitized: false,
+      provider: "byok",
+      analysis,
+    };
+    lighthouseResults.update((r) => {
+      const history = [newDoc, ...r.history].slice(0, 10);
+      saveHistory(history);
+      return { ...r, currentId: docId, history, loading: false, error: null };
+    });
+    return newDoc;
   },
 
   async uploadPdf(file, sanitize = false) {

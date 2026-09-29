@@ -6,6 +6,7 @@
   import { lighthouseActions, lighthouseStatus } from "$lib/lighthouseStore.js";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthousePastSessions from "$lib/components/lighthouse/LighthousePastSessions.svelte";
+  import LighthouseStandard from "$lib/components/lighthouse/LighthouseStandard.svelte";
   import { browser } from "$app/environment";
   import { onDestroy, onMount } from "svelte";
   import { base } from "$app/paths";
@@ -77,6 +78,7 @@
   {:else}
     <LighthousePastSessions />
   {/if}
+  <LighthouseStandard />
   {#if (secretKey && secretKey.length >= 5) || sessionActive}
     <div class="engine-wrap">
       <LighthouseControl />

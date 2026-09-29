@@ -1,6 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import { HOST_URL } from '$lib/aiSetupStore.js';
+    import { csrfHeaders, rememberCsrf } from '$lib/byokSession.js';
     import Button from './button.svelte';
     import Icon from '@iconify/svelte';
 
@@ -23,7 +24,7 @@
         try {
             const response = await fetch(`${HOST_URL}api/v1/auth/lighthouse-session`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: csrfHeaders({ "Content-Type": "application/json" }),
                 body: JSON.stringify({
                     provider: "hf",
                     model: "lighthouse",
@@ -32,10 +33,12 @@
                 credentials: 'include'
             });
 
+            const data = await response.json();
             if (!response.ok) {
-                const data = await response.json();
                 throw new Error(data.detail || "Failed to initialize session.");
             }
+            rememberCsrf("lighthouse", data.csrf_token);
+            apiKey = "";
 
             onComplete();
         } catch (err) {
@@ -46,12 +49,12 @@
     }
 </script>
 
-<div 
-    class="modal-overlay" 
-    onclick={onCancel} 
-    onkeydown={(e) => (e.key === 'Escape') && onCancel && onCancel()} 
-    role="button" 
-    tabindex="0" 
+<div
+    class="modal-overlay"
+    onclick={onCancel}
+    onkeydown={(e) => (e.key === 'Escape') && onCancel && onCancel()}
+    role="button"
+    tabindex="0"
     aria-label="Close modal"
 >
     <div class="modal-content" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Lighthouse Unlock" tabindex="-1">
@@ -61,11 +64,11 @@
         <div class="form-group">
             <label for="api-key">Experimental Access Key</label>
             <div class="input-wrapper">
-                <input 
-                    type={showKey ? "text" : "password"} 
-                    id="api-key" 
-                    bind:value={apiKey} 
-                    placeholder="Enter team access key..." 
+                <input
+                    type={showKey ? "text" : "password"}
+                    id="api-key"
+                    bind:value={apiKey}
+                    placeholder="Enter team access key..."
                 />
                 <button class="eye-toggle" onclick={() => showKey = !showKey} type="button" title={showKey ? "Hide key" : "Show key"}>
                     {#if showKey}
@@ -88,8 +91,8 @@
             {#if onCancel}
                 <button class="btn-cancel" onclick={onCancel} disabled={loading}>Cancel</button>
             {/if}
-            <Button 
-                text={loading ? "Verifying..." : "Unlock"} 
+            <Button
+                text={loading ? "Verifying..." : "Unlock"}
                 click={handleSubmit}
                 disabled={loading || !apiKey.trim()}
             />
