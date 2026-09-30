@@ -53,7 +53,7 @@ export const lighthouseSettings = writable({
 
 export const lighthouseResults = writable({
   currentId: null,
-  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized, provider }
+  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized, provider, analysisMs }
   loading: false,
   error: null,
 });
@@ -465,7 +465,17 @@ export const lighthouseActions = {
 
   async analyzeText(text, sanitize = false) {
     const settings = get(lighthouseSettings);
-    lighthouseResults.update((r) => ({ ...r, loading: true, error: null }));
+    const startedAt = new Date().toISOString();
+    const startedMs = Date.now();
+    lighthouseResults.update((r) => {
+      const history = r.history.map((doc) =>
+        doc.id === r.currentId
+          ? { ...doc, analysisStartedAt: startedAt, analysisMs: null }
+          : doc,
+      );
+      saveHistory(history);
+      return { ...r, history, loading: true, error: null };
+    });
 
     try {
       let result;
@@ -578,11 +588,17 @@ export const lighthouseActions = {
         top_jobs: ensureJobArray(result.top_jobs),
       };
 
+      const analysisMs = Date.now() - startedMs;
       lighthouseResults.update((r) => {
         const history = [...r.history];
         const docIndex = history.findIndex((d) => d.id === r.currentId);
         if (docIndex !== -1) {
-          history[docIndex] = { ...history[docIndex], analysis: cleanedResult };
+          history[docIndex] = {
+            ...history[docIndex],
+            analysis: cleanedResult,
+            analysisMs,
+            analysisStartedAt: null,
+          };
           saveHistory(history);
         }
         return { ...r, history, loading: false };
@@ -590,11 +606,18 @@ export const lighthouseActions = {
 
       return cleanedResult;
     } catch (err) {
-      lighthouseResults.update((r) => ({
-        ...r,
-        loading: false,
-        error: err?.name === "TesterKeyRequired" ? null : formatError(err),
-      }));
+      lighthouseResults.update((r) => {
+        const history = r.history.map((doc) =>
+          doc.id === r.currentId ? { ...doc, analysisStartedAt: null } : doc,
+        );
+        saveHistory(history);
+        return {
+          ...r,
+          history,
+          loading: false,
+          error: err?.name === "TesterKeyRequired" ? null : formatError(err),
+        };
+      });
       throw err;
     }
   },

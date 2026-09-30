@@ -16,6 +16,7 @@
     livePhase,
     releaseSeat,
     scheduleLine,
+    sourceTag,
     scheduledTesterActive,
     SESSION_DRAIN_WARNING,
     SESSION_ENDED_WARNING,
@@ -104,7 +105,7 @@
   }
 
   function sourceLabel(doc) {
-    return doc?.provider === "byok" ? "Your API key" : "In house";
+    return sourceTag(doc, now);
   }
 
   async function refresh() {
@@ -202,14 +203,7 @@
       {SESSION_ENDED_WARNING} Resume upload is closed.
     </p>
   {/if}
-  <EngineStatus {engine} />
-  {#if canLeave}
-    <p class="leave-row">
-      <button type="button" disabled={leaving} onclick={leaveSeat}
-        >Leave session</button
-      >
-    </p>
-  {/if}
+  <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
   {#if leaveError}
     <p class="upload-error">{leaveError}</p>
   {/if}
@@ -330,23 +324,6 @@
     margin: 0 0 0.85rem;
     color: #1b3350;
     font-weight: 650;
-  }
-  .leave-row {
-    margin: 0.75rem 0 0;
-  }
-  .leave-row button {
-    border: 1px solid #1b3350;
-    background: #fff;
-    color: #1b3350;
-    border-radius: 999px;
-    padding: 0.35rem 0.8rem;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .leave-row button:disabled {
-    opacity: 0.55;
-    cursor: default;
   }
   .session-warning {
     margin: 0 0 0.85rem;

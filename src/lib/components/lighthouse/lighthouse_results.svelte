@@ -7,9 +7,11 @@
   } from "$lib/lighthouseStore.js";
   import { fade, slide } from "svelte/transition";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
+  import { formatElapsed } from "$lib/lighthouseSchedule.js";
 
   let showTesterKey = $state(false);
   let pendingAnalysis = $state(false);
+  let now = $state(Date.now());
 
   let activeTab = $state("preview"); // 'preview', 'analysis'
 
@@ -38,6 +40,25 @@
         "SLEEPING",
       ].includes(stageName),
   );
+
+  let analysisClock = $derived.by(() => {
+    if (!currentDoc) return "";
+    if (Number.isFinite(currentDoc.analysisMs) && !$lighthouseResults.loading) {
+      return `Analysis took ${formatElapsed(currentDoc.analysisMs)}`;
+    }
+    if (currentDoc.analysisStartedAt && $lighthouseResults.loading) {
+      const elapsed = now - Date.parse(currentDoc.analysisStartedAt);
+      if (Number.isFinite(elapsed)) return `Analysis ${formatElapsed(elapsed)}`;
+    }
+    return "";
+  });
+
+  $effect(() => {
+    const id = setInterval(() => {
+      now = Date.now();
+    }, 1000);
+    return () => clearInterval(id);
+  });
 
   let selectedText = $derived(
     sections
@@ -103,6 +124,9 @@
     <div class="loading-overlay" in:fade>
       <div class="spinner"></div>
       <p>Lighthouse is scanning your profile...</p>
+      {#if analysisClock}
+        <p class="analysis-clock">{analysisClock}</p>
+      {/if}
     </div>
   {/if}
 
@@ -154,6 +178,9 @@
             >
               {results ? "Re-Run Analysis" : "Run AI Analysis"}
             </button>
+            {#if analysisClock && !$lighthouseResults.loading}
+              <span class="analysis-clock">{analysisClock}</span>
+            {/if}
           </div>
         </div>
 
@@ -349,6 +376,12 @@
     color: var(--error-color);
     font-weight: 700;
     text-transform: uppercase;
+  }
+
+  .analysis-clock {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: #1b3350;
   }
 
   .btn-sm {

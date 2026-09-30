@@ -2,7 +2,12 @@
   import { onDestroy, onMount } from "svelte";
   import { formatElapsed } from "$lib/lighthouseSchedule.js";
 
-  let { engine = null } = $props();
+  let {
+    engine = null,
+    canLeave = false,
+    leaving = false,
+    onLeave = () => {},
+  } = $props();
 
   const STEPS = [
     ["off", "Off"],
@@ -45,18 +50,30 @@
 
 {#if engine?.summary}
   <div class="engine-status" class:problem={engine.step === "error"}>
-    {#if showSteps}
-      <ol>
-        {#each STEPS as [id, label], index}
-          <li
-            class={id}
-            class:current={index === stepIndex}
-            aria-current={index === stepIndex ? "step" : undefined}
+    {#if showSteps || canLeave}
+      <div class="status-row">
+        {#if showSteps}
+          <ol>
+            {#each STEPS as [id, label], index}
+              <li
+                class={id}
+                class:current={index === stepIndex}
+                aria-current={index === stepIndex ? "step" : undefined}
+              >
+                {label}
+              </li>
+            {/each}
+          </ol>
+        {/if}
+        {#if canLeave}
+          <button
+            type="button"
+            class="leave"
+            disabled={leaving}
+            onclick={onLeave}>Leave session</button
           >
-            {label}
-          </li>
-        {/each}
-      </ol>
+        {/if}
+      </div>
     {/if}
     {#if startupLabel}
       <p class="startup">{startupLabel}</p>
@@ -77,13 +94,35 @@
     background: #fbf4f4;
     color: #8a2a2a;
   }
+  .status-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 0 0.55rem;
+  }
   ol {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    margin: 0 0 0.55rem;
+    margin: 0;
     padding: 0;
     list-style: none;
+  }
+  button.leave {
+    border: 2px solid #000;
+    border-radius: 999px;
+    padding: 0.28rem 0.7rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #fff;
+    color: #1b3350;
+    cursor: pointer;
+  }
+  button.leave:disabled {
+    opacity: 0.55;
+    cursor: default;
   }
   li {
     border: 2px solid #000;

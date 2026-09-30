@@ -15,6 +15,7 @@ import {
   canReturnSeat,
   scheduleLine,
   seatControls,
+  sourceTag,
   sessionIcs,
   sessionInstants,
 } from "./lighthouseSchedule.js";
@@ -63,6 +64,42 @@ test("a warmup countdown shows seconds and opens when it runs out", () => {
   const opened = scheduleLine(warming, start + 1000, 0);
   assert.match(opened, /Deep session is live/);
   assert.match(opened, /29m 59s/);
+});
+
+test("open now does not call the session live until a seat starts the clock", () => {
+  const waiting = {
+    phase: "open",
+    dev_waiting_for_seat: true,
+    countdown_to: "2026-09-30T05:18:00+00:00",
+    timezone: "America/Detroit",
+  };
+  const line = scheduleLine(
+    waiting,
+    Date.parse("2026-09-30T04:18:00+00:00"),
+    0,
+  );
+  assert.match(line, /waiting for a seat/);
+  assert.doesNotMatch(line, /Deep session is live/);
+});
+
+test("the in-house tag keeps how long analysis took", () => {
+  assert.equal(sourceTag({ provider: "in_house" }, 0), "In house");
+  assert.equal(
+    sourceTag({ provider: "byok", analysisMs: 8000 }, 0),
+    "Your API key · 0:08",
+  );
+  assert.equal(
+    sourceTag({ provider: "in_house", analysisMs: 125000 }, 0),
+    "In house · 2:05",
+  );
+  const started = "2026-09-30T03:00:00.000Z";
+  assert.equal(
+    sourceTag(
+      { provider: "in_house", analysisStartedAt: started },
+      Date.parse(started) + 4000,
+    ),
+    "In house · 0:04",
+  );
 });
 
 test("open and drain copy uses the time left", () => {

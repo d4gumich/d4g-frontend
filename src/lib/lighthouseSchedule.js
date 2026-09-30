@@ -50,6 +50,20 @@ export function formatElapsed(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
+export function sourceTag(doc, nowMs = Date.now()) {
+  const name = doc?.provider === "byok" ? "Your API key" : "In house";
+  if (Number.isFinite(doc?.analysisMs)) {
+    return `${name} · ${formatElapsed(doc.analysisMs)}`;
+  }
+  if (doc?.analysisStartedAt) {
+    const elapsed = nowMs - Date.parse(doc.analysisStartedAt);
+    if (Number.isFinite(elapsed) && elapsed >= 0) {
+      return `${name} · ${formatElapsed(elapsed)}`;
+    }
+  }
+  return name;
+}
+
 export const SESSION_ENDED_WARNING = "This session has ended.";
 export const SESSION_DRAIN_WARNING =
   "No more new seats. People who already have a seat are finishing before the server shuts down.";
@@ -117,6 +131,9 @@ export function livePhase(payload, clientNowMs, skewMs) {
 }
 
 export function scheduleLine(payload, clientNowMs, skewMs) {
+  if (payload?.dev_waiting_for_seat) {
+    return "Open now is waiting for a seat. The session clock and the GPU start together.";
+  }
   const serverNow = clientNowMs - skewMs;
   const phase = livePhase(payload, clientNowMs, skewMs);
   let target = Date.parse(payload.countdown_to);

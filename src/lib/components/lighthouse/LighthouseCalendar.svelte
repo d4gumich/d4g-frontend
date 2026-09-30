@@ -110,11 +110,22 @@
       : null,
   );
   const zone = $derived(SESSION_TIMEZONES[zoneIndex]);
-  const zoneRange = $derived(
-    selectedSession
-      ? formatSessionRange(selectedSession.start, selectedSession.end, zone.id)
-      : "",
-  );
+  const zoneRange = $derived.by(() => {
+    if (!selectedSession) return "";
+    if (payload?.dev_waiting_for_seat && selected) {
+      const date = sessionDateKey(
+        selected.year,
+        selected.monthIndex,
+        selected.day,
+      );
+      if (date === payload.dev_date) return "Starts when someone takes a seat";
+    }
+    return formatSessionRange(
+      selectedSession.start,
+      selectedSession.end,
+      zone.id,
+    );
+  });
   const selectedTitle = $derived(
     selectedSession
       ? new Intl.DateTimeFormat("en-US", {
@@ -200,7 +211,9 @@
         payload?.phase === "open" ||
         payload?.phase === "drain"),
   );
-  const shownPhase = $derived(payload ? livePhase(payload, now, skew) : "closed");
+  const shownPhase = $derived(
+    payload ? livePhase(payload, now, skew) : "closed",
+  );
   const canLeaveFocus = $derived(
     focusDate !== "" &&
       held.includes(focusDate) &&
@@ -303,11 +316,13 @@
         claimError = "";
       }
       if (preset === "open") {
-        const taken = Number(next.seats?.[next.dev_date] ?? next.seats_taken ?? 0);
+        const taken = Number(
+          next.seats?.[next.dev_date] ?? next.seats_taken ?? 0,
+        );
         devNotice =
           taken >= 1
             ? "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it."
-            : "The session is open. The GPU stays off until someone takes a seat.";
+            : "Open now is armed. The session clock and the GPU stay off until someone takes a seat.";
       } else if (preset === "soon") {
         devNotice =
           "Session starts in 10 minutes. Fast forward skips that wait. The GPU stays off.";
@@ -402,7 +417,7 @@
         if (payload?.dev_preset === "open") {
           devNotice =
             "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it.";
-          await refreshEngine();
+          await refresh();
         }
       }
     } catch (error) {
@@ -429,12 +444,14 @@
         seat_cap: result.seat_cap,
         seats: { ...(payload?.seats || {}), [date]: result.seats_taken },
         seats_taken:
-          date === payload?.seat_session ? result.seats_taken : payload?.seats_taken,
+          date === payload?.seat_session
+            ? result.seats_taken
+            : payload?.seats_taken,
       };
       forgetSeat(date);
       if (payload?.dev_preset === "open" && result.seats_taken < 1) {
         devNotice =
-          "The session is open. The GPU stays off until someone takes a seat.";
+          "Open now is armed. The session clock and the GPU stay off until someone takes a seat.";
       }
     } catch (error) {
       if (error instanceof TesterKeyRequired) {
@@ -549,13 +566,15 @@
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
         Practice schedule. Only Open now starts the GPU, and only after someone
-        takes a seat. Fast forward skips the 10 minute wait and stays off the GPU.
-        Leaving Open now stops it.
+        takes a seat. Fast forward skips the 10 minute wait and stays off the
+        GPU. Leaving Open now stops it.
       </p>
       <div class="dev-actions">
         <button
           type="button"
-          aria-pressed={payload.dev_preset === "soon"}
+          class:forwarded={payload.dev_preset === "soon" &&
+            payload.dev_forwarded}
+          aria-pressed={payload.dev_preset === "soon" && !payload.dev_forwarded}
           onclick={() => chooseDev("soon")}>Starts in 10 min</button
         >
         <button
@@ -604,19 +623,17 @@
     {#if payload?.dev_preset === "ended"}
       <p class="session-warning">{SESSION_ENDED_WARNING} Take a seat is off.</p>
     {/if}
-    <EngineStatus {engine} />
+    <EngineStatus
+      {engine}
+      canLeave={canLeaveFocus}
+      {leaving}
+      onLeave={() => leaveSeat(focusDate)}
+    />
     {#if (canUseFocusSeat || canLeaveFocus) && !selected}
       <p class="next-step">
         You have a seat.
         {#if canUseFocusSeat}
-          <button type="button" onclick={continueToUpload}>Use your seat</button>
-        {/if}
-        {#if canLeaveFocus}
-          <button
-            type="button"
-            class="leave"
-            disabled={leaving}
-            onclick={() => leaveSeat(focusDate)}>Leave session</button
+          <button type="button" onclick={continueToUpload}>Use your seat</button
           >
         {/if}
       </p>
@@ -781,6 +798,12 @@
     background: #5c3b16;
     color: #fff;
   }
+  .dev-actions button.forwarded,
+  .dev-actions button.forwarded:active {
+    background: #c4a574;
+    color: #3d2914;
+    border-color: #8a6239;
+  }
   .dev-actions button:active {
     transform: translateY(1px);
     background: #5c3b16;
@@ -832,19 +855,6 @@
     cursor: pointer;
     text-decoration: underline;
     padding: 0;
-  }
-  .schedule-header .next-step button.leave {
-    margin-left: 0.75rem;
-    border: 1px solid #1b3350;
-    background: #fff;
-    color: #1b3350;
-    border-radius: 999px;
-    padding: 0.25rem 0.7rem;
-    text-decoration: none;
-  }
-  .schedule-header .next-step button.leave:disabled {
-    opacity: 0.55;
-    cursor: default;
   }
   .schedule-card {
     margin: 1rem auto 2rem;
