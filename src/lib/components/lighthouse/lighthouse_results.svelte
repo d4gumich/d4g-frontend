@@ -3,6 +3,7 @@
     import { fade, slide } from 'svelte/transition';
 
     let activeTab = $state('preview'); // 'preview', 'analysis'
+    let feedbackState = $state({}); // job title -> "relevant" | "not_relevant"
 
     let currentDoc = $derived($lighthouseResults?.history?.find(d => d.id === $lighthouseResults.currentId) ?? null);
     let results = $derived(currentDoc?.analysis);
@@ -16,6 +17,21 @@
             .map(s => s.content)
             .join('\n\n')
     );
+
+    async function sendJobFeedback(job, index, type) {
+    const key = job.title;
+    try {
+        await lighthouseActions.sendFeedback({
+            query: results.extracted_skills?.join(', ') ?? '',
+            doc_id: job.title,
+            rank_position: index,
+            feedback_type: type
+        });
+        feedbackState = { ...feedbackState, [key]: type };
+    } catch (err) {
+        alert('Failed to send feedback. Please try again.');
+        }
+    }
 
     async function triggerAnalysis() {
         if (selectedText) {
@@ -154,7 +170,22 @@
                                         <strong>{job.title}</strong>
                                         <span class="score">{Math.round(job.score * 100)}%</span>
                                     </div>
-                                    
+                                    <div class="job-feedback">
+                                        <button
+                                            class="feedback-btn"
+                                            class:active={feedbackState[job.title] === 'relevant'}
+                                            onclick={(e) => { e.stopPropagation(); sendJobFeedback(job, i, 'relevant'); }}
+                                            title="Relevant"
+                                        >👍
+                                        </button>
+                                        <button
+                                            class="feedback-btn"
+                                            class:active={feedbackState[job.title] === 'not_relevant'}
+                                            onclick={(e) => { e.stopPropagation(); sendJobFeedback(job, i, 'not_relevant'); }}
+                                            title="Not relevant"
+                                        >👎
+                                        </button>
+                                    </div>
                                     {#if job.skills}
                                         <div class="tooltip-content">
                                             <h4>Matched Skills:</h4>
@@ -459,6 +490,32 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin-bottom: 1rem;
+    }
+
+    .job-feedback {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    }
+
+.feedback-btn {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    }
+
+.feedback-btn:hover {
+    border-color: var(--blue-color-main);
+    background: #f0f4f8;
+    }
+
+.feedback-btn.active {
+    border-color: var(--blue-color-main);
+    background: #eef2f7;
     }
 
     @keyframes spin { 100% { transform: rotate(360deg); } }
