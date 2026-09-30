@@ -108,6 +108,16 @@ async function apiRequest(path, options = {}) {
     }
 }
 
+function getOrCreateUserId() {
+    if (typeof window === 'undefined') return 'anonymous';
+    let id = localStorage.getItem('lighthouse_user_id');
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('lighthouse_user_id', id);
+    }
+    return id;
+}
+
 export const lighthouseActions = {
     async fetchStatus(isSilent = false) {
         if (isSilent) {
@@ -450,7 +460,27 @@ export const lighthouseActions = {
             throw err;
         }
     },
-
+    async sendFeedback({ query, doc_id, rank_position, feedback_type }) {
+    try {
+        await apiRequest('/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                events: [{
+                    query,
+                    doc_id,
+                    rank_position,
+                    feedback_type,
+                    user_id: getOrCreateUserId(),
+                    timestamp: Date.now() / 1000
+                }]
+            })
+        });
+    } catch (err) {
+        console.error('Feedback request failed:', err);
+        throw err;
+        }
+    },
     selectDocument(id) {
         lighthouseResults.update(r => ({ ...r, currentId: id }));
     },
