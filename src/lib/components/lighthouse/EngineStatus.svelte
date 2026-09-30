@@ -1,13 +1,11 @@
 <script>
   import { onDestroy, onMount } from "svelte";
-  import { formatElapsed, stageClock } from "$lib/lighthouseSchedule.js";
+  import { formatElapsed } from "$lib/lighthouseSchedule.js";
 
   let { engine = null } = $props();
 
   const STEPS = [
-    ["asleep", "Off"],
-    ["waking", "Waking"],
-    ["building", "Building"],
+    ["off", "Off"],
     ["starting", "Starting"],
     ["ready", "Ready"],
   ];
@@ -15,7 +13,15 @@
   let now = $state(Date.now());
   let clock;
 
-  const stepIndex = $derived(STEPS.findIndex(([id]) => id === engine?.step));
+  const displayStep = $derived.by(() => {
+    const step = engine?.step;
+    if (step === "asleep") return "off";
+    if (step === "ready") return "ready";
+    if (step === "waking" || step === "building" || step === "starting")
+      return "starting";
+    return "";
+  });
+  const stepIndex = $derived(STEPS.findIndex(([id]) => id === displayStep));
   const showSteps = $derived(stepIndex >= 0);
   const startupLabel = $derived.by(() => {
     const startup = engine?.startup;
@@ -42,22 +48,12 @@
     {#if showSteps}
       <ol>
         {#each STEPS as [id, label], index}
-          {@const clock = stageClock(
-            id,
-            engine?.startup?.stages?.[id],
-            engine?.step,
-            engine?.startup?.ready_at,
-            now,
-          )}
           <li
-            class:done={index < stepIndex}
+            class={id}
             class:current={index === stepIndex}
             aria-current={index === stepIndex ? "step" : undefined}
           >
-            <span>{label}</span>
-            {#if clock}
-              <span class="stage-time">{clock}</span>
-            {/if}
+            {label}
           </li>
         {/each}
       </ol>
@@ -90,28 +86,33 @@
     list-style: none;
   }
   li {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     border-radius: 999px;
-    padding: 0.2rem 0.6rem;
-    background: #e6e8ee;
-    color: #667;
+    padding: 0.28rem 0.7rem;
     font-size: 0.75rem;
     font-weight: 700;
-    line-height: 1.15;
   }
-  .stage-time {
-    font-variant-numeric: tabular-nums;
-    font-weight: 650;
-    font-size: 0.68rem;
+  li.off {
+    background: #f3d6d6;
+    color: #8d3a3a;
   }
-  li.done {
-    background: #d5e0ef;
-    color: #1a4a86;
+  li.off.current {
+    background: #c23b3b;
+    color: #fff;
   }
-  li.current {
-    background: #1a4a86;
+  li.starting {
+    background: #f6e4c4;
+    color: #8a5a14;
+  }
+  li.starting.current {
+    background: linear-gradient(90deg, #e2a31a 0%, #e07a2a 100%);
+    color: #fff;
+  }
+  li.ready {
+    background: #d9eedf;
+    color: #246b3e;
+  }
+  li.ready.current {
+    background: #1f8a4c;
     color: #fff;
   }
   p {

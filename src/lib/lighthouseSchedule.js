@@ -54,18 +54,6 @@ export const SESSION_ENDED_WARNING = "This session has ended.";
 export const SESSION_DRAIN_WARNING =
   "No more new seats. People who already have a seat are finishing before the server shuts down.";
 
-export function stageClock(stepId, stage, activeStep, readyAt, nowMs) {
-  if (!stage?.entered_at) return "";
-  const entered = Date.parse(stage.entered_at);
-  let endMs;
-  if (stage.left_at) endMs = Date.parse(stage.left_at);
-  else if (stepId === activeStep) endMs = nowMs;
-  else if (readyAt) endMs = Date.parse(readyAt);
-  else endMs = entered;
-  if (Number.isNaN(entered) || Number.isNaN(endMs)) return "";
-  return formatElapsed(endMs - entered);
-}
-
 export function seatControls({ stage, holding, full, claiming }) {
   if (claiming) {
     return { disabled: true, label: "Saving seat…", warning: "" };

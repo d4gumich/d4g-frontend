@@ -16,7 +16,6 @@ import {
   seatControls,
   sessionIcs,
   sessionInstants,
-  stageClock,
 } from "./lighthouseSchedule.js";
 
 const payload = {
@@ -119,39 +118,6 @@ test("ended and draining deactivate a new seat, and a full house stays full", ()
   assert.equal(
     seatControls({ stage: "pre_warm", holding: false, full: false }).disabled,
     false,
-  );
-});
-
-test("each startup stage keeps the time we observed it", () => {
-  const stages = {
-    asleep: {
-      entered_at: "2026-09-29T22:00:00.000Z",
-      left_at: "2026-09-29T22:00:04.000Z",
-    },
-    waking: {
-      entered_at: "2026-09-29T22:00:04.000Z",
-      left_at: null,
-    },
-  };
-  assert.equal(
-    stageClock(
-      "asleep",
-      stages.asleep,
-      "waking",
-      null,
-      Date.parse("2026-09-29T22:00:20.000Z"),
-    ),
-    "0:04",
-  );
-  assert.equal(
-    stageClock(
-      "waking",
-      stages.waking,
-      "waking",
-      null,
-      Date.parse("2026-09-29T22:00:20.000Z"),
-    ),
-    "0:16",
   );
 });
 

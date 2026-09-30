@@ -475,8 +475,8 @@
   {#if payload?.dev}
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
-        Practice schedule. Only Open now starts the GPU and times each startup
-        stage. Fast forward skips the 10 minute wait and stays off the GPU.
+        Practice schedule. Only Open now starts the GPU and times that startup.
+        Fast forward skips the 10 minute wait and stays off the GPU.
         Leaving Open now stops it.
       </p>
       <div class="dev-actions">
