@@ -12,7 +12,12 @@ import {
   formatWindow,
   googleCalendarUrl,
   highlightedDayNumbers,
+  canReturnSeat,
   scheduleLine,
+  seatControls,
+  analysisSourceLabel,
+  sourceTag,
+  syncHeldSeats,
   sessionIcs,
   sessionInstants,
   sessionIsJoined,
@@ -42,6 +47,81 @@ test("skew corrects a fast client clock", () => {
   assert.match(line, /1d 6h/);
 });
 
+test("a warmup countdown shows seconds and opens when it runs out", () => {
+  const start = Date.parse("2026-09-29T22:00:00+00:00");
+  const warming = {
+    phase: "pre_warm",
+    countdown_to: "2026-09-29T22:00:00+00:00",
+    timezone: "America/Detroit",
+    drain_minutes: 10,
+    current_window: {
+      start: "2026-09-29T22:00:00+00:00",
+      end: "2026-09-29T22:30:00+00:00",
+    },
+  };
+  assert.match(scheduleLine(warming, start - 45000, 0), /Opens in 45s/);
+  assert.match(
+    scheduleLine({ ...warming, seats_taken: 0 }, start - 45000, 0),
+    /engine stays off until someone takes a seat/,
+  );
+  const opened = scheduleLine(warming, start + 1000, 0);
+  assert.match(opened, /Deep session is live/);
+  assert.match(opened, /29m 59s/);
+});
+
+test("open now does not call the session live until a seat starts the clock", () => {
+  const waiting = {
+    phase: "open",
+    dev_waiting_for_seat: true,
+    countdown_to: "2026-09-30T05:18:00+00:00",
+    timezone: "America/Detroit",
+  };
+  const line = scheduleLine(
+    waiting,
+    Date.parse("2026-09-30T04:18:00+00:00"),
+    0,
+  );
+  assert.match(line, /waiting for a seat/);
+  assert.doesNotMatch(line, /Deep session is live/);
+});
+
+test("a server restart drops a seat the browser still remembers", () => {
+  assert.deepEqual(syncHeldSeats(["2026-09-30"], { "2026-09-30": 0 }), []);
+  assert.deepEqual(syncHeldSeats(["2026-09-30"], { "2026-09-30": 1 }), [
+    "2026-09-30",
+  ]);
+  assert.deepEqual(
+    syncHeldSeats(["2026-09-30", "2026-10-01"], { "2026-10-01": 2 }),
+    ["2026-10-01"],
+  );
+});
+
+test("the in-house tag keeps how long analysis took", () => {
+  assert.equal(analysisSourceLabel("personal"), "Your API key");
+  assert.equal(analysisSourceLabel("byok"), "Your API key");
+  assert.equal(analysisSourceLabel("team"), "In house");
+  assert.equal(analysisSourceLabel("in_house"), "In house");
+  assert.equal(analysisSourceLabel(undefined), "Not analyzed");
+  assert.equal(sourceTag({ provider: "in_house" }, 0), "In house");
+  assert.equal(sourceTag({}, 0), "Not analyzed");
+  assert.equal(
+    sourceTag({ provider: "byok", analysisMs: 8000 }, 0),
+    "Your API key · 0:08",
+  );
+  assert.equal(
+    sourceTag({ provider: "in_house", analysisMs: 125000 }, 0),
+    "In house · 2:05",
+  );
+  const started = "2026-09-30T03:00:00.000Z";
+  assert.equal(
+    sourceTag(
+      { provider: "in_house", analysisStartedAt: started },
+      Date.parse(started) + 4000,
+    ),
+    "In house · 0:04",
+  );
+});
+
 test("open and drain copy uses the time left", () => {
   const open = {
     ...payload,
@@ -65,8 +145,48 @@ test("open and drain copy uses the time left", () => {
   };
   assert.match(
     scheduleLine(drain, Date.parse(drain.server_time), skew),
-    /closing/,
+    /No more new seats/,
   );
+  assert.match(
+    scheduleLine(drain, Date.parse(drain.server_time), skew),
+    /Ends in 10m/,
+  );
+});
+
+test("ended and draining deactivate a new seat, and a full house stays full", () => {
+  assert.deepEqual(
+    seatControls({ stage: "ended", holding: false, full: false }),
+    {
+      disabled: true,
+      label: "Session ended",
+      warning: "This session has ended.",
+    },
+  );
+  const draining = seatControls({
+    stage: "drain",
+    holding: false,
+    full: false,
+  });
+  assert.equal(draining.disabled, true);
+  assert.match(draining.warning, /No more new seats/);
+  assert.equal(
+    seatControls({ stage: "drain", holding: true, full: false }).label,
+    "Seat saved",
+  );
+  assert.equal(
+    seatControls({ stage: "open", holding: false, full: true }).label,
+    "Session full",
+  );
+  assert.equal(
+    seatControls({ stage: "pre_warm", holding: false, full: false }).disabled,
+    false,
+  );
+  assert.equal(canReturnSeat("open"), true);
+  assert.equal(canReturnSeat("pre_warm"), true);
+  assert.equal(canReturnSeat("closed"), true);
+  assert.equal(canReturnSeat("drain"), false);
+  assert.equal(canReturnSeat("ended"), false);
+  assert.equal(canReturnSeat("open", "ended"), false);
 });
 
 test("detroit formatting is 6:00 PM EST in January", () => {

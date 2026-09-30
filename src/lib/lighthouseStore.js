@@ -1,12 +1,9 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
 import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
+import { TesterKeyRequired } from "$lib/lighthouseSchedule.js";
 
-export function analysisSourceLabel(provider) {
-  if (provider === "personal" || provider === "byok") return "Personal API key";
-  if (provider === "team" || provider === "in_house") return "Team LLM";
-  return "Not analyzed";
-}
+export { analysisSourceLabel } from "$lib/lighthouseSchedule.js";
 
 const BASE_PATH = "api/v1/products/lighthouse";
 
@@ -59,7 +56,7 @@ export const lighthouseSettings = writable({
 
 export const lighthouseResults = writable({
   currentId: null,
-  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized, provider }
+  history: [], // Array of { id, name, timestamp, extractedText, sections, analysis, isSanitized, provider, analysisMs }
   loading: false,
   error: null,
 });
@@ -84,6 +81,13 @@ function saveHistory(history) {
       JSON.stringify(history.slice(0, 10)),
     );
   }
+}
+
+function testerKeyError(status, detail) {
+  if (status === 403 && String(detail || "").includes("security key")) {
+    return new TesterKeyRequired();
+  }
+  return null;
 }
 
 function formatError(err) {
@@ -132,7 +136,21 @@ async function apiRequest(path, options = {}) {
   }
 }
 
+let scheduledSeat = null;
+
 export const lighthouseActions = {
+  useScheduledSeat(token, session) {
+    scheduledSeat = token && session ? { token, session } : null;
+  },
+
+  rememberEngine(snapshot) {
+    lighthouseStatus.update((s) => ({
+      ...s,
+      stage: snapshot?.stage || "OFFLINE",
+      hardware: snapshot?.hardware || "None",
+    }));
+  },
+
   async fetchStatus(isSilent = false) {
     if (isSilent) {
       lighthouseStatus.update((s) => ({ ...s, isRefreshing: true }));
@@ -360,10 +378,37 @@ export const lighthouseActions = {
     formData.append("sanitize", sanitize);
 
     try {
-      const result = await apiRequest("/parse-pdf", {
-        method: "POST",
-        body: formData,
-      });
+      let result;
+      if (scheduledSeat) {
+        formData.append("token", scheduledSeat.token);
+        formData.append("session", scheduledSeat.session);
+        const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+        const response = await fetch(
+          `${baseUrl}api/v1/products/lighthouse/schedule/parse`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: csrfHeaders(),
+            body: formData,
+          },
+        );
+        if (!response.ok) {
+          const errorData = await response
+            .json()
+            .catch(() => ({ detail: "Upload failed" }));
+          const keyError = testerKeyError(response.status, errorData.detail);
+          if (keyError) throw keyError;
+          throw new Error(
+            errorData.detail || `Server error: ${response.status}`,
+          );
+        }
+        result = await response.json();
+      } else {
+        result = await apiRequest("/parse-pdf", {
+          method: "POST",
+          body: formData,
+        });
+      }
 
       const rawText = result.extracted_text;
       const sections = this.splitIntoSections(rawText);
@@ -390,7 +435,7 @@ export const lighthouseActions = {
       lighthouseResults.update((r) => ({
         ...r,
         loading: false,
-        error: formatError(err),
+        error: err?.name === "TesterKeyRequired" ? null : formatError(err),
       }));
       throw err;
     }
@@ -490,7 +535,22 @@ export const lighthouseActions = {
 
   async analyzeText(text, sanitize = false, provider = "team") {
     const settings = get(lighthouseSettings);
-    lighthouseResults.update((r) => ({ ...r, loading: true, error: null }));
+    const startedAt = new Date().toISOString();
+    const startedMs = Date.now();
+    lighthouseResults.update((r) => {
+      const history = r.history.map((doc) =>
+        doc.id === r.currentId
+          ? {
+              ...doc,
+              provider,
+              analysisStartedAt: startedAt,
+              analysisMs: null,
+            }
+          : doc,
+      );
+      saveHistory(history);
+      return { ...r, history, loading: true, error: null };
+    });
 
     try {
       let result;
@@ -499,17 +559,46 @@ export const lighthouseActions = {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         result = JSON.parse(JSON.stringify(MOCK_ANALYSIS));
       } else {
-        const path =
-          provider === "personal" ? "/standard/analyze" : "/analyze-text";
-        const body =
-          provider === "personal"
-            ? { resume_text: text }
-            : { resume_text: text, sanitize };
-        result = await apiRequest(path, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+        if (provider === "personal") {
+          result = await apiRequest("/standard/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resume_text: text }),
+          });
+        } else if (scheduledSeat) {
+          const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+          const response = await fetch(
+            `${baseUrl}api/v1/products/lighthouse/schedule/analyze`,
+            {
+              method: "POST",
+              credentials: "include",
+              headers: csrfHeaders({ "Content-Type": "application/json" }),
+              body: JSON.stringify({
+                token: scheduledSeat.token,
+                session: scheduledSeat.session,
+                resume_text: text,
+                sanitize,
+              }),
+            },
+          );
+          if (!response.ok) {
+            const errorData = await response
+              .json()
+              .catch(() => ({ detail: "Analysis failed" }));
+            const keyError = testerKeyError(response.status, errorData.detail);
+            if (keyError) throw keyError;
+            throw new Error(
+              errorData.detail || `Server error: ${response.status}`,
+            );
+          }
+          result = await response.json();
+        } else {
+          result = await apiRequest("/analyze-text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resume_text: text, sanitize }),
+          });
+        }
       }
 
       const ensureArray = (input) => {
@@ -580,6 +669,7 @@ export const lighthouseActions = {
         top_jobs: ensureJobArray(result.top_jobs),
       };
 
+      const analysisMs = Date.now() - startedMs;
       lighthouseResults.update((r) => {
         const history = [...r.history];
         const docIndex = history.findIndex((d) => d.id === r.currentId);
@@ -588,6 +678,8 @@ export const lighthouseActions = {
             ...history[docIndex],
             analysis: cleanedResult,
             provider,
+            analysisMs,
+            analysisStartedAt: null,
           };
           saveHistory(history);
         }
@@ -596,11 +688,18 @@ export const lighthouseActions = {
 
       return cleanedResult;
     } catch (err) {
-      lighthouseResults.update((r) => ({
-        ...r,
-        loading: false,
-        error: formatError(err),
-      }));
+      lighthouseResults.update((r) => {
+        const history = r.history.map((doc) =>
+          doc.id === r.currentId ? { ...doc, analysisStartedAt: null } : doc,
+        );
+        saveHistory(history);
+        return {
+          ...r,
+          history,
+          loading: false,
+          error: err?.name === "TesterKeyRequired" ? null : formatError(err),
+        };
+      });
       throw err;
     }
   },

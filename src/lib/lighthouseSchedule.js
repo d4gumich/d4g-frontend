@@ -25,32 +25,152 @@ export function formatWindow(iso, timeZone) {
 }
 
 export function formatDuration(ms) {
-  const minutes = Math.max(0, Math.floor(ms / 60000));
-  const days = Math.floor(minutes / (60 * 24));
-  const hours = Math.floor((minutes % (60 * 24)) / 60);
-  const mins = minutes % 60;
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
   if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0 && seconds === 0) return `${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
+export function formatElapsed(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+      seconds,
+    ).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+export function analysisSourceLabel(provider) {
+  if (provider === "personal" || provider === "byok") return "Your API key";
+  if (provider === "team" || provider === "in_house") return "In house";
+  return "Not analyzed";
+}
+
+export function sourceTag(doc, nowMs = Date.now()) {
+  const name = analysisSourceLabel(doc?.provider);
+  if (Number.isFinite(doc?.analysisMs)) {
+    return `${name} · ${formatElapsed(doc.analysisMs)}`;
+  }
+  if (doc?.analysisStartedAt) {
+    const elapsed = nowMs - Date.parse(doc.analysisStartedAt);
+    if (Number.isFinite(elapsed) && elapsed >= 0) {
+      return `${name} · ${formatElapsed(elapsed)}`;
+    }
+  }
+  return name;
+}
+
+export const SESSION_ENDED_WARNING = "This session has ended.";
+export const SESSION_DRAIN_WARNING =
+  "No more new seats. People who already have a seat are finishing before the server shuts down.";
+
+export function syncHeldSeats(held, seats) {
+  const counts = seats || {};
+  return (held || []).filter((date) => Number(counts[date]) > 0);
+}
+
+export function canReturnSeat(stage, preset) {
+  if (preset === "drain" || preset === "ended") return false;
+  return stage !== "drain" && stage !== "ended";
+}
+
+export function seatWindowOpen(payload, sessionDate, clientNowMs, skewMs = 0) {
+  if (!sessionDate) return false;
+  const [year, month, day] = sessionDate.split("-").map(Number);
+  if (!year || !month || !day) return false;
+  const session = sessionInstants(
+    year,
+    month - 1,
+    day,
+    payload?.weekly,
+    payload?.one_off,
+  );
+  if (!session) return false;
+  return clientNowMs - skewMs < session.end.getTime();
+}
+
+export function seatControls({ stage, holding, full, claiming }) {
+  if (claiming) {
+    return { disabled: true, label: "Saving seat…", warning: "" };
+  }
+  if (stage === "ended") {
+    return {
+      disabled: true,
+      label: "Session ended",
+      warning: SESSION_ENDED_WARNING,
+    };
+  }
+  if (stage === "drain") {
+    return {
+      disabled: true,
+      label: holding ? "Seat saved" : "No new seats",
+      warning: SESSION_DRAIN_WARNING,
+    };
+  }
+  if (holding) return { disabled: true, label: "Seat saved", warning: "" };
+  if (full) return { disabled: true, label: "Session full", warning: "" };
+  return { disabled: false, label: "Take a seat", warning: "" };
+}
+
+export function livePhase(payload, clientNowMs, skewMs) {
+  const phase = payload?.phase || "closed";
+  if (!payload?.countdown_to) return phase;
+  const serverNow = clientNowMs - skewMs;
+  const target = Date.parse(payload.countdown_to);
+  if (Number.isNaN(target)) return phase;
+  if (phase === "pre_warm" && serverNow >= target) return "open";
+  if (phase === "open") {
+    const drainMinutes = Number(payload.drain_minutes) || 0;
+    if (serverNow >= target) return "closed";
+    if (drainMinutes > 0 && serverNow >= target - drainMinutes * 60000)
+      return "drain";
+    return "open";
+  }
+  if (phase === "drain" && serverNow >= target) return "closed";
+  if (phase === "closed" && serverNow >= target) return "open";
+  return phase;
 }
 
 export function scheduleLine(payload, clientNowMs, skewMs) {
+  if (payload?.dev_waiting_for_seat) {
+    return "Open now is waiting for a seat. The session clock and the GPU start together.";
+  }
   const serverNow = clientNowMs - skewMs;
-  const remaining = formatDuration(
-    Date.parse(payload.countdown_to) - serverNow,
-  );
+  const phase = livePhase(payload, clientNowMs, skewMs);
+  let target = Date.parse(payload.countdown_to);
+  if (phase !== payload.phase) {
+    const end = payload.current_window?.end || payload.upcoming?.[0]?.end;
+    if (end) target = Date.parse(end);
+  }
+  const remaining = formatDuration(target - serverNow);
   const when = formatWindow(
-    payload.countdown_to,
+    phase === payload.phase
+      ? payload.countdown_to
+      : new Date(target).toISOString(),
     payload.timezone || "America/Detroit",
   );
-  if (payload.phase === "pre_warm") {
+  if (phase === "pre_warm") {
+    const taken = Number(payload.seats_taken);
+    if (Number.isFinite(taken) && taken < 1) {
+      return `Opens in ${remaining}. The engine stays off until someone takes a seat.`;
+    }
     return `Engine starting for the ${when} session. Opens in ${remaining}.`;
   }
-  if (payload.phase === "open") {
+  if (phase === "open") {
     return `Deep session is live. ${remaining} left.`;
   }
-  if (payload.phase === "drain") {
-    return `This session is closing. Ends in ${remaining}.`;
+  if (phase === "drain") {
+    return `${SESSION_DRAIN_WARNING} Ends in ${remaining}.`;
   }
   return `Next Deep session ${when}. Starts in ${remaining}.`;
 }
@@ -336,14 +456,44 @@ export function googleCalendarUrl(session) {
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
-export async function fetchSchedule(baseUrl) {
+export const SEAT_TOKEN_KEY = "lighthouse_seat_token";
+export const HELD_SEATS_KEY = "lighthouse_seats_held";
+
+export class TesterKeyRequired extends Error {
+  constructor() {
+    super("A team security key is required for this user test.");
+    this.name = "TesterKeyRequired";
+  }
+}
+
+async function seatHeaders() {
+  const { csrfHeaders } = await import("$lib/byokSession.js");
+  return csrfHeaders({ "Content-Type": "application/json" });
+}
+
+async function scheduleBase(baseUrl) {
   if (baseUrl == null) {
     const { HOST_URL } = await import("$lib/config.js");
     baseUrl = HOST_URL;
   }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+}
+
+export async function scheduledTesterActive(baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const response = await fetch(`${base}api/v1/auth/lighthouse-status`, {
+    credentials: "include",
+  });
+  if (!response.ok) return false;
+  const body = await response.json();
+  return body.status === "active";
+}
+
+export async function fetchSchedule(baseUrl) {
+  const base = await scheduleBase(baseUrl);
   const response = await fetch(`${base}api/v1/products/lighthouse/schedule`, {
     credentials: "omit",
+    cache: "no-store",
   });
   if (!response.ok) {
     throw new Error(`Schedule request failed: ${response.status}`);
@@ -352,22 +502,92 @@ export async function fetchSchedule(baseUrl) {
 }
 
 export async function claimSeat(token, sessionDate, baseUrl) {
-  if (baseUrl == null) {
-    const { HOST_URL } = await import("$lib/config.js");
-    baseUrl = HOST_URL;
-  }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const base = await scheduleBase(baseUrl);
   const response = await fetch(
     `${base}api/v1/products/lighthouse/schedule/seats`,
     {
       method: "POST",
-      credentials: "omit",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: await seatHeaders(),
       body: JSON.stringify({ token, session: sessionDate }),
     },
   );
   if (!response.ok) {
-    throw new Error(`Seat request failed: ${response.status}`);
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Seat request failed: ${response.status}`,
+    );
+  }
+  return response.json();
+}
+
+export async function releaseSeat(token, sessionDate, baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/seats/release`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: await seatHeaders(),
+      body: JSON.stringify({ token, session: sessionDate }),
+    },
+  );
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Could not leave the session: ${response.status}`,
+    );
+  }
+  return response.json();
+}
+
+export async function fetchEngineStatus(baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/engine`,
+    { credentials: "omit", cache: "no-store" },
+  );
+  if (!response.ok) {
+    throw new Error(`Engine status request failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function setDevSchedule(preset, sessionDate, baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const body = { preset };
+  if (sessionDate) body.session = sessionDate;
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/dev`,
+    {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Dev schedule request failed: ${response.status}`);
   }
   return response.json();
 }

@@ -4,14 +4,8 @@
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
   import Console from "$lib/components/lighthouse/Console.svelte";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
-  import LighthousePastSessions from "$lib/components/lighthouse/LighthousePastSessions.svelte";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
   import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
-  import { sessionIsJoined } from "$lib/lighthouseSchedule.js";
-  import {
-    scheduleState,
-    watchSchedule,
-  } from "$lib/lighthouseScheduleStore.js";
   import { browser } from "$app/environment";
   import { onDestroy, onMount } from "svelte";
   import { base } from "$app/paths";
@@ -24,15 +18,10 @@
       $aiStatus.key_source === "personal" &&
       !$aiStatus.forceTeamKey,
   );
-  let joined = $derived(
-    sessionIsJoined($scheduleState.payload, $scheduleState.held),
-  );
-  let showWorkspace = $derived(byokMode || joined);
 
   onMount(() => {
     document.body.classList.add("has-system-console");
     if (browser) aiActions.fetchStatus();
-    return watchSchedule();
   });
 
   onDestroy(() => {
@@ -61,36 +50,40 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
-    {#if !showWorkspace}
-      <div class="session-tabs" role="tablist" aria-label="Lighthouse sessions">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === "upcoming"}
-          onclick={() => (view = "upcoming")}
-        >
-          Upcoming
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={view === "past"}
-          onclick={() => (view = "past")}
-        >
-          Past sessions
-        </button>
-      </div>
+    {#if !byokMode}
+    <div
+      class="session-tabs"
+      role="tablist"
+      aria-label="Current and past sessions"
+    >
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "upcoming"}
+        onclick={() => (view = "upcoming")}
+      >
+        Current
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={view === "past"}
+        onclick={() => (view = "past")}
+      >
+        Past sessions
+      </button>
+    </div>
     {/if}
   </div>
 </div>
 
 {#if browser}
-  {#if showWorkspace}
-    <LighthouseWorkspace source={byokMode ? "personal" : "team"} />
+  {#if byokMode}
+    <LighthouseWorkspace personal />
   {:else if view === "upcoming"}
-    <LighthouseCalendar />
+    <LighthouseCalendar onUpload={() => (view = "past")} />
   {:else}
-    <LighthousePastSessions />
+    <LighthouseWorkspace />
   {/if}
 {/if}
 
@@ -159,16 +152,5 @@
     margin: 0.1rem 0 0 0;
     font-size: 0.8rem;
     color: #666;
-  }
-
-  @media (max-width: 800px) {
-    .navbar {
-      margin-bottom: 0.75rem;
-      padding: 0.5rem 0;
-    }
-
-    .nav-content {
-      padding: 0 1rem;
-    }
   }
 </style>
