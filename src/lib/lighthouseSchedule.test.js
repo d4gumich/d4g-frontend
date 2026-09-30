@@ -13,8 +13,10 @@ import {
   googleCalendarUrl,
   highlightedDayNumbers,
   scheduleLine,
+  seatControls,
   sessionIcs,
   sessionInstants,
+  stageClock,
 } from "./lighthouseSchedule.js";
 
 const payload = {
@@ -82,7 +84,74 @@ test("open and drain copy uses the time left", () => {
   };
   assert.match(
     scheduleLine(drain, Date.parse(drain.server_time), skew),
-    /closing/,
+    /No more new seats/,
+  );
+  assert.match(
+    scheduleLine(drain, Date.parse(drain.server_time), skew),
+    /Ends in 10m/,
+  );
+});
+
+test("ended and draining deactivate a new seat, and a full house stays full", () => {
+  assert.deepEqual(
+    seatControls({ stage: "ended", holding: false, full: false }),
+    {
+      disabled: true,
+      label: "Session ended",
+      warning: "This session has ended.",
+    },
+  );
+  const draining = seatControls({
+    stage: "drain",
+    holding: false,
+    full: false,
+  });
+  assert.equal(draining.disabled, true);
+  assert.match(draining.warning, /No more new seats/);
+  assert.equal(
+    seatControls({ stage: "drain", holding: true, full: false }).label,
+    "Seat saved",
+  );
+  assert.equal(
+    seatControls({ stage: "open", holding: false, full: true }).label,
+    "Session full",
+  );
+  assert.equal(
+    seatControls({ stage: "pre_warm", holding: false, full: false }).disabled,
+    false,
+  );
+});
+
+test("each startup stage keeps the time we observed it", () => {
+  const stages = {
+    asleep: {
+      entered_at: "2026-09-29T22:00:00.000Z",
+      left_at: "2026-09-29T22:00:04.000Z",
+    },
+    waking: {
+      entered_at: "2026-09-29T22:00:04.000Z",
+      left_at: null,
+    },
+  };
+  assert.equal(
+    stageClock(
+      "asleep",
+      stages.asleep,
+      "waking",
+      null,
+      Date.parse("2026-09-29T22:00:20.000Z"),
+    ),
+    "0:04",
+  );
+  assert.equal(
+    stageClock(
+      "waking",
+      stages.waking,
+      "waking",
+      null,
+      Date.parse("2026-09-29T22:00:20.000Z"),
+    ),
+    "0:16",
   );
 });
 

@@ -50,6 +50,45 @@ export function formatElapsed(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
+export const SESSION_ENDED_WARNING = "This session has ended.";
+export const SESSION_DRAIN_WARNING =
+  "No more new seats. People who already have a seat are finishing before the server shuts down.";
+
+export function stageClock(stepId, stage, activeStep, readyAt, nowMs) {
+  if (!stage?.entered_at) return "";
+  const entered = Date.parse(stage.entered_at);
+  let endMs;
+  if (stage.left_at) endMs = Date.parse(stage.left_at);
+  else if (stepId === activeStep) endMs = nowMs;
+  else if (readyAt) endMs = Date.parse(readyAt);
+  else endMs = entered;
+  if (Number.isNaN(entered) || Number.isNaN(endMs)) return "";
+  return formatElapsed(endMs - entered);
+}
+
+export function seatControls({ stage, holding, full, claiming }) {
+  if (claiming) {
+    return { disabled: true, label: "Saving seat…", warning: "" };
+  }
+  if (stage === "ended") {
+    return {
+      disabled: true,
+      label: "Session ended",
+      warning: SESSION_ENDED_WARNING,
+    };
+  }
+  if (stage === "drain") {
+    return {
+      disabled: true,
+      label: holding ? "Seat saved" : "No new seats",
+      warning: SESSION_DRAIN_WARNING,
+    };
+  }
+  if (holding) return { disabled: true, label: "Seat saved", warning: "" };
+  if (full) return { disabled: true, label: "Session full", warning: "" };
+  return { disabled: false, label: "Take a seat", warning: "" };
+}
+
 export function livePhase(payload, clientNowMs, skewMs) {
   const phase = payload?.phase || "closed";
   if (!payload?.countdown_to) return phase;
@@ -91,7 +130,7 @@ export function scheduleLine(payload, clientNowMs, skewMs) {
     return `Deep session is live. ${remaining} left.`;
   }
   if (phase === "drain") {
-    return `This session is closing. Ends in ${remaining}.`;
+    return `${SESSION_DRAIN_WARNING} Ends in ${remaining}.`;
   }
   return `Next Deep session ${when}. Starts in ${remaining}.`;
 }
@@ -394,6 +433,7 @@ export async function fetchSchedule(baseUrl) {
   const base = await scheduleBase(baseUrl);
   const response = await fetch(`${base}api/v1/products/lighthouse/schedule`, {
     credentials: "omit",
+    cache: "no-store",
   });
   if (!response.ok) {
     throw new Error(`Schedule request failed: ${response.status}`);
@@ -414,7 +454,17 @@ export async function claimSeat(token, sessionDate, baseUrl) {
   );
   if (response.status === 403) throw new TesterKeyRequired();
   if (!response.ok) {
-    throw new Error(`Seat request failed: ${response.status}`);
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Seat request failed: ${response.status}`,
+    );
   }
   return response.json();
 }
@@ -423,7 +473,7 @@ export async function fetchEngineStatus(baseUrl) {
   const base = await scheduleBase(baseUrl);
   const response = await fetch(
     `${base}api/v1/products/lighthouse/schedule/engine`,
-    { credentials: "omit" },
+    { credentials: "omit", cache: "no-store" },
   );
   if (!response.ok) {
     throw new Error(`Engine status request failed: ${response.status}`);

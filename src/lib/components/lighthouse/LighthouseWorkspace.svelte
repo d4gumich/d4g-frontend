@@ -14,6 +14,8 @@
     livePhase,
     scheduleLine,
     scheduledTesterActive,
+    SESSION_DRAIN_WARNING,
+    SESSION_ENDED_WARNING,
     SEAT_TOKEN_KEY,
     TesterKeyRequired,
   } from "$lib/lighthouseSchedule.js";
@@ -138,6 +140,11 @@
   {#if line}
     <p class="session-line">{line}</p>
   {/if}
+  {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
+    <p class="session-warning">
+      {SESSION_ENDED_WARNING} Resume upload is closed.
+    </p>
+  {/if}
   <EngineStatus {engine} />
   <div class="dashboard-grid">
     <aside class="sidebar">
@@ -146,8 +153,14 @@
         <p>Analyze your PDF resume</p>
         {#if !canUpload}
           <p class="gate">
-            Take a seat while a session is starting or live. Reading the PDF
-            does not wait for the engine.
+            {#if phase === "drain"}
+              {SESSION_DRAIN_WARNING}
+            {:else if seated && phase === "closed"}
+              {SESSION_ENDED_WARNING} Resume upload is closed.
+            {:else}
+              Take a seat while a session is starting or live. Reading the PDF
+              does not wait for the engine.
+            {/if}
           </p>
         {/if}
         <div class="file-options">
@@ -244,6 +257,14 @@
     margin: 0 0 0.85rem;
     color: #1b3350;
     font-weight: 650;
+  }
+  .session-warning {
+    margin: 0 0 0.85rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 8px;
+    background: #fff4e5;
+    color: #6a3d09;
+    font-weight: 600;
   }
   .dashboard-grid {
     display: grid;

@@ -17,7 +17,10 @@
     highlightedDayNumbers,
     scheduleLine,
     scheduledTesterActive,
+    seatControls,
     SEAT_TOKEN_KEY,
+    SESSION_DRAIN_WARNING,
+    SESSION_ENDED_WARNING,
     sessionDateKey,
     sessionIcs,
     sessionInstants,
@@ -138,6 +141,7 @@
   );
   const seatCap = $derived(Number(payload?.seat_cap ?? SEAT_CAP));
   const focusDate = $derived.by(() => {
+    if (payload?.dev_date) return payload.dev_date;
     if (!payload) return "";
     const window = payload.current_window || payload.upcoming?.[0];
     if (!window?.start) return payload.seat_session || "";
@@ -147,7 +151,17 @@
   const focusTaken = $derived(
     Number(payload?.seats?.[focusDate] ?? payload?.seats_taken ?? 0),
   );
-  const selectedTaken = $derived(Number(payload?.seats?.[selectedDate] ?? 0));
+  const selectedTaken = $derived.by(() => {
+    if (!selectedDate) return 0;
+    const seats = payload?.seats || {};
+    if (Object.prototype.hasOwnProperty.call(seats, selectedDate)) {
+      return Number(seats[selectedDate]);
+    }
+    if (selectedDate === payload?.seat_session) {
+      return Number(payload?.seats_taken || 0);
+    }
+    return 0;
+  });
   const holdingSelected = $derived(
     selectedDate !== "" && held.includes(selectedDate),
   );
@@ -180,6 +194,14 @@
       (payload?.phase === "pre_warm" ||
         payload?.phase === "open" ||
         payload?.phase === "drain"),
+  );
+  const seat = $derived(
+    seatControls({
+      stage: selectedStage,
+      holding: holdingSelected,
+      full: selectedFull,
+      claiming,
+    }),
   );
   const seatNextStep = $derived.by(() => {
     if (!holdingSelected) return "";
@@ -234,12 +256,11 @@
 
   async function chooseDev(preset) {
     const session =
-      focusDate || sessionDateKey(today.year, today.monthIndex, today.day);
+      payload?.dev_date ||
+      selectedDate ||
+      focusDate ||
+      sessionDateKey(today.year, today.monthIndex, today.day);
     try {
-      if (PRACTICE_PRESETS.includes(preset)) {
-        await setDevSchedule("reset_seats");
-        releaseLocalSeats();
-      }
       const next = await setDevSchedule(
         preset,
         preset === "fill_seats" ? session : undefined,
@@ -248,22 +269,39 @@
       skew = clockSkewMs(next.server_time, Date.now());
       failed = false;
       if (preset === "reset_seats") releaseLocalSeats();
-      const shown = showDevDate(next.dev_date);
-      if (shown && PRACTICE_PRESETS.includes(preset)) {
+      const shown = showDevDate(
+        preset === "fill_seats" ? session : next.dev_date,
+      );
+      const openPopup =
+        shown &&
+        (PRACTICE_PRESETS.includes(preset) ||
+          preset === "fill_seats" ||
+          preset === "fast_forward");
+      if (openPopup) {
         selected = shown;
         zoneIndex = 0;
         claimError = "";
+      }
+      if (preset === "open") {
         devNotice =
-          preset === "open"
-            ? "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it."
-            : "Seats are open. Use Take a seat in the session popup.";
+          "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it.";
+      } else if (preset === "soon") {
+        devNotice =
+          "Session starts in 10 minutes. Fast forward skips that wait. The GPU stays off.";
+      } else if (preset === "fast_forward") {
+        devNotice = "Skipped the wait. The session is open. The GPU stays off.";
+      } else if (preset === "drain") {
+        devNotice = SESSION_DRAIN_WARNING;
+      } else if (preset === "ended") {
+        devNotice = `${SESSION_ENDED_WARNING} Take a seat is off.`;
       } else if (preset === "clear") {
         selected = null;
         devNotice = "Real Tuesday and Thursday calendar is on.";
       } else if (preset === "reset_seats") {
         devNotice = "Seats reset. Open a session, then take a seat.";
       } else if (preset === "fill_seats") {
-        devNotice = "All 30 seats are filled. Reset seats to take one.";
+        devNotice =
+          "All 30 seats are filled. Take a seat stays off until you reset seats.";
       }
       await refreshEngine();
     } catch (error) {
@@ -437,14 +475,20 @@
   {#if payload?.dev}
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
-        Practice schedule. Only Open now starts the GPU and times that startup.
-        The other controls stay off the GPU. Leaving Open now stops it.
+        Practice schedule. Only Open now starts the GPU and times each startup
+        stage. Fast forward skips the 10 minute wait and stays off the GPU.
+        Leaving Open now stops it.
       </p>
       <div class="dev-actions">
         <button
           type="button"
           aria-pressed={payload.dev_preset === "soon"}
           onclick={() => chooseDev("soon")}>Starts in 10 min</button
+        >
+        <button
+          type="button"
+          disabled={payload.dev_preset !== "soon"}
+          onclick={() => chooseDev("fast_forward")}>Fast forward</button
         >
         <button
           type="button"
@@ -483,6 +527,9 @@
     <p>{failed ? "Schedule unavailable." : line}</p>
     {#if payload}
       <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
+    {/if}
+    {#if payload?.dev_preset === "ended"}
+      <p class="session-warning">{SESSION_ENDED_WARNING} Take a seat is off.</p>
     {/if}
     <EngineStatus {engine} />
     {#if canUseFocusSeat && !selected}
@@ -568,17 +615,18 @@
         <button
           type="button"
           class="primary"
-          disabled={holdingSelected || selectedFull || claiming}
+          disabled={seat.disabled}
           onclick={() => takeSeat(selectedDate)}
         >
-          {claiming
-            ? "Saving seat…"
-            : holdingSelected
-              ? "Seat saved"
-              : selectedFull
-                ? "Session full"
-                : "Take a seat"}
+          {seat.label}
         </button>
+        {#if payload?.dev_preset === "soon" && (selectedStage === "pre_warm" || selectedStage === "upcoming")}
+          <button
+            type="button"
+            class="secondary"
+            onclick={() => chooseDev("fast_forward")}>Fast forward</button
+          >
+        {/if}
         <button type="button" class="secondary" onclick={downloadCalendar}
           >Add to calendar</button
         >
@@ -586,6 +634,9 @@
           >Google Calendar</a
         >
       </div>
+      {#if seat.warning}
+        <p class="session-warning">{seat.warning}</p>
+      {/if}
       {#if claimError}
         <p class="claim-error">{claimError}</p>
       {/if}
@@ -643,6 +694,23 @@
     transform: translateY(1px);
     background: #5c3b16;
     color: #fff;
+  }
+  .dev-actions button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .dev-actions button:disabled:active {
+    transform: none;
+    background: #fff;
+    color: #5c3b16;
+  }
+  .session-warning {
+    margin: 0.7rem 0 0;
+    padding: 0.7rem 0.8rem;
+    border-radius: 8px;
+    background: #fff4e5;
+    color: #6a3d09;
+    font-weight: 600;
   }
   .dev-notice {
     margin: 0.7rem 0 0;

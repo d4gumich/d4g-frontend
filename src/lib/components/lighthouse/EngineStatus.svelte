@@ -1,6 +1,6 @@
 <script>
   import { onDestroy, onMount } from "svelte";
-  import { formatElapsed } from "$lib/lighthouseSchedule.js";
+  import { formatElapsed, stageClock } from "$lib/lighthouseSchedule.js";
 
   let { engine = null } = $props();
 
@@ -42,12 +42,22 @@
     {#if showSteps}
       <ol>
         {#each STEPS as [id, label], index}
+          {@const clock = stageClock(
+            id,
+            engine?.startup?.stages?.[id],
+            engine?.step,
+            engine?.startup?.ready_at,
+            now,
+          )}
           <li
             class:done={index < stepIndex}
             class:current={index === stepIndex}
             aria-current={index === stepIndex ? "step" : undefined}
           >
-            {label}
+            <span>{label}</span>
+            {#if clock}
+              <span class="stage-time">{clock}</span>
+            {/if}
           </li>
         {/each}
       </ol>
@@ -80,12 +90,21 @@
     list-style: none;
   }
   li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     border-radius: 999px;
-    padding: 0.15rem 0.55rem;
+    padding: 0.2rem 0.6rem;
     background: #e6e8ee;
     color: #667;
     font-size: 0.75rem;
     font-weight: 700;
+    line-height: 1.15;
+  }
+  .stage-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    font-size: 0.68rem;
   }
   li.done {
     background: #d5e0ef;
