@@ -15,14 +15,17 @@
     HELD_SEATS_KEY,
     highlightedDayNumbers,
     scheduleLine,
+    scheduledTesterActive,
     SEAT_TOKEN_KEY,
     sessionDateKey,
     sessionIcs,
     sessionInstants,
     setDevSchedule,
+    TesterKeyRequired,
   } from "$lib/lighthouseSchedule.js";
   import { lighthouseActions } from "$lib/lighthouseStore.js";
   import EngineStatus from "$lib/components/lighthouse/EngineStatus.svelte";
+  import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
   let { onUpload = () => {} } = $props();
 
@@ -40,6 +43,8 @@
   let held = $state(readHeld());
   let claiming = $state(false);
   let claimError = $state("");
+  let showTesterKey = $state(false);
+  let pendingSeatDate = $state(null);
   let devNotice = $state("");
   let engine = $state(null);
 
@@ -296,6 +301,23 @@
 
   async function takeSeat(date) {
     if (!date || claiming) return;
+    claimError = "";
+    try {
+      if (!(await scheduledTesterActive())) {
+        pendingSeatDate = date;
+        showTesterKey = true;
+        return;
+      }
+    } catch {
+      pendingSeatDate = date;
+      showTesterKey = true;
+      return;
+    }
+    await saveSeat(date);
+  }
+
+  async function saveSeat(date) {
+    if (!date || claiming) return;
     claiming = true;
     claimError = "";
     try {
@@ -307,10 +329,27 @@
       };
       if (result.accepted) rememberSeat(date);
     } catch (error) {
+      if (error instanceof TesterKeyRequired) {
+        pendingSeatDate = date;
+        showTesterKey = true;
+        return;
+      }
       claimError = error?.message || "Could not save a seat.";
     } finally {
       claiming = false;
     }
+  }
+
+  function finishTesterKey() {
+    showTesterKey = false;
+    const date = pendingSeatDate;
+    pendingSeatDate = null;
+    if (date) saveSeat(date);
+  }
+
+  function cancelTesterKey() {
+    showTesterKey = false;
+    pendingSeatDate = null;
   }
 
   function openDay(day) {
@@ -537,6 +576,10 @@
       <button type="button" class="text" onclick={closeDialog}>Close</button>
     </div>
   </div>
+{/if}
+
+{#if showTesterKey}
+  <LighthouseSetup onComplete={finishTesterKey} onCancel={cancelTesterKey} />
 {/if}
 
 <style>

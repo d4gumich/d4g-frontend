@@ -1,5 +1,6 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
+import { TesterKeyRequired } from "$lib/lighthouseSchedule.js";
 
 const BASE_PATH = "api/v1/products/lighthouse";
 
@@ -77,6 +78,13 @@ function saveHistory(history) {
       JSON.stringify(history.slice(0, 10)),
     );
   }
+}
+
+function testerKeyError(status, detail) {
+  if (status === 403 && String(detail || "").includes("security key")) {
+    return new TesterKeyRequired();
+  }
+  return null;
 }
 
 function formatError(err) {
@@ -348,12 +356,14 @@ export const lighthouseActions = {
         const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
         const response = await fetch(
           `${baseUrl}api/v1/products/lighthouse/schedule/parse`,
-          { method: "POST", credentials: "omit", body: formData },
+          { method: "POST", credentials: "include", body: formData },
         );
         if (!response.ok) {
           const errorData = await response
             .json()
             .catch(() => ({ detail: "Upload failed" }));
+          const keyError = testerKeyError(response.status, errorData.detail);
+          if (keyError) throw keyError;
           throw new Error(
             errorData.detail || `Server error: ${response.status}`,
           );
@@ -392,7 +402,7 @@ export const lighthouseActions = {
       lighthouseResults.update((r) => ({
         ...r,
         loading: false,
-        error: formatError(err),
+        error: err?.name === "TesterKeyRequired" ? null : formatError(err),
       }));
       throw err;
     }
@@ -470,7 +480,7 @@ export const lighthouseActions = {
             `${baseUrl}api/v1/products/lighthouse/schedule/analyze`,
             {
               method: "POST",
-              credentials: "omit",
+              credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 token: scheduledSeat.token,
@@ -484,6 +494,8 @@ export const lighthouseActions = {
             const errorData = await response
               .json()
               .catch(() => ({ detail: "Analysis failed" }));
+            const keyError = testerKeyError(response.status, errorData.detail);
+            if (keyError) throw keyError;
             throw new Error(
               errorData.detail || `Server error: ${response.status}`,
             );
@@ -581,7 +593,7 @@ export const lighthouseActions = {
       lighthouseResults.update((r) => ({
         ...r,
         loading: false,
-        error: formatError(err),
+        error: err?.name === "TesterKeyRequired" ? null : formatError(err),
       }));
       throw err;
     }

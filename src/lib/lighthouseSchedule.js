@@ -324,12 +324,33 @@ export function googleCalendarUrl(session) {
 export const SEAT_TOKEN_KEY = "lighthouse_seat_token";
 export const HELD_SEATS_KEY = "lighthouse_seats_held";
 
-export async function fetchSchedule(baseUrl) {
+export class TesterKeyRequired extends Error {
+  constructor() {
+    super("A team security key is required for this user test.");
+    this.name = "TesterKeyRequired";
+  }
+}
+
+async function scheduleBase(baseUrl) {
   if (baseUrl == null) {
     const { HOST_URL } = await import("$lib/config.js");
     baseUrl = HOST_URL;
   }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+}
+
+export async function scheduledTesterActive(baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const response = await fetch(`${base}api/v1/auth/lighthouse-status`, {
+    credentials: "include",
+  });
+  if (!response.ok) return false;
+  const body = await response.json();
+  return body.status === "active";
+}
+
+export async function fetchSchedule(baseUrl) {
+  const base = await scheduleBase(baseUrl);
   const response = await fetch(`${base}api/v1/products/lighthouse/schedule`, {
     credentials: "omit",
   });
@@ -340,20 +361,17 @@ export async function fetchSchedule(baseUrl) {
 }
 
 export async function claimSeat(token, sessionDate, baseUrl) {
-  if (baseUrl == null) {
-    const { HOST_URL } = await import("$lib/config.js");
-    baseUrl = HOST_URL;
-  }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const base = await scheduleBase(baseUrl);
   const response = await fetch(
     `${base}api/v1/products/lighthouse/schedule/seats`,
     {
       method: "POST",
-      credentials: "omit",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, session: sessionDate }),
     },
   );
+  if (response.status === 403) throw new TesterKeyRequired();
   if (!response.ok) {
     throw new Error(`Seat request failed: ${response.status}`);
   }
@@ -361,11 +379,7 @@ export async function claimSeat(token, sessionDate, baseUrl) {
 }
 
 export async function fetchEngineStatus(baseUrl) {
-  if (baseUrl == null) {
-    const { HOST_URL } = await import("$lib/config.js");
-    baseUrl = HOST_URL;
-  }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const base = await scheduleBase(baseUrl);
   const response = await fetch(
     `${base}api/v1/products/lighthouse/schedule/engine`,
     { credentials: "omit" },
@@ -377,11 +391,7 @@ export async function fetchEngineStatus(baseUrl) {
 }
 
 export async function setDevSchedule(preset, sessionDate, baseUrl) {
-  if (baseUrl == null) {
-    const { HOST_URL } = await import("$lib/config.js");
-    baseUrl = HOST_URL;
-  }
-  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const base = await scheduleBase(baseUrl);
   const body = { preset };
   if (sessionDate) body.session = sessionDate;
   const response = await fetch(

@@ -10,8 +10,11 @@
     fetchEngineStatus,
     fetchSchedule,
     HELD_SEATS_KEY,
+    scheduledTesterActive,
     SEAT_TOKEN_KEY,
+    TesterKeyRequired,
   } from "$lib/lighthouseSchedule.js";
+  import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
   let schedule = $state(null);
   let engine = $state(null);
@@ -20,6 +23,7 @@
   let fileInput = $state(null);
   let shouldSanitize = $state(false);
   let uploadError = $state("");
+  let showTesterKey = $state(false);
 
   const focusDate = $derived(schedule?.seat_session || "");
   const phase = $derived(schedule?.phase || "closed");
@@ -61,10 +65,18 @@
     if (!file || !canUpload) return;
     uploadError = "";
     try {
+      if (!(await scheduledTesterActive())) {
+        showTesterKey = true;
+        return;
+      }
       await lighthouseActions.uploadPdf(file, shouldSanitize);
       file = null;
       if (fileInput) fileInput.value = "";
     } catch (error) {
+      if (error instanceof TesterKeyRequired) {
+        showTesterKey = true;
+        return;
+      }
       uploadError = error?.message || "Upload failed.";
     }
   }
@@ -178,6 +190,16 @@
     </section>
   </div>
 </section>
+
+{#if showTesterKey}
+  <LighthouseSetup
+    onComplete={() => {
+      showTesterKey = false;
+      handleUpload();
+    }}
+    onCancel={() => (showTesterKey = false)}
+  />
+{/if}
 
 <style>
   .workspace {

@@ -6,6 +6,10 @@
     lighthouseSettings,
   } from "$lib/lighthouseStore.js";
   import { fade, slide } from "svelte/transition";
+  import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
+
+  let showTesterKey = $state(false);
+  let pendingAnalysis = $state(false);
 
   let activeTab = $state("preview"); // 'preview', 'analysis'
 
@@ -43,9 +47,23 @@
   );
 
   async function triggerAnalysis() {
-    if (selectedText) {
+    if (!selectedText) return;
+    try {
       await lighthouseActions.analyzeText(selectedText);
       activeTab = "analysis";
+    } catch (error) {
+      if (error?.name === "TesterKeyRequired") {
+        pendingAnalysis = true;
+        showTesterKey = true;
+      }
+    }
+  }
+
+  function finishTesterKey() {
+    showTesterKey = false;
+    if (pendingAnalysis) {
+      pendingAnalysis = false;
+      triggerAnalysis();
     }
   }
 
@@ -232,6 +250,13 @@
     </div>
   {/if}
 </div>
+
+{#if showTesterKey}
+  <LighthouseSetup
+    onComplete={finishTesterKey}
+    onCancel={() => (showTesterKey = false)}
+  />
+{/if}
 
 <style>
   .results-layout {
