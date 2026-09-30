@@ -3,10 +3,20 @@
  * Uses build-safe environment variable access with fallback.
  */
 
-// Fallback to PythonAnywhere production URL
-const DEFAULT_BACKEND_URL = 'https://d4gumsi.pythonanywhere.com/';
+import { env } from "$env/dynamic/public";
 
-// In SvelteKit/Vite, import.meta.env handles optional variables without crashing the build
-export const PUBLIC_BACKEND_URL = import.meta.env.VITE_PUBLIC_BACKEND_URL || DEFAULT_BACKEND_URL;
+// Production builds have no PUBLIC_BACKEND_URL, so they stay on PythonAnywhere.
+// Dev mode loads PUBLIC_BACKEND_URL from .env.development. Vite only puts VITE_* on
+// import.meta.env, so the documented PUBLIC_ name has to come from SvelteKit's env.
+const DEFAULT_BACKEND_URL = "https://d4gumsi.pythonanywhere.com/";
 
-export const HOST_URL = PUBLIC_BACKEND_URL.endsWith('/') ? PUBLIC_BACKEND_URL : `${PUBLIC_BACKEND_URL}/`;
+const configured =
+  env.PUBLIC_BACKEND_URL ||
+  import.meta.env.VITE_PUBLIC_BACKEND_URL ||
+  DEFAULT_BACKEND_URL;
+
+export const PUBLIC_BACKEND_URL = configured;
+
+export const HOST_URL = configured.endsWith("/")
+  ? configured
+  : `${configured}/`;
