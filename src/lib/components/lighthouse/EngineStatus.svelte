@@ -100,12 +100,12 @@
     color: #fff;
   }
   li.starting {
-    background: #f6e4c4;
-    color: #8a5a14;
+    background: #f8efc0;
+    color: #6f5b10;
   }
   li.starting.current {
-    background: linear-gradient(90deg, #e2a31a 0%, #e07a2a 100%);
-    color: #fff;
+    background: #f2c200;
+    color: #3a3008;
   }
   li.ready {
     background: #d9eedf;
