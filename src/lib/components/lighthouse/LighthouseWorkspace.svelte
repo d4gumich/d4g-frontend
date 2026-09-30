@@ -9,9 +9,12 @@
   import {
     clockSkewMs,
     fetchEngineStatus,
+    canReturnSeat,
     fetchSchedule,
+    seatWindowOpen,
     HELD_SEATS_KEY,
     livePhase,
+    releaseSeat,
     scheduleLine,
     scheduledTesterActive,
     SESSION_DRAIN_WARNING,
@@ -30,7 +33,10 @@
   let fileInput = $state(null);
   let shouldSanitize = $state(false);
   let uploadError = $state("");
+  let leaveError = $state("");
+  let leaving = $state(false);
   let showTesterKey = $state(false);
+  let keyForLeave = $state(false);
 
   const focusDate = $derived(schedule?.seat_session || "");
   const phase = $derived(schedule ? livePhase(schedule, now, skew) : "closed");
@@ -38,6 +44,11 @@
   const seated = $derived(focusDate !== "" && held.includes(focusDate));
   const canUpload = $derived(
     seated && (phase === "pre_warm" || phase === "open" || phase === "drain"),
+  );
+  const canLeave = $derived(
+    seated &&
+      canReturnSeat(phase, schedule?.dev_preset) &&
+      seatWindowOpen(schedule, focusDate, now, skew),
   );
 
   function readHeld() {
@@ -47,6 +58,48 @@
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
+    }
+  }
+
+  function forgetSeat(date) {
+    held = held.filter((item) => item !== date);
+    sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(held));
+  }
+
+  async function leaveSeat() {
+    if (!focusDate || leaving) return;
+    leaving = true;
+    leaveError = "";
+    try {
+      if (!(await scheduledTesterActive())) {
+        keyForLeave = true;
+        showTesterKey = true;
+        return;
+      }
+      const token = sessionStorage.getItem(SEAT_TOKEN_KEY);
+      if (!token) {
+        forgetSeat(focusDate);
+        return;
+      }
+      const result = await releaseSeat(token, focusDate);
+      if (schedule) {
+        schedule = {
+          ...schedule,
+          seats_taken: result.seats_taken,
+          seats: { ...(schedule.seats || {}), [focusDate]: result.seats_taken },
+        };
+      }
+      forgetSeat(focusDate);
+      lighthouseActions.useScheduledSeat(null, null);
+    } catch (error) {
+      if (error instanceof TesterKeyRequired) {
+        keyForLeave = true;
+        showTesterKey = true;
+        return;
+      }
+      leaveError = error?.message || "Could not leave the session.";
+    } finally {
+      leaving = false;
     }
   }
 
@@ -75,6 +128,7 @@
     uploadError = "";
     try {
       if (!(await scheduledTesterActive())) {
+        keyForLeave = false;
         showTesterKey = true;
         return;
       }
@@ -83,6 +137,7 @@
       if (fileInput) fileInput.value = "";
     } catch (error) {
       if (error instanceof TesterKeyRequired) {
+        keyForLeave = false;
         showTesterKey = true;
         return;
       }
@@ -104,7 +159,9 @@
 
   let announcedPhase = null;
   const engineFast = $derived(
-    schedule?.dev_preset === "open" && !engine?.startup?.ready_at,
+    schedule?.dev_preset === "open" &&
+      Boolean(engine?.startup?.started_at) &&
+      !engine?.startup?.ready_at,
   );
 
   $effect(() => {
@@ -146,6 +203,16 @@
     </p>
   {/if}
   <EngineStatus {engine} />
+  {#if canLeave}
+    <p class="leave-row">
+      <button type="button" disabled={leaving} onclick={leaveSeat}
+        >Leave session</button
+      >
+    </p>
+  {/if}
+  {#if leaveError}
+    <p class="upload-error">{leaveError}</p>
+  {/if}
   <div class="dashboard-grid">
     <aside class="sidebar">
       <div class="card upload-card">
@@ -240,10 +307,16 @@
 {#if showTesterKey}
   <LighthouseSetup
     onComplete={() => {
+      const leavingAfterKey = keyForLeave;
       showTesterKey = false;
-      handleUpload();
+      keyForLeave = false;
+      if (leavingAfterKey) leaveSeat();
+      else handleUpload();
     }}
-    onCancel={() => (showTesterKey = false)}
+    onCancel={() => {
+      showTesterKey = false;
+      keyForLeave = false;
+    }}
   />
 {/if}
 
@@ -257,6 +330,23 @@
     margin: 0 0 0.85rem;
     color: #1b3350;
     font-weight: 650;
+  }
+  .leave-row {
+    margin: 0.75rem 0 0;
+  }
+  .leave-row button {
+    border: 1px solid #1b3350;
+    background: #fff;
+    color: #1b3350;
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .leave-row button:disabled {
+    opacity: 0.55;
+    cursor: default;
   }
   .session-warning {
     margin: 0 0 0.85rem;

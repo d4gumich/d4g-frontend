@@ -54,6 +54,26 @@ export const SESSION_ENDED_WARNING = "This session has ended.";
 export const SESSION_DRAIN_WARNING =
   "No more new seats. People who already have a seat are finishing before the server shuts down.";
 
+export function canReturnSeat(stage, preset) {
+  if (preset === "drain" || preset === "ended") return false;
+  return stage !== "drain" && stage !== "ended";
+}
+
+export function seatWindowOpen(payload, sessionDate, clientNowMs, skewMs = 0) {
+  if (!sessionDate) return false;
+  const [year, month, day] = sessionDate.split("-").map(Number);
+  if (!year || !month || !day) return false;
+  const session = sessionInstants(
+    year,
+    month - 1,
+    day,
+    payload?.weekly,
+    payload?.one_off,
+  );
+  if (!session) return false;
+  return clientNowMs - skewMs < session.end.getTime();
+}
+
 export function seatControls({ stage, holding, full, claiming }) {
   if (claiming) {
     return { disabled: true, label: "Saving seat…", warning: "" };
@@ -112,6 +132,10 @@ export function scheduleLine(payload, clientNowMs, skewMs) {
     payload.timezone || "America/Detroit",
   );
   if (phase === "pre_warm") {
+    const taken = Number(payload.seats_taken);
+    if (Number.isFinite(taken) && taken < 1) {
+      return `Opens in ${remaining}. The engine stays off until someone takes a seat.`;
+    }
     return `Engine starting for the ${when} session. Opens in ${remaining}.`;
   }
   if (phase === "open") {
@@ -452,6 +476,34 @@ export async function claimSeat(token, sessionDate, baseUrl) {
       typeof detail === "string" && detail
         ? detail
         : `Seat request failed: ${response.status}`,
+    );
+  }
+  return response.json();
+}
+
+export async function releaseSeat(token, sessionDate, baseUrl) {
+  const base = await scheduleBase(baseUrl);
+  const response = await fetch(
+    `${base}api/v1/products/lighthouse/schedule/seats/release`,
+    {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, session: sessionDate }),
+    },
+  );
+  if (response.status === 403) throw new TesterKeyRequired();
+  if (!response.ok) {
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Could not leave the session: ${response.status}`,
     );
   }
   return response.json();

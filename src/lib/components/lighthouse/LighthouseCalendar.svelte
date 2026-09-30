@@ -4,6 +4,7 @@
     SEAT_CAP,
     SESSION_TIMEZONES,
     canGoToPreviousMonth,
+    canReturnSeat,
     claimSeat,
     clickableDayNumbers,
     clockSkewMs,
@@ -15,7 +16,9 @@
     HELD_SEATS_KEY,
     livePhase,
     highlightedDayNumbers,
+    releaseSeat,
     scheduleLine,
+    seatWindowOpen,
     scheduledTesterActive,
     seatControls,
     SEAT_TOKEN_KEY,
@@ -46,6 +49,8 @@
   let dialogEl = $state(null);
   let held = $state(readHeld());
   let claiming = $state(false);
+  let leaving = $state(false);
+  let pendingAction = $state("claim");
   let claimError = $state("");
   let showTesterKey = $state(false);
   let pendingSeatDate = $state(null);
@@ -195,6 +200,16 @@
         payload?.phase === "open" ||
         payload?.phase === "drain"),
   );
+  const shownPhase = $derived(payload ? livePhase(payload, now, skew) : "closed");
+  const canLeaveFocus = $derived(
+    focusDate !== "" &&
+      held.includes(focusDate) &&
+      canReturnSeat(shownPhase, payload?.dev_preset) &&
+      seatWindowOpen(payload, focusDate, now, skew),
+  );
+  const canLeaveSelected = $derived(
+    holdingSelected && canReturnSeat(selectedStage, payload?.dev_preset),
+  );
   const seat = $derived(
     seatControls({
       stage: selectedStage,
@@ -242,6 +257,11 @@
     sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(held));
   }
 
+  function forgetSeat(date) {
+    held = held.filter((item) => item !== date);
+    sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(held));
+  }
+
   function releaseLocalSeats() {
     held = [];
     sessionStorage.removeItem(HELD_SEATS_KEY);
@@ -283,8 +303,11 @@
         claimError = "";
       }
       if (preset === "open") {
+        const taken = Number(next.seats?.[next.dev_date] ?? next.seats_taken ?? 0);
         devNotice =
-          "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it.";
+          taken >= 1
+            ? "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it."
+            : "The session is open. The GPU stays off until someone takes a seat.";
       } else if (preset === "soon") {
         devNotice =
           "Session starts in 10 minutes. Fast forward skips that wait. The GPU stays off.";
@@ -301,7 +324,9 @@
         devNotice = "Seats reset. Open a session, then take a seat.";
       } else if (preset === "fill_seats") {
         devNotice =
-          "All 30 seats are filled. Take a seat stays off until you reset seats.";
+          next.dev_preset === "open"
+            ? "All 30 seats are filled. The GPU starts because someone has a seat."
+            : "All 30 seats are filled. Take a seat stays off until you reset seats.";
       }
       await refreshEngine();
     } catch (error) {
@@ -348,11 +373,13 @@
     try {
       if (!(await scheduledTesterActive())) {
         pendingSeatDate = date;
+        pendingAction = "claim";
         showTesterKey = true;
         return;
       }
     } catch {
       pendingSeatDate = date;
+      pendingAction = "claim";
       showTesterKey = true;
       return;
     }
@@ -370,10 +397,18 @@
         seat_cap: result.seat_cap,
         seats: { ...(payload?.seats || {}), [date]: result.seats_taken },
       };
-      if (result.accepted) rememberSeat(date);
+      if (result.accepted) {
+        rememberSeat(date);
+        if (payload?.dev_preset === "open") {
+          devNotice =
+            "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it.";
+          await refreshEngine();
+        }
+      }
     } catch (error) {
       if (error instanceof TesterKeyRequired) {
         pendingSeatDate = date;
+        pendingAction = "claim";
         showTesterKey = true;
         return;
       }
@@ -383,16 +418,52 @@
     }
   }
 
+  async function leaveSeat(date) {
+    if (!date || leaving) return;
+    leaving = true;
+    claimError = "";
+    try {
+      const result = await releaseSeat(seatToken(), date);
+      payload = {
+        ...payload,
+        seat_cap: result.seat_cap,
+        seats: { ...(payload?.seats || {}), [date]: result.seats_taken },
+        seats_taken:
+          date === payload?.seat_session ? result.seats_taken : payload?.seats_taken,
+      };
+      forgetSeat(date);
+      if (payload?.dev_preset === "open" && result.seats_taken < 1) {
+        devNotice =
+          "The session is open. The GPU stays off until someone takes a seat.";
+      }
+    } catch (error) {
+      if (error instanceof TesterKeyRequired) {
+        pendingSeatDate = date;
+        pendingAction = "leave";
+        showTesterKey = true;
+        return;
+      }
+      claimError = error?.message || "Could not leave the session.";
+    } finally {
+      leaving = false;
+    }
+  }
+
   function finishTesterKey() {
     showTesterKey = false;
     const date = pendingSeatDate;
+    const action = pendingAction;
     pendingSeatDate = null;
-    if (date) saveSeat(date);
+    pendingAction = "claim";
+    if (!date) return;
+    if (action === "leave") leaveSeat(date);
+    else saveSeat(date);
   }
 
   function cancelTesterKey() {
     showTesterKey = false;
     pendingSeatDate = null;
+    pendingAction = "claim";
   }
 
   function openDay(day) {
@@ -435,7 +506,9 @@
   let announcedPhase = null;
 
   const engineFast = $derived(
-    payload?.dev_preset === "open" && !engine?.startup?.ready_at,
+    payload?.dev_preset === "open" &&
+      Boolean(engine?.startup?.started_at) &&
+      !engine?.startup?.ready_at,
   );
 
   $effect(() => {
@@ -475,8 +548,8 @@
   {#if payload?.dev}
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
-        Practice schedule. Only Open now starts the GPU and times that startup.
-        Fast forward skips the 10 minute wait and stays off the GPU.
+        Practice schedule. Only Open now starts the GPU, and only after someone
+        takes a seat. Fast forward skips the 10 minute wait and stays off the GPU.
         Leaving Open now stops it.
       </p>
       <div class="dev-actions">
@@ -532,10 +605,20 @@
       <p class="session-warning">{SESSION_ENDED_WARNING} Take a seat is off.</p>
     {/if}
     <EngineStatus {engine} />
-    {#if canUseFocusSeat && !selected}
+    {#if (canUseFocusSeat || canLeaveFocus) && !selected}
       <p class="next-step">
         You have a seat.
-        <button type="button" onclick={continueToUpload}>Use your seat</button>
+        {#if canUseFocusSeat}
+          <button type="button" onclick={continueToUpload}>Use your seat</button>
+        {/if}
+        {#if canLeaveFocus}
+          <button
+            type="button"
+            class="leave"
+            disabled={leaving}
+            onclick={() => leaveSeat(focusDate)}>Leave session</button
+          >
+        {/if}
       </p>
     {/if}
   </div>
@@ -648,6 +731,14 @@
               >Use your seat</button
             >
           {/if}
+          {#if canLeaveSelected}
+            <button
+              type="button"
+              class="secondary"
+              disabled={leaving}
+              onclick={() => leaveSeat(selectedDate)}>Leave session</button
+            >
+          {/if}
         </div>
       {/if}
       <button type="button" class="text" onclick={closeDialog}>Close</button>
@@ -742,6 +833,19 @@
     text-decoration: underline;
     padding: 0;
   }
+  .schedule-header .next-step button.leave {
+    margin-left: 0.75rem;
+    border: 1px solid #1b3350;
+    background: #fff;
+    color: #1b3350;
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    text-decoration: none;
+  }
+  .schedule-header .next-step button.leave:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
   .schedule-card {
     margin: 1rem auto 2rem;
     max-width: 720px;
@@ -769,9 +873,13 @@
     align-items: center;
   }
   .month-nav {
-    grid-template-columns: 2rem 1fr 2rem;
-    margin-top: 0.75rem;
+    grid-template-columns: 2.4rem 1fr 2.4rem;
+    margin-top: 1.1rem;
     text-align: center;
+  }
+  .month-nav strong {
+    font-size: 1.35rem;
+    color: #1b3350;
   }
   .month-nav button,
   .carousel button {
@@ -787,36 +895,50 @@
   }
   .month-grid {
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.35rem;
-    margin-top: 0.5rem;
+    gap: 0.4rem;
+    margin-top: 0.7rem;
+    padding: 0.85rem 0.55rem 0.95rem;
+    border: 1px solid #c5d3e4;
+    border-radius: 12px;
+    background: #f4f7fb;
     text-align: center;
   }
   .dow {
-    font-size: 0.7rem;
-    color: #777;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #1b3350;
   }
   .day {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.1rem;
-    height: 2.1rem;
+    width: 100%;
+    max-width: 2.75rem;
+    aspect-ratio: 1;
+    height: auto;
     margin: 0 auto;
-    color: #c4c4c4;
+    color: #8b97a6;
     font: inherit;
+    font-size: 0.95rem;
   }
   .was-session {
-    background: #f2f2f2;
+    background: #e4eaf2;
+    border: 1px solid #c5d0dc;
     border-radius: 999px;
-    color: #9a9a9a;
+    color: #4e5d6e;
+    font-weight: 650;
   }
   button.session {
     background: #1a4a86;
     border-radius: 999px;
     color: #fff;
     font-weight: 700;
+    font-size: 1rem;
     border: 0;
     cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(26, 74, 134, 0.22);
   }
   button.session:hover {
     background: #153d70;

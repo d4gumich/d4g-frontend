@@ -86,6 +86,7 @@
     list-style: none;
   }
   li {
+    border: 2px solid #000;
     border-radius: 999px;
     padding: 0.28rem 0.7rem;
     font-size: 0.75rem;

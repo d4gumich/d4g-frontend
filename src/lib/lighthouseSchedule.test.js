@@ -12,6 +12,7 @@ import {
   formatWindow,
   googleCalendarUrl,
   highlightedDayNumbers,
+  canReturnSeat,
   scheduleLine,
   seatControls,
   sessionIcs,
@@ -55,6 +56,10 @@ test("a warmup countdown shows seconds and opens when it runs out", () => {
     },
   };
   assert.match(scheduleLine(warming, start - 45000, 0), /Opens in 45s/);
+  assert.match(
+    scheduleLine({ ...warming, seats_taken: 0 }, start - 45000, 0),
+    /engine stays off until someone takes a seat/,
+  );
   const opened = scheduleLine(warming, start + 1000, 0);
   assert.match(opened, /Deep session is live/);
   assert.match(opened, /29m 59s/);
@@ -119,6 +124,12 @@ test("ended and draining deactivate a new seat, and a full house stays full", ()
     seatControls({ stage: "pre_warm", holding: false, full: false }).disabled,
     false,
   );
+  assert.equal(canReturnSeat("open"), true);
+  assert.equal(canReturnSeat("pre_warm"), true);
+  assert.equal(canReturnSeat("closed"), true);
+  assert.equal(canReturnSeat("drain"), false);
+  assert.equal(canReturnSeat("ended"), false);
+  assert.equal(canReturnSeat("open", "ended"), false);
 });
 
 test("detroit formatting is 6:00 PM EST in January", () => {
