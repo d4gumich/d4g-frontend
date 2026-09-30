@@ -15,6 +15,7 @@ import {
   scheduleLine,
   sessionIcs,
   sessionInstants,
+  sessionIsJoined,
 } from "./lighthouseSchedule.js";
 
 const payload = {
@@ -183,6 +184,31 @@ test("calendar exports use Detroit local time and name the 30 seat cap", () => {
   assert.match(url, /ctz=America%2FDetroit/);
   assert.match(url, /20260929T180000%2F20260929T200000/);
   assert.match(url, /30\+seats|30%20seats/);
+});
+
+test("a held seat joins only while that Deep session is open or closing", () => {
+  const live = {
+    phase: "open",
+    current_window: {
+      start: "2026-09-29T22:00:00Z",
+      end: "2026-09-30T00:00:00Z",
+    },
+  };
+  assert.equal(sessionIsJoined(live, ["2026-09-29"]), true);
+  assert.equal(sessionIsJoined(live, ["2026-10-01"]), false);
+  assert.equal(sessionIsJoined(live, []), false);
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "drain" }, ["2026-09-29"]),
+    true,
+  );
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "pre_warm" }, ["2026-09-29"]),
+    false,
+  );
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "closed" }, ["2026-09-29"]),
+    false,
+  );
 });
 
 test("detroitDate reads the Detroit calendar day", () => {

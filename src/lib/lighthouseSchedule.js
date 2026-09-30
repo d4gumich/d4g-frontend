@@ -251,6 +251,21 @@ export function sessionDateKey(year, monthIndex, day) {
   return `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
 }
 
+export function currentSessionDate(payload) {
+  const start = payload?.current_window?.start;
+  if (!start) return "";
+  const date = detroitDate(new Date(start));
+  return sessionDateKey(date.year, date.monthIndex, date.day);
+}
+
+export function sessionIsJoined(payload, heldDates) {
+  if (!payload || (payload.phase !== "open" && payload.phase !== "drain")) {
+    return false;
+  }
+  const date = currentSessionDate(payload);
+  return date !== "" && Array.isArray(heldDates) && heldDates.includes(date);
+}
+
 function localStamp(year, monthIndex, day, time) {
   const { hours, minutes } = parseClock(time);
   return `${year}${pad(monthIndex + 1)}${pad(day)}T${pad(hours)}${pad(

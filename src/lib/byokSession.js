@@ -19,6 +19,23 @@ export function clearCsrf(kind) {
   tokens.lighthouse = "";
 }
 
+export function rememberSessionStatuses(sessionStatus, lighthouseStatus) {
+  if (sessionStatus) {
+    if (sessionStatus.status === "active" && sessionStatus.csrf_token) {
+      rememberCsrf("session", sessionStatus.csrf_token);
+    } else {
+      clearCsrf("session");
+    }
+  }
+  if (lighthouseStatus) {
+    if (lighthouseStatus.status === "active" && lighthouseStatus.csrf_token) {
+      rememberCsrf("lighthouse", lighthouseStatus.csrf_token);
+    } else {
+      clearCsrf("lighthouse");
+    }
+  }
+}
+
 export function csrfHeaders(extra = {}) {
   const headers = { ...extra };
   if (tokens.session) headers["X-CSRF-Token"] = tokens.session;

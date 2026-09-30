@@ -2,6 +2,12 @@ import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
 import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
 
+export function analysisSourceLabel(provider) {
+  if (provider === "personal" || provider === "byok") return "Personal API key";
+  if (provider === "team" || provider === "in_house") return "Team LLM";
+  return "Not analyzed";
+}
+
 const BASE_PATH = "api/v1/products/lighthouse";
 
 // Mock Data for Development
@@ -335,7 +341,7 @@ export const lighthouseActions = {
       extractedText: resumeText,
       sections: this.splitIntoSections(resumeText),
       isSanitized: false,
-      provider: "byok",
+      provider: "personal",
       analysis,
     };
     lighthouseResults.update((r) => {
@@ -370,7 +376,6 @@ export const lighthouseActions = {
         extractedText: rawText,
         sections: sections,
         isSanitized: sanitize,
-        provider: "in_house",
         analysis: null,
       };
 
@@ -446,7 +451,44 @@ export const lighthouseActions = {
     });
   },
 
-  async analyzeText(text, sanitize = false) {
+  async uploadStandardPdf(file, sanitize = false) {
+    lighthouseResults.update((r) => ({ ...r, loading: true, error: null }));
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("sanitize", sanitize ? "true" : "false");
+    try {
+      const result = await apiRequest("/standard/parse-pdf", {
+        method: "POST",
+        body: formData,
+      });
+      const rawText = result.extracted_text || "";
+      const docId = Date.now().toString();
+      const newDoc = {
+        id: docId,
+        name: file.name,
+        timestamp: new Date().toISOString(),
+        extractedText: rawText,
+        sections: this.splitIntoSections(rawText),
+        isSanitized: sanitize,
+        analysis: null,
+      };
+      lighthouseResults.update((r) => {
+        const history = [newDoc, ...r.history].slice(0, 10);
+        saveHistory(history);
+        return { ...r, currentId: docId, history, loading: false };
+      });
+      return result;
+    } catch (err) {
+      lighthouseResults.update((r) => ({
+        ...r,
+        loading: false,
+        error: formatError(err),
+      }));
+      throw err;
+    }
+  },
+
+  async analyzeText(text, sanitize = false, provider = "team") {
     const settings = get(lighthouseSettings);
     lighthouseResults.update((r) => ({ ...r, loading: true, error: null }));
 
@@ -457,10 +499,16 @@ export const lighthouseActions = {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         result = JSON.parse(JSON.stringify(MOCK_ANALYSIS));
       } else {
-        result = await apiRequest("/analyze-text", {
+        const path =
+          provider === "personal" ? "/standard/analyze" : "/analyze-text";
+        const body =
+          provider === "personal"
+            ? { resume_text: text }
+            : { resume_text: text, sanitize };
+        result = await apiRequest(path, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ resume_text: text, sanitize }),
+          body: JSON.stringify(body),
         });
       }
 
@@ -536,7 +584,11 @@ export const lighthouseActions = {
         const history = [...r.history];
         const docIndex = history.findIndex((d) => d.id === r.currentId);
         if (docIndex !== -1) {
-          history[docIndex] = { ...history[docIndex], analysis: cleanedResult };
+          history[docIndex] = {
+            ...history[docIndex],
+            analysis: cleanedResult,
+            provider,
+          };
           saveHistory(history);
         }
         return { ...r, history, loading: false };
@@ -551,6 +603,10 @@ export const lighthouseActions = {
       }));
       throw err;
     }
+  },
+
+  analyzeWithKey(text) {
+    return this.analyzeText(text, false, "personal");
   },
 
   selectDocument(id) {

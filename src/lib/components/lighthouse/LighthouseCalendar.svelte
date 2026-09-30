@@ -1,14 +1,10 @@
 <script>
-  import { onDestroy, onMount } from "svelte";
   import {
     SEAT_CAP,
     SESSION_TIMEZONES,
     canGoToPreviousMonth,
-    claimSeat,
     clickableDayNumbers,
-    clockSkewMs,
     detroitDate,
-    fetchSchedule,
     formatSessionRange,
     googleCalendarUrl,
     highlightedDayNumbers,
@@ -17,20 +13,19 @@
     sessionIcs,
     sessionInstants,
   } from "$lib/lighthouseSchedule.js";
+  import { saveSeat, scheduleState } from "$lib/lighthouseScheduleStore.js";
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const SEAT_TOKEN_KEY = "lighthouse_seat_token";
-  const HELD_KEY = "lighthouse_seats_held";
 
-  let payload = $state(null);
-  let skew = $state(0);
-  let now = $state(Date.now());
-  let failed = $state(false);
+  let payload = $derived($scheduleState.payload);
+  let skew = $derived($scheduleState.skew);
+  let now = $derived($scheduleState.now);
+  let failed = $derived($scheduleState.failed);
+  let held = $derived($scheduleState.held);
   let cursor = $state(detroitDate(new Date()));
   let selected = $state(null);
   let zoneIndex = $state(0);
   let dialogEl = $state(null);
-  let held = $state(readHeld());
   let claiming = $state(false);
   let claimError = $state("");
 
@@ -138,42 +133,6 @@
   );
   const selectedFull = $derived(selectedTaken >= seatCap && !holdingSelected);
 
-  function readHeld() {
-    if (typeof sessionStorage === "undefined") return [];
-    try {
-      const parsed = JSON.parse(sessionStorage.getItem(HELD_KEY) || "[]");
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function seatToken() {
-    let token = sessionStorage.getItem(SEAT_TOKEN_KEY);
-    if (!token) {
-      token = crypto.randomUUID();
-      sessionStorage.setItem(SEAT_TOKEN_KEY, token);
-    }
-    return token;
-  }
-
-  function rememberSeat(date) {
-    if (held.includes(date)) return;
-    held = [...held, date];
-    sessionStorage.setItem(HELD_KEY, JSON.stringify(held));
-  }
-
-  async function refresh() {
-    try {
-      const next = await fetchSchedule();
-      payload = next;
-      skew = clockSkewMs(next.server_time, Date.now());
-      failed = false;
-    } catch {
-      failed = true;
-    }
-  }
-
   function shiftMonth(delta) {
     if (delta < 0 && !previousEnabled) return;
     const date = new Date(Date.UTC(cursor.year, cursor.monthIndex + delta, 1));
@@ -185,13 +144,7 @@
     claiming = true;
     claimError = "";
     try {
-      const result = await claimSeat(seatToken(), date);
-      payload = {
-        ...payload,
-        seat_cap: result.seat_cap,
-        seats: { ...(payload?.seats || {}), [date]: result.seats_taken },
-      };
-      if (result.accepted) rememberSeat(date);
+      await saveSeat(date);
     } catch (error) {
       claimError = error?.message || "Could not save a seat.";
     } finally {
@@ -236,19 +189,6 @@
     if (selected && dialogEl) dialogEl.focus();
   });
 
-  let tick;
-  let poll;
-  onMount(() => {
-    refresh();
-    tick = setInterval(() => {
-      now = Date.now();
-    }, 30000);
-    poll = setInterval(refresh, 60000);
-  });
-  onDestroy(() => {
-    clearInterval(tick);
-    clearInterval(poll);
-  });
 </script>
 
 <svelte:window onkeydown={onKeydown} />

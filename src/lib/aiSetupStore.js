@@ -1,6 +1,11 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
-import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
+import {
+  clearCsrf,
+  csrfHeaders,
+  rememberCsrf,
+  rememberSessionStatuses,
+} from "$lib/byokSession.js";
 
 export { HOST_URL };
 
@@ -14,41 +19,53 @@ export const aiStatus = writable({
   errorMessage: "",
   key_source: "none",
   availableModels: [],
+  connected: false,
 });
 
 export const aiActions = {
+  async prepareCsrf() {
+    const [sessionResponse, lighthouseResponse] = await Promise.all([
+      fetch(`${HOST_URL}api/v1/auth/status`, { credentials: "include" }),
+      fetch(`${HOST_URL}api/v1/auth/lighthouse-status`, {
+        credentials: "include",
+      }),
+    ]);
+    if (!sessionResponse.ok) {
+      throw new Error("Backend offline");
+    }
+    const sessionData = await sessionResponse.json();
+    const lighthouseData = lighthouseResponse.ok
+      ? await lighthouseResponse.json()
+      : null;
+    rememberSessionStatuses(sessionData, lighthouseData);
+    return sessionData;
+  },
+
   async fetchStatus() {
     aiStatus.update((s) => ({ ...s, loading: true }));
     try {
-      const response = await fetch(`${HOST_URL}api/v1/auth/status`, {
-        credentials: "include",
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.status === "active" && data.csrf_token) {
-          rememberCsrf("session", data.csrf_token);
-        } else {
-          clearCsrf("session");
-        }
-        aiStatus.update((s) => ({
-          ...s,
-          ...data,
-          key_source: data.key_source || "none",
-          loading: false,
-        }));
+      const data = await this.prepareCsrf();
+      aiStatus.update((s) => ({
+        ...s,
+        ...data,
+        key_source: data.key_source || "none",
+        loading: false,
+        connected: true,
+        hasError: s.errorMessage === "Backend offline" ? false : s.hasError,
+        errorMessage:
+          s.errorMessage === "Backend offline" ? "" : s.errorMessage,
+      }));
 
-        // Auto-fetch models
-        const provider = data.provider || "google";
-        await this.fetchModels(provider);
-
-        return data;
-      }
+      const provider = data.provider || "google";
+      await this.fetchModels(provider);
+      return data;
     } catch (err) {
       console.error("Failed to fetch AI session status:", err);
       aiStatus.update((s) => ({
         ...s,
+        connected: false,
         hasError: true,
-        errorMessage: "Backend Connection Failed",
+        errorMessage: "Backend offline",
       }));
     } finally {
       aiStatus.update((s) => ({ ...s, loading: false }));

@@ -46,6 +46,22 @@
         model = "";
     }
 
+    async function postWithCsrf(url, body) {
+        await aiActions.prepareCsrf();
+        const send = () => fetch(url, {
+            method: "POST",
+            headers: csrfHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify(body),
+            credentials: "include",
+        });
+        let response = await send();
+        if (response.status !== 403) return response;
+        const data = await response.clone().json().catch(() => ({}));
+        if (!String(data.detail || "").toLowerCase().includes("csrf")) return response;
+        await aiActions.prepareCsrf();
+        return send();
+    }
+
     async function handleVerify() {
         if (!apiKey.trim()) {
             error = "Please provide your API key to verify.";
@@ -56,14 +72,9 @@
         error = "";
 
         try {
-            const response = await fetch(`${HOST_URL}api/v1/auth/models`, {
-                method: "POST",
-                headers: csrfHeaders({ "Content-Type": "application/json" }),
-                body: JSON.stringify({
-                    provider: provider,
-                    api_key: apiKey
-                }),
-                credentials: 'include'
+            const response = await postWithCsrf(`${HOST_URL}api/v1/auth/models`, {
+                provider: provider,
+                api_key: apiKey
             });
 
             const data = await response.json();
@@ -105,12 +116,7 @@
                 body.api_key = apiKey;
             }
 
-            const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
-                method: "POST",
-                headers: csrfHeaders({ "Content-Type": "application/json" }),
-                body: JSON.stringify(body),
-                credentials: 'include'
-            });
+            const response = await postWithCsrf(`${HOST_URL}api/v1/auth/session`, body);
 
             const data = await response.json();
             if (!response.ok) {

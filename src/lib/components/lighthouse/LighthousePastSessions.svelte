@@ -1,62 +1,18 @@
 <script>
   import LighthouseResults from "$lib/components/lighthouse/lighthouse_results.svelte";
   import {
+    analysisSourceLabel,
     lighthouseActions,
     lighthouseResults,
   } from "$lib/lighthouseStore.js";
-
-  let resumeFile = $state(null);
-  let sanitizeResume = $state(false);
-  let resumeError = $state("");
-  let fileInput = $state(null);
-
-  function sourceLabel(doc) {
-    return doc?.provider === "byok" ? "Your API key" : "In house";
-  }
-
-  async function processResume(event) {
-    event.preventDefault();
-    if (!resumeFile) return;
-    resumeError = "";
-    try {
-      await lighthouseActions.uploadPdf(resumeFile, sanitizeResume);
-      resumeFile = null;
-      if (fileInput) fileInput.value = "";
-    } catch (error) {
-      resumeError = error?.message || "Upload failed.";
-    }
-  }
 </script>
 
 <section class="past-card" aria-label="Past Lighthouse sessions">
   <div class="past-header">
     <h2>Past sessions</h2>
-    <p>Resumes processed in this tab stay here until the tab closes.</p>
+    <p>Resumes analyzed in this browser stay here until the tab closes.</p>
   </div>
 
-  <form class="resume-form" onsubmit={processResume}>
-    <label>
-      Resume
-      <input
-        bind:this={fileInput}
-        type="file"
-        accept="application/pdf"
-        onchange={(event) => {
-          resumeFile = event.currentTarget.files?.[0] || null;
-        }}
-      />
-    </label>
-    <label class="sanitize">
-      <input type="checkbox" bind:checked={sanitizeResume} />
-      Sanitize PDF
-    </label>
-    <button type="submit" disabled={!resumeFile || $lighthouseResults.loading}>
-      {$lighthouseResults.loading ? "Processing…" : "Process resume"}
-    </button>
-  </form>
-  {#if resumeError}
-    <p class="empty">{resumeError}</p>
-  {/if}
   {#if $lighthouseResults.history.length === 0}
     <p class="empty">No resumes processed in this tab yet.</p>
   {:else}
@@ -70,8 +26,10 @@
           >
             {doc.name}
           </button>
-          <span class="source" class:byok={doc.provider === "byok"}
-            >{sourceLabel(doc)}</span
+          <span
+            class="source"
+            class:byok={doc.provider === "byok" || doc.provider === "personal"}
+            >{analysisSourceLabel(doc.provider)}</span
           >
           <time datetime={doc.timestamp}
             >{new Date(doc.timestamp).toLocaleString()}</time

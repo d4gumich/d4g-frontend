@@ -1,29 +1,38 @@
 <script>
   import Navbar from "$lib/components/navbar.svelte";
-  import LighthouseControl from "$lib/components/lighthouse/LighthouseControl.svelte";
+  import AIBanner from "$lib/components/AIBanner.svelte";
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
   import Console from "$lib/components/lighthouse/Console.svelte";
-  import { lighthouseActions, lighthouseStatus } from "$lib/lighthouseStore.js";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthousePastSessions from "$lib/components/lighthouse/LighthousePastSessions.svelte";
-  import LighthouseStandard from "$lib/components/lighthouse/LighthouseStandard.svelte";
+  import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
+  import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
+  import { sessionIsJoined } from "$lib/lighthouseSchedule.js";
+  import {
+    scheduleState,
+    watchSchedule,
+  } from "$lib/lighthouseScheduleStore.js";
   import { browser } from "$app/environment";
   import { onDestroy, onMount } from "svelte";
   import { base } from "$app/paths";
-  import { page } from "$app/stores";
 
   const currentPage = "products";
 
-  let secretKey = $state(null);
-  let sessionActive = $derived($lighthouseStatus.sessionActive);
   let view = $state("upcoming");
+  let byokMode = $derived(
+    $aiStatus.status === "active" &&
+      $aiStatus.key_source === "personal" &&
+      !$aiStatus.forceTeamKey,
+  );
+  let joined = $derived(
+    sessionIsJoined($scheduleState.payload, $scheduleState.held),
+  );
+  let showWorkspace = $derived(byokMode || joined);
 
-  onMount(async () => {
+  onMount(() => {
     document.body.classList.add("has-system-console");
-    if (browser) {
-      secretKey = $page.url.searchParams.get("key");
-      await lighthouseActions.fetchStatus(true);
-    }
+    if (browser) aiActions.fetchStatus();
+    return watchSchedule();
   });
 
   onDestroy(() => {
@@ -37,6 +46,7 @@
 </svelte:head>
 
 <Navbar {currentPage} />
+<AIBanner variant="lighthouse" productName="Lighthouse" />
 
 <div class="demo-warning">
   ⚠️ DEMO VERSION: This is an experimental prototype still in development.
@@ -51,50 +61,42 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
-    <div class="session-tabs" role="tablist" aria-label="Lighthouse sessions">
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === "upcoming"}
-        onclick={() => (view = "upcoming")}
-      >
-        Upcoming
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === "past"}
-        onclick={() => (view = "past")}
-      >
-        Past sessions
-      </button>
-    </div>
+    {#if !showWorkspace}
+      <div class="session-tabs" role="tablist" aria-label="Lighthouse sessions">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "upcoming"}
+          onclick={() => (view = "upcoming")}
+        >
+          Upcoming
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "past"}
+          onclick={() => (view = "past")}
+        >
+          Past sessions
+        </button>
+      </div>
+    {/if}
   </div>
 </div>
 
 {#if browser}
-  {#if view === "upcoming"}
+  {#if showWorkspace}
+    <LighthouseWorkspace source={byokMode ? "personal" : "team"} />
+  {:else if view === "upcoming"}
     <LighthouseCalendar />
   {:else}
     <LighthousePastSessions />
-  {/if}
-  <LighthouseStandard />
-  {#if (secretKey && secretKey.length >= 5) || sessionActive}
-    <div class="engine-wrap">
-      <LighthouseControl />
-    </div>
   {/if}
 {/if}
 
 <Console />
 
 <style>
-  .engine-wrap {
-    max-width: 720px;
-    margin: 0 auto 2rem;
-    padding: 0 1rem;
-  }
-
   .navbar {
     background-color: white;
     border-bottom: 1px solid var(--border-color);
@@ -157,5 +159,16 @@
     margin: 0.1rem 0 0 0;
     font-size: 0.8rem;
     color: #666;
+  }
+
+  @media (max-width: 800px) {
+    .navbar {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem 0;
+    }
+
+    .nav-content {
+      padding: 0 1rem;
+    }
   }
 </style>

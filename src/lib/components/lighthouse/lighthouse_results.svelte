@@ -1,14 +1,22 @@
 <script>
-    import { lighthouseResults, lighthouseActions, lighthouseStatus, lighthouseSettings } from '$lib/lighthouseStore.js';
+    import { lighthouseResults, lighthouseActions, lighthouseStatus, lighthouseSettings, analysisSourceLabel } from '$lib/lighthouseStore.js';
+    import { aiStatus } from '$lib/aiSetupStore.js';
     import { fade, slide } from 'svelte/transition';
 
     let activeTab = $state('preview'); // 'preview', 'analysis'
 
     let currentDoc = $derived($lighthouseResults?.history?.find(d => d.id === $lighthouseResults.currentId) ?? null);
+    let shownDocId = $state(null);
     let results = $derived(currentDoc?.analysis);
     let sections = $derived(currentDoc?.sections || []);
     let isSanitized = $derived(currentDoc?.isSanitized);
     let isEngineRunning = $derived($lighthouseStatus?.stage === 'RUNNING' || $lighthouseSettings?.useMockData);
+    let personal = $derived(
+        $aiStatus.status === 'active' &&
+            $aiStatus.key_source === 'personal' &&
+            !$aiStatus.forceTeamKey
+    );
+    let canAnalyze = $derived(personal || isEngineRunning);
 
     let selectedText = $derived(
         sections
@@ -17,10 +25,21 @@
             .join('\n\n')
     );
 
+    $effect(() => {
+        const id = currentDoc?.id ?? null;
+        if (id === shownDocId) return;
+        shownDocId = id;
+        if (!currentDoc?.analysis) activeTab = 'preview';
+    });
+
     async function triggerAnalysis() {
-        if (selectedText) {
-            await lighthouseActions.analyzeText(selectedText);
+        if (!selectedText) return;
+        try {
+            if (personal) await lighthouseActions.analyzeWithKey(selectedText);
+            else await lighthouseActions.analyzeText(selectedText);
             activeTab = 'analysis';
+        } catch {
+            // analyzeText records the message on the system console.
         }
     }
 
@@ -59,6 +78,7 @@
             <div class="doc-info">
                 <h2>{currentDoc.name}</h2>
                 <span class="timestamp">{new Date(currentDoc.timestamp).toLocaleString()}</span>
+                <span class="source-tag" class:personal={currentDoc.provider === 'personal' || currentDoc.provider === 'byok'}>{analysisSourceLabel(currentDoc.provider)}</span>
             </div>
             <div class="tab-switcher">
                 <button
@@ -85,13 +105,13 @@
                     </div>
 
                     <div class="action-group">
-                        {#if !isEngineRunning}
+                        {#if !canAnalyze}
                             <span class="warning-tag">Engine Offline</span>
                         {/if}
                         <button
                             class="btn-primary btn-sm"
                             onclick={triggerAnalysis}
-                            disabled={!isEngineRunning || $lighthouseResults.loading || selectedText.length === 0}
+                            disabled={!canAnalyze || $lighthouseResults.loading || selectedText.length === 0}
                         >
                             {results ? 'Re-Run Analysis' : 'Run AI Analysis'}
                         </button>
@@ -215,6 +235,18 @@
 
     .doc-info h2 { margin: 0; font-size: 1.25rem; color: var(--blue-color-main); }
     .doc-info .timestamp { font-size: 0.75rem; color: #888; }
+    .source-tag {
+        display: inline-block;
+        margin-left: 0.5rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: #1b3350;
+        background: #e7eef6;
+        border-radius: 999px;
+        padding: 0.1rem 0.45rem;
+    }
+    .source-tag.personal { color: #5c3b16; background: #f6ead7; }
 
     .tab-switcher {
         display: flex;

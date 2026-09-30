@@ -2,9 +2,21 @@
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from './AISetup.svelte';
     import Icon from '@iconify/svelte';
-    import { browser } from '$app/environment';
+    let { variant = "product", productName = "AI Product" } = $props();
+    const lighthouseTeamModel = "meta-llama/Meta-Llama-3.1-8B-Instruct";
 
     let showSetup = $state(false);
+
+    let personal = $derived(
+        $aiStatus.status === "active" &&
+            $aiStatus.key_source === "personal" &&
+            !$aiStatus.forceTeamKey,
+    );
+    let byokMode = $derived(
+        variant === "lighthouse"
+            ? personal
+            : $aiStatus.status === "active" && !$aiStatus.forceTeamKey,
+    );
 
     function toggleKeyType() {
         if ($aiStatus.status === 'active') {
@@ -15,36 +27,42 @@
     }
 </script>
 
-<div 
-    class="ai-status-banner" 
-    class:byok={$aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+<div
+    class="ai-status-banner"
+    class:byok={byokMode}
     class:has-error={$aiStatus.hasError}
 >
     <div class="banner-container">
         <div class="status-left">
             <button class="mode-toggle" onclick={toggleKeyType} title="Click to toggle between Team and Personal key">
-                {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+                {#if byokMode}
                     <div class="badge byok-badge">
                         <Icon icon="mdi:account-key" width="16" height="16" />
-                        <span>Personal Key</span>
+                        <span>{variant === "lighthouse" ? "BYOK" : "Personal Key"}</span>
                     </div>
                 {:else}
                     <div class="badge team-badge">
                         <Icon icon="mdi:shield-check" width="16" height="16" />
-                        <span>Team Key</span>
+                        <span>{variant === "lighthouse" ? "Scheduling" : "Team Key"}</span>
                     </div>
                 {/if}
             </button>
-            
-            {#if $aiStatus.model}
+
+            {#if variant === "lighthouse" && !byokMode}
+                <div class="active-info">
+                    <span class="banner-model-select banner-model-fixed" title={lighthouseTeamModel}>
+                        {lighthouseTeamModel}
+                    </span>
+                </div>
+            {:else if $aiStatus.model}
                 <div class="active-info">
                     <select class="banner-model-select" value={$aiStatus.model} onchange={(e) => aiActions.setModel(e.target.value)}>
                         {#each $aiStatus.availableModels as m}
                             <option value={m.id}>
                                 {m.name} {(() => {
                                     // Robust check: use backend tier if available, otherwise check name
-                                    const isFree = m.tier === 'free' || 
-                                                  m.id.toLowerCase().includes('flash') || 
+                                    const isFree = m.tier === 'free' ||
+                                                  m.id.toLowerCase().includes('flash') ||
                                                   m.id.toLowerCase().includes('lite') ||
                                                   m.name.toLowerCase().includes('flash') ||
                                                   m.name.toLowerCase().includes('lite');
@@ -66,10 +84,10 @@
         </div>
 
         <div class="controls-center">
-            {#if $aiStatus.hasError}
+            {#if $aiStatus.hasError && $aiStatus.errorMessage && $aiStatus.errorMessage !== "Backend offline"}
                 <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
                     <Icon icon="mdi:alert" width="16" height="16" />
-                    <span>{$aiStatus.errorMessage || 'Engine Error'}</span>
+                    <span>{$aiStatus.errorMessage}</span>
                 </button>
             {/if}
         </div>
@@ -84,9 +102,10 @@
 </div>
 
 {#if showSetup}
-    <AISetup 
-        onComplete={() => { showSetup = false; }} 
-        onCancel={() => showSetup = false} 
+    <AISetup
+        {productName}
+        onComplete={() => { showSetup = false; }}
+        onCancel={() => showSetup = false}
     />
 {/if}
 
@@ -162,6 +181,17 @@
         border-color: var(--blue-color-main);
     }
 
+    .banner-model-fixed {
+        cursor: default;
+        display: inline-block;
+        max-width: 100%;
+    }
+
+    .banner-model-fixed:hover {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
     .mode-toggle {
         background: none;
         border: none;
@@ -202,6 +232,7 @@
         align-items: center;
         justify-content: center;
         flex: 1;
+        gap: 0.75rem;
     }
 
     .error-pill {
@@ -254,8 +285,34 @@
     @media (max-width: 800px) {
         .banner-container {
             flex-direction: column;
-            gap: 1rem;
-            padding: 0.5rem;
+            align-items: stretch;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            box-sizing: border-box;
+        }
+
+        .status-left,
+        .controls-center,
+        .actions-right {
+            width: 100%;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .status-left {
+            gap: 0.5rem;
+        }
+
+        .active-info {
+            flex: 1 1 12rem;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .banner-model-select {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
     }
 </style>
