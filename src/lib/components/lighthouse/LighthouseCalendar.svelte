@@ -18,6 +18,7 @@
     highlightedDayNumbers,
     releaseSeat,
     scheduleLine,
+    syncHeldSeats,
     seatWindowOpen,
     scheduledTesterActive,
     seatControls,
@@ -279,6 +280,20 @@
     held = [];
     sessionStorage.removeItem(HELD_SEATS_KEY);
   }
+
+  $effect(() => {
+    const seats = payload?.seats;
+    if (!seats) return;
+    const next = syncHeldSeats(held, seats);
+    if (
+      next.length === held.length &&
+      next.every((date, index) => date === held[index])
+    ) {
+      return;
+    }
+    held = next;
+    sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(next));
+  });
 
   function showDevDate(date) {
     if (!date) return;
@@ -566,8 +581,8 @@
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
         Practice schedule. Only Open now starts the GPU, and only after someone
-        takes a seat. Fast forward skips the 10 minute wait and stays off the
-        GPU. Leaving Open now stops it.
+        takes a seat. The session popup can skip the 10 minute wait, and that
+        stays off the GPU. Leaving Open now stops it.
       </p>
       <div class="dev-actions">
         <button
@@ -576,11 +591,6 @@
             payload.dev_forwarded}
           aria-pressed={payload.dev_preset === "soon" && !payload.dev_forwarded}
           onclick={() => chooseDev("soon")}>Starts in 10 min</button
-        >
-        <button
-          type="button"
-          disabled={payload.dev_preset !== "soon"}
-          onclick={() => chooseDev("fast_forward")}>Fast forward</button
         >
         <button
           type="button"

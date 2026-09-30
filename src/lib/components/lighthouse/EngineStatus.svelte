@@ -51,29 +51,26 @@
 {#if engine?.summary}
   <div class="engine-status" class:problem={engine.step === "error"}>
     {#if showSteps || canLeave}
-      <div class="status-row">
+      <ol>
         {#if showSteps}
-          <ol>
-            {#each STEPS as [id, label], index}
-              <li
-                class={id}
-                class:current={index === stepIndex}
-                aria-current={index === stepIndex ? "step" : undefined}
-              >
-                {label}
-              </li>
-            {/each}
-          </ol>
+          {#each STEPS as [id, label], index}
+            <li
+              class={id}
+              class:current={index === stepIndex}
+              aria-current={index === stepIndex ? "step" : undefined}
+            >
+              {label}
+            </li>
+          {/each}
         {/if}
         {#if canLeave}
-          <button
-            type="button"
-            class="leave"
-            disabled={leaving}
-            onclick={onLeave}>Leave session</button
-          >
+          <li class="leave">
+            <button type="button" disabled={leaving} onclick={onLeave}
+              >Leave session</button
+            >
+          </li>
         {/if}
-      </div>
+      </ol>
     {/if}
     {#if startupLabel}
       <p class="startup">{startupLabel}</p>
@@ -94,33 +91,32 @@
     background: #fbf4f4;
     color: #8a2a2a;
   }
-  .status-row {
+  ol {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.35rem;
     margin: 0 0 0.55rem;
-  }
-  ol {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin: 0;
     padding: 0;
     list-style: none;
   }
-  button.leave {
-    border: 2px solid #000;
-    border-radius: 999px;
-    padding: 0.28rem 0.7rem;
+  li.leave {
+    padding: 0;
+    background: #fff;
+    color: #1b3350;
+  }
+  li.leave button {
+    border: 0;
+    background: transparent;
+    color: inherit;
     font: inherit;
     font-size: 0.75rem;
     font-weight: 700;
-    background: #fff;
-    color: #1b3350;
+    padding: 0.28rem 0.7rem;
+    border-radius: 999px;
     cursor: pointer;
   }
-  button.leave:disabled {
+  li.leave button:disabled {
     opacity: 0.55;
     cursor: default;
   }

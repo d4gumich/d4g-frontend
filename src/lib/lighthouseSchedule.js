@@ -68,6 +68,11 @@ export const SESSION_ENDED_WARNING = "This session has ended.";
 export const SESSION_DRAIN_WARNING =
   "No more new seats. People who already have a seat are finishing before the server shuts down.";
 
+export function syncHeldSeats(held, seats) {
+  const counts = seats || {};
+  return (held || []).filter((date) => Number(counts[date]) > 0);
+}
+
 export function canReturnSeat(stage, preset) {
   if (preset === "drain" || preset === "ended") return false;
   return stage !== "drain" && stage !== "ended";

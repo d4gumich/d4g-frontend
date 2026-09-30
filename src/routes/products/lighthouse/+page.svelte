@@ -41,14 +41,18 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
-    <div class="session-tabs" role="tablist" aria-label="Lighthouse sessions">
+    <div
+      class="session-tabs"
+      role="tablist"
+      aria-label="Current and past sessions"
+    >
       <button
         type="button"
         role="tab"
         aria-selected={view === "upcoming"}
         onclick={() => (view = "upcoming")}
       >
-        Upcoming
+        Current
       </button>
       <button
         type="button"

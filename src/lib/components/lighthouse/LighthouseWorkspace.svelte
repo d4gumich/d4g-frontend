@@ -17,6 +17,7 @@
     releaseSeat,
     scheduleLine,
     sourceTag,
+    syncHeldSeats,
     scheduledTesterActive,
     SESSION_DRAIN_WARNING,
     SESSION_ENDED_WARNING,
@@ -66,6 +67,20 @@
     held = held.filter((item) => item !== date);
     sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(held));
   }
+
+  $effect(() => {
+    const seats = schedule?.seats;
+    if (!seats) return;
+    const next = syncHeldSeats(held, seats);
+    if (
+      next.length === held.length &&
+      next.every((date, index) => date === held[index])
+    ) {
+      return;
+    }
+    held = next;
+    sessionStorage.setItem(HELD_SEATS_KEY, JSON.stringify(next));
+  });
 
   async function leaveSeat() {
     if (!focusDate || leaving) return;

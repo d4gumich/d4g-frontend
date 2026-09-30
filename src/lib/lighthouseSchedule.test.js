@@ -16,6 +16,7 @@ import {
   scheduleLine,
   seatControls,
   sourceTag,
+  syncHeldSeats,
   sessionIcs,
   sessionInstants,
 } from "./lighthouseSchedule.js";
@@ -80,6 +81,17 @@ test("open now does not call the session live until a seat starts the clock", ()
   );
   assert.match(line, /waiting for a seat/);
   assert.doesNotMatch(line, /Deep session is live/);
+});
+
+test("a server restart drops a seat the browser still remembers", () => {
+  assert.deepEqual(syncHeldSeats(["2026-09-30"], { "2026-09-30": 0 }), []);
+  assert.deepEqual(syncHeldSeats(["2026-09-30"], { "2026-09-30": 1 }), [
+    "2026-09-30",
+  ]);
+  assert.deepEqual(
+    syncHeldSeats(["2026-09-30", "2026-10-01"], { "2026-10-01": 2 }),
+    ["2026-10-01"],
+  );
 });
 
 test("the in-house tag keeps how long analysis took", () => {
