@@ -13,6 +13,7 @@
     formatSessionRange,
     googleCalendarUrl,
     HELD_SEATS_KEY,
+    livePhase,
     highlightedDayNumbers,
     scheduleLine,
     scheduledTesterActive,
@@ -252,7 +253,10 @@
         selected = shown;
         zoneIndex = 0;
         claimError = "";
-        devNotice = "Seats are open. Use Take a seat in the session popup.";
+        devNotice =
+          preset === "open"
+            ? "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it."
+            : "Seats are open. Use Take a seat in the session popup.";
       } else if (preset === "clear") {
         selected = null;
         devNotice = "Real Tuesday and Thursday calendar is on.";
@@ -261,6 +265,7 @@
       } else if (preset === "fill_seats") {
         devNotice = "All 30 seats are filled. Reset seats to take one.";
       }
+      await refreshEngine();
     } catch (error) {
       failed = true;
       claimError = error?.message || "Could not change the dev schedule.";
@@ -389,19 +394,40 @@
 
   let tick;
   let poll;
-  let enginePoll;
+  let announcedPhase = null;
+
+  const engineFast = $derived(
+    payload?.dev_preset === "open" && !engine?.startup?.ready_at,
+  );
+
+  $effect(() => {
+    if (!payload) return;
+    const shown = livePhase(payload, now, skew);
+    if (shown === payload.phase) {
+      announcedPhase = shown;
+      return;
+    }
+    if (announcedPhase === shown) return;
+    announcedPhase = shown;
+    refresh();
+  });
+
+  $effect(() => {
+    const delay = engineFast ? 3000 : 15000;
+    const id = setInterval(refreshEngine, delay);
+    return () => clearInterval(id);
+  });
+
   onMount(() => {
     refresh();
     tick = setInterval(() => {
       now = Date.now();
-    }, 30000);
+    }, 1000);
     poll = setInterval(refresh, 60000);
-    enginePoll = setInterval(refreshEngine, 15000);
   });
   onDestroy(() => {
     clearInterval(tick);
     clearInterval(poll);
-    clearInterval(enginePoll);
   });
 </script>
 
@@ -411,8 +437,8 @@
   {#if payload?.dev}
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
-        Practice schedule. Open a session on this machine to take a seat and add
-        a calendar reminder. This does not wake the GPU.
+        Practice schedule. Only Open now starts the GPU and times that startup.
+        The other controls stay off the GPU. Leaving Open now stops it.
       </p>
       <div class="dev-actions">
         <button

@@ -25,31 +25,72 @@ export function formatWindow(iso, timeZone) {
 }
 
 export function formatDuration(ms) {
-  const minutes = Math.max(0, Math.floor(ms / 60000));
-  const days = Math.floor(minutes / (60 * 24));
-  const hours = Math.floor((minutes % (60 * 24)) / 60);
-  const mins = minutes % 60;
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
   if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${mins}m`;
-  return `${mins}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0 && seconds === 0) return `${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
+}
+
+export function formatElapsed(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+      seconds,
+    ).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+export function livePhase(payload, clientNowMs, skewMs) {
+  const phase = payload?.phase || "closed";
+  if (!payload?.countdown_to) return phase;
+  const serverNow = clientNowMs - skewMs;
+  const target = Date.parse(payload.countdown_to);
+  if (Number.isNaN(target)) return phase;
+  if (phase === "pre_warm" && serverNow >= target) return "open";
+  if (phase === "open") {
+    const drainMinutes = Number(payload.drain_minutes) || 0;
+    if (serverNow >= target) return "closed";
+    if (drainMinutes > 0 && serverNow >= target - drainMinutes * 60000)
+      return "drain";
+    return "open";
+  }
+  if (phase === "drain" && serverNow >= target) return "closed";
+  if (phase === "closed" && serverNow >= target) return "open";
+  return phase;
 }
 
 export function scheduleLine(payload, clientNowMs, skewMs) {
   const serverNow = clientNowMs - skewMs;
-  const remaining = formatDuration(
-    Date.parse(payload.countdown_to) - serverNow,
-  );
+  const phase = livePhase(payload, clientNowMs, skewMs);
+  let target = Date.parse(payload.countdown_to);
+  if (phase !== payload.phase) {
+    const end = payload.current_window?.end || payload.upcoming?.[0]?.end;
+    if (end) target = Date.parse(end);
+  }
+  const remaining = formatDuration(target - serverNow);
   const when = formatWindow(
-    payload.countdown_to,
+    phase === payload.phase
+      ? payload.countdown_to
+      : new Date(target).toISOString(),
     payload.timezone || "America/Detroit",
   );
-  if (payload.phase === "pre_warm") {
+  if (phase === "pre_warm") {
     return `Engine starting for the ${when} session. Opens in ${remaining}.`;
   }
-  if (payload.phase === "open") {
+  if (phase === "open") {
     return `Deep session is live. ${remaining} left.`;
   }
-  if (payload.phase === "drain") {
+  if (phase === "drain") {
     return `This session is closing. Ends in ${remaining}.`;
   }
   return `Next Deep session ${when}. Starts in ${remaining}.`;

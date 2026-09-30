@@ -1,4 +1,7 @@
 <script>
+  import { onDestroy, onMount } from "svelte";
+  import { formatElapsed } from "$lib/lighthouseSchedule.js";
+
   let { engine = null } = $props();
 
   const STEPS = [
@@ -9,8 +12,29 @@
     ["ready", "Ready"],
   ];
 
+  let now = $state(Date.now());
+  let clock;
+
   const stepIndex = $derived(STEPS.findIndex(([id]) => id === engine?.step));
   const showSteps = $derived(stepIndex >= 0);
+  const startupLabel = $derived.by(() => {
+    const startup = engine?.startup;
+    if (!startup?.started_at) return "";
+    const started = Date.parse(startup.started_at);
+    const end = startup.ready_at ? Date.parse(startup.ready_at) : now;
+    if (Number.isNaN(started) || Number.isNaN(end)) return "";
+    const clockText = formatElapsed(end - started);
+    return startup.ready_at
+      ? `Startup took ${clockText}`
+      : `Startup ${clockText}`;
+  });
+
+  onMount(() => {
+    clock = setInterval(() => {
+      now = Date.now();
+    }, 1000);
+  });
+  onDestroy(() => clearInterval(clock));
 </script>
 
 {#if engine?.summary}
@@ -27,6 +51,9 @@
           </li>
         {/each}
       </ol>
+    {/if}
+    {#if startupLabel}
+      <p class="startup">{startupLabel}</p>
     {/if}
     <p>{engine.summary}</p>
   </div>
@@ -70,5 +97,10 @@
   }
   p {
     margin: 0;
+  }
+  .startup {
+    margin-bottom: 0.35rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
   }
 </style>

@@ -41,6 +41,24 @@ test("skew corrects a fast client clock", () => {
   assert.match(line, /1d 6h/);
 });
 
+test("a warmup countdown shows seconds and opens when it runs out", () => {
+  const start = Date.parse("2026-09-29T22:00:00+00:00");
+  const warming = {
+    phase: "pre_warm",
+    countdown_to: "2026-09-29T22:00:00+00:00",
+    timezone: "America/Detroit",
+    drain_minutes: 10,
+    current_window: {
+      start: "2026-09-29T22:00:00+00:00",
+      end: "2026-09-29T22:30:00+00:00",
+    },
+  };
+  assert.match(scheduleLine(warming, start - 45000, 0), /Opens in 45s/);
+  const opened = scheduleLine(warming, start + 1000, 0);
+  assert.match(opened, /Deep session is live/);
+  assert.match(opened, /29m 59s/);
+});
+
 test("open and drain copy uses the time left", () => {
   const open = {
     ...payload,

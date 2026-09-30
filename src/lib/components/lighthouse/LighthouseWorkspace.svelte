@@ -7,9 +7,12 @@
     lighthouseResults,
   } from "$lib/lighthouseStore.js";
   import {
+    clockSkewMs,
     fetchEngineStatus,
     fetchSchedule,
     HELD_SEATS_KEY,
+    livePhase,
+    scheduleLine,
     scheduledTesterActive,
     SEAT_TOKEN_KEY,
     TesterKeyRequired,
@@ -18,6 +21,8 @@
 
   let schedule = $state(null);
   let engine = $state(null);
+  let now = $state(Date.now());
+  let skew = $state(0);
   let held = $state(readHeld());
   let file = $state(null);
   let fileInput = $state(null);
@@ -26,7 +31,8 @@
   let showTesterKey = $state(false);
 
   const focusDate = $derived(schedule?.seat_session || "");
-  const phase = $derived(schedule?.phase || "closed");
+  const phase = $derived(schedule ? livePhase(schedule, now, skew) : "closed");
+  const line = $derived(schedule ? scheduleLine(schedule, now, skew) : "");
   const seated = $derived(focusDate !== "" && held.includes(focusDate));
   const canUpload = $derived(
     seated && (phase === "pre_warm" || phase === "open" || phase === "drain"),
@@ -49,6 +55,7 @@
   async function refresh() {
     try {
       schedule = await fetchSchedule();
+      skew = clockSkewMs(schedule.server_time, Date.now());
       engine = await fetchEngineStatus();
       lighthouseActions.rememberEngine(engine);
       held = readHeld();
@@ -93,18 +100,44 @@
     }
   });
 
-  let poll;
+  let announcedPhase = null;
+  const engineFast = $derived(
+    schedule?.dev_preset === "open" && !engine?.startup?.ready_at,
+  );
+
+  $effect(() => {
+    if (!schedule) return;
+    const shown = livePhase(schedule, now, skew);
+    if (shown === schedule.phase) {
+      announcedPhase = shown;
+      return;
+    }
+    if (announcedPhase === shown) return;
+    announcedPhase = shown;
+    refresh();
+  });
+
+  $effect(() => {
+    const id = setInterval(refresh, engineFast ? 3000 : 15000);
+    return () => clearInterval(id);
+  });
+
   onMount(() => {
     refresh();
-    poll = setInterval(refresh, 15000);
+    const clock = setInterval(() => {
+      now = Date.now();
+    }, 1000);
+    return () => clearInterval(clock);
   });
   onDestroy(() => {
-    clearInterval(poll);
     lighthouseActions.useScheduledSeat(null, null);
   });
 </script>
 
 <section class="workspace" aria-label="Lighthouse seat workspace">
+  {#if line}
+    <p class="session-line">{line}</p>
+  {/if}
   <EngineStatus {engine} />
   <div class="dashboard-grid">
     <aside class="sidebar">
@@ -206,6 +239,11 @@
     max-width: 1400px;
     margin: 0 auto 2rem;
     padding: 0 2rem;
+  }
+  .session-line {
+    margin: 0 0 0.85rem;
+    color: #1b3350;
+    font-weight: 650;
   }
   .dashboard-grid {
     display: grid;
