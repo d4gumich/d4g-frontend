@@ -233,7 +233,7 @@
     {/if}
     <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
     {#if leaveError}
-      <p class="upload-error">{leaveError}</p>
+      <p class="upload-error" role="alert">{leaveError}</p>
     {/if}
   {/if}
   <div class="dashboard-grid">
@@ -282,7 +282,7 @@
           {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
         </button>
         {#if uploadError}
-          <p class="upload-error">{uploadError}</p>
+          <p class="upload-error" role="alert">{uploadError}</p>
         {/if}
       </div>
 

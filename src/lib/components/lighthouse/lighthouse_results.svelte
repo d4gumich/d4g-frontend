@@ -133,6 +133,10 @@
     </div>
   {/if}
 
+  {#if !$lighthouseResults.loading && $lighthouseResults.error}
+    <p class="analysis-error" role="alert">{$lighthouseResults.error}</p>
+  {/if}
+
   {#if currentDoc}
     <div class="doc-header">
       <div class="doc-info">
@@ -385,6 +389,16 @@
     font-variant-numeric: tabular-nums;
     font-weight: 700;
     color: #1b3350;
+  }
+
+  .analysis-error {
+    margin: 0 0 1rem;
+    max-width: 40rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e3b3b3;
+    border-radius: 6px;
+    background: #fff6f6;
+    color: #8a2a2a;
   }
 
   .btn-sm {

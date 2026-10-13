@@ -4,6 +4,13 @@
     import Button from './button.svelte';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import { csrfHeaders, rememberCsrf } from '$lib/byokSession.js';
+    import {
+        messageForStatus,
+        referenceFromBody,
+        supportReference,
+        userFacingError,
+        withReference,
+    } from '$lib/userError.js';
 
     let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
@@ -128,6 +135,20 @@
         return send();
     }
 
+    async function readJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    function failureError(response, data) {
+        const detail = typeof data?.detail === "string" ? data.detail : data?.message;
+        const reference = supportReference(response) || referenceFromBody(data?.request_id);
+        return new Error(withReference(messageForStatus(response.status, detail), reference));
+    }
+
     async function handleVerify() {
         if (!apiKey.trim()) {
             error = "Please provide your API key to verify.";
@@ -143,11 +164,8 @@
                 api_key: apiKey
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to verify key.");
-            }
+            const data = await readJson(response);
+            if (!response.ok || !data) throw failureError(response, data);
 
             dynamicModels = data.models || [];
             isVerified = true;
@@ -157,7 +175,7 @@
                 model = dynamicModels[0].id;
             }
         } catch (err) {
-            error = err.message;
+            error = userFacingError(err);
             isVerified = false;
         } finally {
             verifying = false;
@@ -184,10 +202,8 @@
 
             const response = await postWithCsrf(`${HOST_URL}api/v1/auth/session`, body);
 
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to initialize session.");
-            }
+            const data = await readJson(response);
+            if (!response.ok || !data) throw failureError(response, data);
             rememberCsrf("session", data.csrf_token);
             apiKey = "";
 
@@ -195,7 +211,7 @@
             await aiActions.fetchStatus();
             onComplete();
         } catch (err) {
-            error = err.message;
+            error = userFacingError(err);
         } finally {
             loading = false;
         }

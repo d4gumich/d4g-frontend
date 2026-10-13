@@ -2,12 +2,11 @@
   import Navbar from "$lib/components/navbar.svelte";
   import AIBanner from "$lib/components/AIBanner.svelte";
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
-  import Console from "$lib/components/lighthouse/Console.svelte";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
   import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
   import { browser } from "$app/environment";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { base } from "$app/paths";
 
   const currentPage = "products";
@@ -20,12 +19,7 @@
   );
 
   onMount(() => {
-    document.body.classList.add("has-system-console");
     if (browser) aiActions.fetchStatus();
-  });
-
-  onDestroy(() => {
-    if (browser) document.body.classList.remove("has-system-console");
   });
 </script>
 
@@ -86,8 +80,6 @@
     <LighthouseWorkspace />
   {/if}
 {/if}
-
-<Console />
 
 <style>
   .navbar {

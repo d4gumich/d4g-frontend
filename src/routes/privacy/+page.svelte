@@ -63,6 +63,13 @@
     the last hop in the forwarding header.
   </p>
 
+  <h2>When a request fails</h2>
+  <p>
+    The page tells you what to try next and shows a short reference code.
+    The same code is written in the API log. The log does not keep the API
+    key. The browser console is not the record of the failure.
+  </p>
+
   <h2>What the browser keeps</h2>
   <p>
     Lighthouse keeps the last 10 resumes in <code>sessionStorage</code> under

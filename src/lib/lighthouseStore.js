@@ -2,6 +2,14 @@ import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
 import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
 import { TesterKeyRequired } from "$lib/lighthouseSchedule.js";
+import {
+  messageForNetworkFailure,
+  messageForStatus,
+  referenceFromBody,
+  supportReference,
+  userFacingError,
+  withReference,
+} from "$lib/userError.js";
 
 export { analysisSourceLabel } from "$lib/lighthouseSchedule.js";
 
@@ -68,8 +76,8 @@ if (typeof window !== "undefined") {
     try {
       const history = JSON.parse(saved);
       lighthouseResults.update((r) => ({ ...r, history }));
-    } catch (e) {
-      console.error("Failed to load history from cache");
+    } catch {
+      /* A broken history cache is ignored. The next analysis starts a new list. */
     }
   }
 }
@@ -91,49 +99,47 @@ function testerKeyError(status, detail) {
 }
 
 function formatError(err) {
-  const message = err.message || String(err);
-  const isHFError =
-    message.includes("MaxRetryError") ||
-    message.includes("502") ||
-    message.includes("Bad Gateway") ||
-    message.includes("HTTPSConnectionPool") ||
-    message.includes("ProxyError");
+  return userFacingError(err);
+}
 
-  if (isHFError) {
-    return `Hugging Face Service Error: The engine is currently unreachable (Bad Gateway/Max Retries). This usually happens during a cold start or high load. Please wait 1-2 minutes and try again. Original error: ${message}`;
-  }
-  return message;
+async function errorFromResponse(response) {
+  const errorData = await response.json().catch(() => ({}));
+  const detail =
+    (typeof errorData.detail === "string" && errorData.detail) ||
+    (typeof errorData.message === "string" && errorData.message) ||
+    "";
+  const keyError = testerKeyError(response.status, detail);
+  if (keyError) throw keyError;
+  const reference =
+    supportReference(response) || referenceFromBody(errorData.request_id);
+  throw new Error(
+    withReference(messageForStatus(response.status, detail), reference),
+  );
 }
 
 async function apiRequest(path, options = {}) {
+  const fullPath = path.startsWith("/auth")
+    ? `api/v1${path}`
+    : `${BASE_PATH}${path}`;
+  const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+  const url = `${baseUrl}${fullPath}`;
+
+  let response;
   try {
-    // Resolve absolute vs relative paths
-    // Auth paths are top-level under api/v1
-    const fullPath = path.startsWith("/auth")
-      ? `api/v1${path}`
-      : `${BASE_PATH}${path}`;
-
-    // Ensure we use the correct backend URL (no double slashes)
-    const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
-    const url = `${baseUrl}${fullPath}`;
-
-    const response = await fetch(url, {
+    response = await fetch(url, {
       ...options,
       headers: csrfHeaders(options.headers || {}),
       credentials: "include",
     });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ detail: "Unknown error" }));
-      throw new Error(errorData.detail || `Server error: ${response.status}`);
-    }
-    return await response.json();
   } catch (err) {
-    console.error(`API Request failed: ${path}`, err);
-    throw err;
+    throw new Error(
+      messageForNetworkFailure(err) ||
+        "The server could not be reached. Check your connection and try again.",
+    );
   }
+
+  if (!response.ok) await errorFromResponse(response);
+  return await response.json();
 }
 
 let scheduledSeat = null;
@@ -178,11 +184,12 @@ export const lighthouseActions = {
           } else {
             this.clearSessionTimer();
           }
-        } catch (err) {
-          console.error(
-            "Failed to fetch engine status even though session is active",
-            err,
-          );
+        } catch {
+          statusData = {
+            stage: "OFFLINE",
+            hardware: "None",
+            message: "",
+          };
         }
       }
 
@@ -333,8 +340,8 @@ export const lighthouseActions = {
         credentials: "include",
       });
       clearCsrf("lighthouse");
-    } catch (err) {
-      console.error("Logout failed:", err);
+    } catch {
+      /* The local session is cleared even when the server cannot be reached. */
     } finally {
       this.clearSessionTimer();
       lighthouseStatus.update((s) => ({
@@ -392,16 +399,7 @@ export const lighthouseActions = {
             body: formData,
           },
         );
-        if (!response.ok) {
-          const errorData = await response
-            .json()
-            .catch(() => ({ detail: "Upload failed" }));
-          const keyError = testerKeyError(response.status, errorData.detail);
-          if (keyError) throw keyError;
-          throw new Error(
-            errorData.detail || `Server error: ${response.status}`,
-          );
-        }
+        if (!response.ok) await errorFromResponse(response);
         result = await response.json();
       } else {
         result = await apiRequest("/parse-pdf", {
@@ -581,16 +579,7 @@ export const lighthouseActions = {
               }),
             },
           );
-          if (!response.ok) {
-            const errorData = await response
-              .json()
-              .catch(() => ({ detail: "Analysis failed" }));
-            const keyError = testerKeyError(response.status, errorData.detail);
-            if (keyError) throw keyError;
-            throw new Error(
-              errorData.detail || `Server error: ${response.status}`,
-            );
-          }
+          if (!response.ok) await errorFromResponse(response);
           result = await response.json();
         } else {
           result = await apiRequest("/analyze-text", {

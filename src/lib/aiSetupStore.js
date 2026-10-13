@@ -64,8 +64,7 @@ export const aiActions = {
       const provider = data.provider || "google";
       await this.fetchModels(provider);
       return data;
-    } catch (err) {
-      console.error("Failed to fetch AI session status:", err);
+    } catch {
       aiStatus.update((s) => ({
         ...s,
         connected: false,
@@ -97,8 +96,8 @@ export const aiActions = {
         aiStatus.update((s) => ({ ...s, availableModels: data.models }));
         return data.models;
       }
-    } catch (err) {
-      console.error("Failed to fetch available models:", err);
+    } catch {
+      /* A model refresh can fail quietly. The form still accepts a saved key. */
     }
     return [];
   },
@@ -130,8 +129,8 @@ export const aiActions = {
       if (currentStatus.status !== "active") {
         await this.fetchStatus();
       }
-    } catch (err) {
-      console.error("Failed to sync model session:", err);
+    } catch {
+      /* The menu already shows the selected model if the session sync fails. */
     }
   },
 
@@ -157,8 +156,8 @@ export const aiActions = {
       }));
       // Refresh team models
       await this.fetchModels("google");
-    } catch (err) {
-      console.error("Logout failed:", err);
+    } catch {
+      /* The page clears the signed-in state again when status is next read. */
     }
   },
 
