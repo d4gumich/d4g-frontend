@@ -581,13 +581,26 @@ export async function setDevSchedule(preset, sessionDate, baseUrl) {
     `${base}api/v1/products/lighthouse/schedule/dev`,
     {
       method: "POST",
-      credentials: "omit",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: await seatHeaders(),
       body: JSON.stringify(body),
     },
   );
   if (!response.ok) {
-    throw new Error(`Dev schedule request failed: ${response.status}`);
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Dev schedule request failed: ${response.status}`,
+    );
   }
   return response.json();
 }
