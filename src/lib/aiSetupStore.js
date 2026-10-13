@@ -20,6 +20,8 @@ export const aiStatus = writable({
   key_source: "none",
   availableModels: [],
   connected: false,
+  expires_at: null,
+  absolute_expires_at: null,
 });
 
 export const aiActions = {
@@ -49,6 +51,9 @@ export const aiActions = {
         ...s,
         ...data,
         key_source: data.key_source || "none",
+        expires_at: data.status === "active" ? data.expires_at || null : null,
+        absolute_expires_at:
+          data.status === "active" ? data.absolute_expires_at || null : null,
         loading: false,
         connected: true,
         hasError: s.errorMessage === "Backend offline" ? false : s.hasError,
@@ -147,6 +152,8 @@ export const aiActions = {
         forceTeamKey: false,
         key_source: "none",
         availableModels: [],
+        expires_at: null,
+        absolute_expires_at: null,
       }));
       // Refresh team models
       await this.fetchModels("google");

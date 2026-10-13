@@ -222,17 +222,19 @@
 </script>
 
 <section class="workspace" aria-label="Lighthouse seat workspace">
-  {#if line}
-    <p class="session-line">{line}</p>
-  {/if}
-  {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
-    <p class="session-warning">
-      {SESSION_ENDED_WARNING} Resume upload is closed.
-    </p>
-  {/if}
-  <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
-  {#if leaveError}
-    <p class="upload-error">{leaveError}</p>
+  {#if !personal}
+    {#if line}
+      <p class="session-line">{line}</p>
+    {/if}
+    {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
+      <p class="session-warning">
+        {SESSION_ENDED_WARNING} Resume upload is closed.
+      </p>
+    {/if}
+    <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
+    {#if leaveError}
+      <p class="upload-error">{leaveError}</p>
+    {/if}
   {/if}
   <div class="dashboard-grid">
     <aside class="sidebar">
