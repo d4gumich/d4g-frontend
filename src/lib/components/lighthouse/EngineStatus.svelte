@@ -10,9 +10,17 @@
   } = $props();
 
   const STEPS = [
-    ["off", "Off"],
-    ["starting", "Starting"],
-    ["ready", "Ready"],
+    [
+      "off",
+      "Off",
+      "The GPU is asleep. It starts about 12 minutes before the session, once someone has a seat.",
+    ],
+    [
+      "starting",
+      "Starting",
+      "The GPU is waking on Hugging Face. Analysis waits until it is ready.",
+    ],
+    ["ready", "Ready", "The GPU is up. Resume analysis can run."],
   ];
 
   let now = $state(Date.now());
@@ -53,13 +61,15 @@
     {#if showSteps || canLeave}
       <ol>
         {#if showSteps}
-          {#each STEPS as [id, label], index}
+          {#each STEPS as [id, label, tip], index}
             <li
               class={id}
               class:current={index === stepIndex}
               aria-current={index === stepIndex ? "step" : undefined}
             >
               {label}
+              <span class="engine-tail"></span>
+              <span class="engine-tip">{tip}</span>
             </li>
           {/each}
         {/if}
@@ -121,11 +131,82 @@
     cursor: default;
   }
   li {
+    position: relative;
     border: 2px solid #000;
     border-radius: 999px;
     padding: 0.28rem 0.7rem;
     font-size: 0.75rem;
     font-weight: 700;
+  }
+  .engine-tail,
+  .engine-tip {
+    position: absolute;
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .engine-tail {
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 8px solid transparent;
+  }
+  .engine-tip {
+    left: 50%;
+    top: calc(100% + 7px);
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 220px;
+    padding: 0.45rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+  }
+  li.off .engine-tail {
+    border-bottom-color: #c23b3b;
+  }
+  li.off .engine-tip {
+    left: 0;
+    transform: none;
+    background: #c23b3b;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(194, 59, 59, 0.28);
+  }
+  li.starting .engine-tail {
+    border-bottom-color: #f2c200;
+  }
+  li.starting .engine-tip {
+    background: #f2c200;
+    color: #3a3008;
+    box-shadow: 0 6px 16px rgba(242, 194, 0, 0.35);
+  }
+  li.ready .engine-tail {
+    border-bottom-color: #1f8a4c;
+  }
+  li.ready .engine-tip {
+    background: #1f8a4c;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(31, 138, 76, 0.28);
+  }
+  li:hover .engine-tail,
+  li:hover .engine-tip,
+  li:focus-within .engine-tail,
+  li:focus-within .engine-tip {
+    opacity: 1;
+  }
+  @media (max-width: 800px) {
+    li.starting .engine-tip,
+    li.ready .engine-tip {
+      left: 0;
+      right: auto;
+      transform: none;
+    }
   }
   li.off {
     background: #f3d6d6;

@@ -1,23 +1,25 @@
 <script>
   import Navbar from "$lib/components/navbar.svelte";
+  import AIBanner from "$lib/components/AIBanner.svelte";
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
-  import Console from "$lib/components/lighthouse/Console.svelte";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
+  import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
   import { browser } from "$app/environment";
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { base } from "$app/paths";
 
   const currentPage = "products";
 
   let view = $state("upcoming");
+  let byokMode = $derived(
+    $aiStatus.status === "active" &&
+      $aiStatus.key_source === "personal" &&
+      !$aiStatus.forceTeamKey,
+  );
 
   onMount(() => {
-    document.body.classList.add("has-system-console");
-  });
-
-  onDestroy(() => {
-    if (browser) document.body.classList.remove("has-system-console");
+    if (browser) aiActions.fetchStatus();
   });
 </script>
 
@@ -27,6 +29,7 @@
 </svelte:head>
 
 <Navbar {currentPage} />
+<AIBanner variant="lighthouse" productName="Lighthouse" />
 
 <div class="demo-warning">
   ⚠️ DEMO VERSION: This is an experimental prototype still in development.
@@ -41,6 +44,7 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
+    {#if !byokMode}
     <div
       class="session-tabs"
       role="tablist"
@@ -63,18 +67,19 @@
         Past sessions
       </button>
     </div>
+    {/if}
   </div>
 </div>
 
 {#if browser}
-  {#if view === "upcoming"}
+  {#if byokMode}
+    <LighthouseWorkspace personal />
+  {:else if view === "upcoming"}
     <LighthouseCalendar onUpload={() => (view = "past")} />
   {:else}
     <LighthouseWorkspace />
   {/if}
 {/if}
-
-<Console />
 
 <style>
   .navbar {

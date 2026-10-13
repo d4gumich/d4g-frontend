@@ -26,6 +26,8 @@
   } from "$lib/lighthouseSchedule.js";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
+  let { personal = false } = $props();
+
   let schedule = $state(null);
   let engine = $state(null);
   let now = $state(Date.now());
@@ -45,7 +47,9 @@
   const line = $derived(schedule ? scheduleLine(schedule, now, skew) : "");
   const seated = $derived(focusDate !== "" && held.includes(focusDate));
   const canUpload = $derived(
-    seated && (phase === "pre_warm" || phase === "open" || phase === "drain"),
+    personal ||
+      (seated &&
+        (phase === "pre_warm" || phase === "open" || phase === "drain")),
   );
   const canLeave = $derived(
     seated &&
@@ -143,12 +147,16 @@
     if (!file || !canUpload) return;
     uploadError = "";
     try {
-      if (!(await scheduledTesterActive())) {
-        keyForLeave = false;
-        showTesterKey = true;
-        return;
+      if (personal) {
+        await lighthouseActions.uploadStandardPdf(file, shouldSanitize);
+      } else {
+        if (!(await scheduledTesterActive())) {
+          keyForLeave = false;
+          showTesterKey = true;
+          return;
+        }
+        await lighthouseActions.uploadPdf(file, shouldSanitize);
       }
-      await lighthouseActions.uploadPdf(file, shouldSanitize);
       file = null;
       if (fileInput) fileInput.value = "";
     } catch (error) {
@@ -162,6 +170,10 @@
   }
 
   $effect(() => {
+    if (personal) {
+      lighthouseActions.useScheduledSeat(null, null);
+      return;
+    }
     const token =
       typeof sessionStorage === "undefined"
         ? ""
@@ -210,17 +222,19 @@
 </script>
 
 <section class="workspace" aria-label="Lighthouse seat workspace">
-  {#if line}
-    <p class="session-line">{line}</p>
-  {/if}
-  {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
-    <p class="session-warning">
-      {SESSION_ENDED_WARNING} Resume upload is closed.
-    </p>
-  {/if}
-  <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
-  {#if leaveError}
-    <p class="upload-error">{leaveError}</p>
+  {#if !personal}
+    {#if line}
+      <p class="session-line">{line}</p>
+    {/if}
+    {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
+      <p class="session-warning">
+        {SESSION_ENDED_WARNING} Resume upload is closed.
+      </p>
+    {/if}
+    <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
+    {#if leaveError}
+      <p class="upload-error" role="alert">{leaveError}</p>
+    {/if}
   {/if}
   <div class="dashboard-grid">
     <aside class="sidebar">
@@ -268,7 +282,7 @@
           {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
         </button>
         {#if uploadError}
-          <p class="upload-error">{uploadError}</p>
+          <p class="upload-error" role="alert">{uploadError}</p>
         {/if}
       </div>
 
@@ -308,7 +322,7 @@
     </aside>
 
     <section class="main-content">
-      <LighthouseResults />
+      <LighthouseResults {personal} />
     </section>
   </div>
 </section>

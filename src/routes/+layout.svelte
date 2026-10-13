@@ -22,8 +22,4 @@
   .app-main {
     flex: 1 0 auto;
   }
-
-  :global(body.has-system-console) .app-shell {
-    padding-bottom: 2.35rem;
-  }
 </style>

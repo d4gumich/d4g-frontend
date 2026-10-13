@@ -590,34 +590,71 @@
           class:forwarded={payload.dev_preset === "soon" &&
             payload.dev_forwarded}
           aria-pressed={payload.dev_preset === "soon" && !payload.dev_forwarded}
-          onclick={() => chooseDev("soon")}>Starts in 10 min</button
+          onclick={() => chooseDev("soon")}
         >
+          Starts in 10 min
+          <span class="dev-tail"></span>
+          <span class="dev-tip"
+            >Practice session starts in 10 minutes. The GPU stays off.</span
+          >
+        </button>
         <button
           type="button"
           aria-pressed={payload.dev_preset === "open"}
-          onclick={() => chooseDev("open")}>Open now</button
+          onclick={() => chooseDev("open")}
         >
+          Open now
+          <span class="dev-tail"></span>
+          <span class="dev-tip"
+            >Session is open now. The GPU starts only after someone takes a
+            seat. Another practice button stops it.</span
+          >
+        </button>
         <button
           type="button"
           aria-pressed={payload.dev_preset === "drain"}
-          onclick={() => chooseDev("drain")}>Draining</button
+          onclick={() => chooseDev("drain")}
         >
+          Draining
+          <span class="dev-tail"></span>
+          <span class="dev-tip"
+            >Last minutes of the session. No new seats. People who already have
+            a seat can finish.</span
+          >
+        </button>
         <button
           type="button"
           aria-pressed={payload.dev_preset === "ended"}
-          onclick={() => chooseDev("ended")}>Ended</button
+          onclick={() => chooseDev("ended")}
         >
+          Ended
+          <span class="dev-tail"></span>
+          <span class="dev-tip">The session is over. Take a seat is off.</span>
+        </button>
         <button
           type="button"
           aria-pressed={!payload.dev_preset}
-          onclick={() => chooseDev("clear")}>Real calendar</button
+          onclick={() => chooseDev("clear")}
         >
-        <button type="button" onclick={() => chooseDev("reset_seats")}
-          >Reset seats</button
-        >
-        <button type="button" onclick={() => chooseDev("fill_seats")}
-          >Fill seats</button
-        >
+          Real calendar
+          <span class="dev-tail"></span>
+          <span class="dev-tip"
+            >Leave practice mode and show the real Tuesday and Thursday
+            schedule.</span
+          >
+        </button>
+        <button type="button" onclick={() => chooseDev("reset_seats")}>
+          Reset seats
+          <span class="dev-tail"></span>
+          <span class="dev-tip">Clear every held seat.</span>
+        </button>
+        <button type="button" onclick={() => chooseDev("fill_seats")}>
+          Fill seats
+          <span class="dev-tail"></span>
+          <span class="dev-tip"
+            >Fill all 30 seats. If Open now is on, that starts the GPU.</span
+          >
+        </button>
       </div>
       {#if devNotice}
         <p class="dev-notice">{devNotice}</p>
@@ -796,6 +833,7 @@
     margin-top: 0.7rem;
   }
   .dev-actions button {
+    position: relative;
     font: inherit;
     cursor: pointer;
     border: 1px solid #5c3b16;
@@ -803,6 +841,52 @@
     color: #5c3b16;
     border-radius: 4px;
     padding: 0.4rem 0.65rem;
+  }
+  .dev-tail,
+  .dev-tip {
+    position: absolute;
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .dev-tail {
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 8px solid #3d2914;
+  }
+  .dev-tip {
+    left: 50%;
+    top: calc(100% + 7px);
+    transform: translateX(-50%);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 220px;
+    padding: 0.45rem 0.55rem;
+    border-radius: 6px;
+    background: #3d2914;
+    color: #fff8ee;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    box-shadow: 0 6px 16px rgba(60, 36, 12, 0.18);
+  }
+  .dev-actions button:hover .dev-tail,
+  .dev-actions button:hover .dev-tip,
+  .dev-actions button:focus-visible .dev-tail,
+  .dev-actions button:focus-visible .dev-tip {
+    opacity: 1;
+  }
+  @media (max-width: 800px) {
+    .dev-actions button:nth-child(1) .dev-tip,
+    .dev-actions button:nth-child(3) .dev-tip {
+      left: 0;
+      transform: none;
+    }
   }
   .dev-actions button[aria-pressed="true"] {
     background: #5c3b16;
@@ -908,6 +992,17 @@
     font-size: 1.4rem;
     cursor: pointer;
     color: #1b3350;
+    border-radius: 999px;
+    line-height: 1;
+    padding: 0.15rem 0.45rem;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .month-nav button:hover:not(:disabled),
+  .month-nav button:focus-visible:not(:disabled),
+  .carousel button:hover,
+  .carousel button:focus-visible {
+    background: #d7e4f4;
+    color: #0e2f58;
   }
   .month-nav button:disabled {
     opacity: 0.3;
@@ -942,6 +1037,12 @@
     color: #8b97a6;
     font: inherit;
     font-size: 0.95rem;
+    border-radius: 999px;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .day:hover {
+    background: #e3ebf5;
+    color: #1b3350;
   }
   .was-session {
     background: #e4eaf2;
@@ -949,6 +1050,11 @@
     border-radius: 999px;
     color: #4e5d6e;
     font-weight: 650;
+  }
+  .was-session:hover {
+    background: #c5d4e6;
+    border-color: #1a4a86;
+    color: #1b3350;
   }
   button.session {
     background: #1a4a86;
@@ -960,8 +1066,10 @@
     cursor: pointer;
     box-shadow: 0 0 0 3px rgba(26, 74, 134, 0.22);
   }
-  button.session:hover {
+  button.session:hover,
+  button.session:focus-visible {
     background: #153d70;
+    color: #fff;
   }
   .backdrop {
     position: fixed;
@@ -1043,13 +1151,27 @@
     opacity: 0.65;
     cursor: default;
   }
+  .primary:hover:not(:disabled),
+  .primary:focus-visible:not(:disabled) {
+    background: #2a4d73;
+  }
   .secondary {
     background: #fff;
     color: #1b3350;
     border: 1px solid #1b3350;
   }
+  .secondary:hover,
+  .secondary:focus-visible {
+    background: #e8eef6;
+  }
   .dialog-actions a {
     color: #1b3350;
+    border-radius: 4px;
+    padding: 0.35rem 0.2rem;
+  }
+  .dialog-actions a:hover,
+  .dialog-actions a:focus-visible {
+    background: #e8eef6;
   }
   .text {
     margin-top: 0.8rem;

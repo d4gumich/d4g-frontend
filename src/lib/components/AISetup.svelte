@@ -1,7 +1,16 @@
 <script>
     import { onMount } from 'svelte';
+    import { base } from '$app/paths';
     import Button from './button.svelte';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
+    import { csrfHeaders, rememberCsrf } from '$lib/byokSession.js';
+    import {
+        messageForStatus,
+        referenceFromBody,
+        supportReference,
+        userFacingError,
+        withReference,
+    } from '$lib/userError.js';
 
     let { onComplete, onCancel = null, productName = "AI Product" } = $props();
 
@@ -21,6 +30,71 @@
             dynamicModels = models || [];
         }
     });
+
+    const keyGuides = {
+        google: {
+            title: "Get a Gemini key",
+            href: "https://aistudio.google.com/apikey",
+            link: "Open Google AI Studio",
+            steps: [
+                "Sign in at Google AI Studio.",
+                "Accept the Gemini API terms if this is your first key.",
+                "Press Create API key. New keys are auth keys.",
+                "Copy the key, paste it below, then press Verify and Save.",
+            ],
+        },
+        openai: {
+            title: "Get an OpenAI key",
+            href: "https://platform.openai.com/api-keys",
+            link: "Open OpenAI API keys",
+            steps: [
+                "Sign in at the OpenAI platform.",
+                "Open API keys and press Create new secret key.",
+                "Copy the key immediately. OpenAI shows it once.",
+                "Paste it below, then press Verify and Save.",
+            ],
+        },
+        anthropic: {
+            title: "Get an Anthropic key",
+            href: "https://platform.claude.com/settings/keys",
+            link: "Open the Claude Console",
+            steps: [
+                "Sign in at the Claude Console.",
+                "Open Settings, then API keys.",
+                "Press Create key and copy it. The console shows it once.",
+                "Paste it below, then press Verify and Save.",
+            ],
+        },
+    };
+
+    let guide = $derived(keyGuides[provider] || keyGuides.google);
+    const idleWindowMs = 30 * 60 * 1000;
+    const absoluteWindowMs = 12 * 60 * 60 * 1000;
+    let openedAt = $state(Date.now());
+
+    function formatWhen(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "";
+        return new Intl.DateTimeFormat(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
+        }).format(date);
+    }
+
+    let savedSession = $derived($aiStatus.status === "active" && $aiStatus.expires_at && $aiStatus.absolute_expires_at);
+    let idleExpiry = $derived(savedSession ? $aiStatus.expires_at : openedAt + idleWindowMs);
+    let hardExpiry = $derived(savedSession ? $aiStatus.absolute_expires_at : openedAt + absoluteWindowMs);
+    let idleText = $derived(formatWhen(idleExpiry));
+    let hardText = $derived(formatWhen(hardExpiry));
+    let expiryLead = $derived(
+        savedSession
+            ? `This session expires at ${idleText} if left idle, and at ${hardText} even if you keep using it.`
+            : `If you save now, this session expires at ${idleText} if left idle, and at ${hardText} even if you keep using it.`,
+    );
 
     const staticModels = {
         google: [
@@ -45,6 +119,36 @@
         model = "";
     }
 
+    async function postWithCsrf(url, body) {
+        await aiActions.prepareCsrf();
+        const send = () => fetch(url, {
+            method: "POST",
+            headers: csrfHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify(body),
+            credentials: "include",
+        });
+        let response = await send();
+        if (response.status !== 403) return response;
+        const data = await response.clone().json().catch(() => ({}));
+        if (!String(data.detail || "").toLowerCase().includes("csrf")) return response;
+        await aiActions.prepareCsrf();
+        return send();
+    }
+
+    async function readJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    function failureError(response, data) {
+        const detail = typeof data?.detail === "string" ? data.detail : data?.message;
+        const reference = supportReference(response) || referenceFromBody(data?.request_id);
+        return new Error(withReference(messageForStatus(response.status, detail), reference));
+    }
+
     async function handleVerify() {
         if (!apiKey.trim()) {
             error = "Please provide your API key to verify.";
@@ -55,31 +159,23 @@
         error = "";
 
         try {
-            const response = await fetch(`${HOST_URL}api/v1/auth/models`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    provider: provider,
-                    api_key: apiKey
-                }),
-                credentials: 'include'
+            const response = await postWithCsrf(`${HOST_URL}api/v1/auth/models`, {
+                provider: provider,
+                api_key: apiKey
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to verify key.");
-            }
+            const data = await readJson(response);
+            if (!response.ok || !data) throw failureError(response, data);
 
             dynamicModels = data.models || [];
             isVerified = true;
-            
+
             // Auto-select first model if none selected
             if (dynamicModels.length > 0 && !model) {
                 model = dynamicModels[0].id;
             }
         } catch (err) {
-            error = err.message;
+            error = userFacingError(err);
             isVerified = false;
         } finally {
             verifying = false;
@@ -104,23 +200,18 @@
                 body.api_key = apiKey;
             }
 
-            const response = await fetch(`${HOST_URL}api/v1/auth/session`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
-                credentials: 'include'
-            });
+            const response = await postWithCsrf(`${HOST_URL}api/v1/auth/session`, body);
 
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || "Failed to initialize session.");
-            }
+            const data = await readJson(response);
+            if (!response.ok || !data) throw failureError(response, data);
+            rememberCsrf("session", data.csrf_token);
+            apiKey = "";
 
             // Update store
             await aiActions.fetchStatus();
             onComplete();
         } catch (err) {
-            error = err.message;
+            error = userFacingError(err);
         } finally {
             loading = false;
         }
@@ -149,19 +240,33 @@
             </select>
         </div>
 
+        <div class="key-guide">
+            <p class="key-guide-title">{guide.title}</p>
+            <ol>
+                {#each guide.steps as step, index}
+                    <li><span>{index + 1}</span>{step}</li>
+                {/each}
+            </ol>
+            <a href={guide.href} target="_blank" rel="noopener noreferrer">{guide.link}</a>
+            {#if productName === "Lighthouse"}
+                <p class="key-note">Lighthouse analysis uses a Gemini key. OpenAI and Anthropic keys work on the other products.</p>
+            {/if}
+            <p class="key-expiry">{expiryLead} Paste the key again after that. If the provider rejects it, repeat the steps above and paste a new key.</p>
+        </div>
+
         <div class="form-group">
             <label for="api-key">API Key</label>
             <div class="input-with-button">
-                <input 
-                    type="password" 
-                    id="api-key" 
-                    bind:value={apiKey} 
+                <input
+                    type="password"
+                    id="api-key"
+                    bind:value={apiKey}
                     oninput={() => { isVerified = false; error = ""; }}
-                    placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."} 
+                    placeholder={$aiStatus.status === 'active' ? "Keep current key or enter new one..." : "Paste your API key here..."}
                 />
-                <button 
-                    class="btn-verify" 
-                    onclick={handleVerify} 
+                <button
+                    class="btn-verify"
+                    onclick={handleVerify}
                     disabled={verifying || !apiKey.trim()}
                 >
                     {verifying ? "..." : "Verify"}
@@ -171,8 +276,9 @@
                 <div class="success-msg">✓ Key Verified</div>
             {/if}
             <div class="security-warning">
-                <strong>SECURE SESSION:</strong> Your key is used for this session only and expires after 30 mins of inactivity.
+                <strong>Key expires</strong> at {idleText} if left idle, and at {hardText} at the latest. Paste it again, or repeat the steps above if you need a new one.
             </div>
+            <p class="privacy-link"><a href={`${base}/privacy`}>How keys and resumes are handled</a></p>
         </div>
 
         {#if error}
@@ -183,13 +289,13 @@
             {#if onCancel}
                 <button class="btn-cancel" onclick={onCancel} disabled={loading}>Cancel</button>
             {/if}
-            
+
             {#if $aiStatus.status === 'active'}
                 <button class="btn-cancel btn-danger-text" onclick={handleLogout} disabled={loading}>Clear Session</button>
             {/if}
 
-            <Button 
-                text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")} 
+            <Button
+                text={loading ? "..." : ($aiStatus.status === 'active' ? "Update" : "Save")}
                 click={handleSubmit}
                 disabled={loading || (!isVerified && $aiStatus.status !== 'active')}
             />
@@ -218,6 +324,8 @@
         border-radius: 1rem;
         width: 90%;
         max-width: 500px;
+        max-height: 90vh;
+        overflow: auto;
         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
 
@@ -232,6 +340,73 @@
         margin-bottom: 2rem;
         line-height: 1.5;
         font-size: 0.95rem;
+    }
+
+    .key-guide {
+        margin: -0.25rem 0 1.25rem;
+        padding: 0.85rem 0.95rem;
+        border-radius: 0.6rem;
+        background: #f4f7fb;
+        color: #1b3350;
+    }
+
+    .key-guide-title {
+        margin: 0 0 0.5rem;
+        font-weight: 700;
+    }
+
+    .key-guide ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 0.45rem;
+    }
+
+    .key-guide li {
+        display: flex;
+        gap: 0.55rem;
+        align-items: flex-start;
+        font-size: 0.88rem;
+        line-height: 1.4;
+    }
+
+    .key-guide li span {
+        flex: 0 0 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 999px;
+        background: #1b3350;
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .key-guide a {
+        display: inline-block;
+        margin-top: 0.7rem;
+        font-weight: 700;
+        color: #1a4a86;
+    }
+
+    .key-note {
+        margin: 0.55rem 0 0;
+        font-size: 0.82rem;
+        line-height: 1.4;
+    }
+
+    .key-expiry {
+        margin: 0.75rem 0 0;
+        padding: 0.55rem 0.65rem;
+        border-radius: 0.45rem;
+        background: #fff4e5;
+        color: #6a3d09;
+        font-size: 0.82rem;
+        font-weight: 600;
+        line-height: 1.4;
     }
 
     .form-group {
@@ -252,6 +427,16 @@
         border-radius: 0.5rem;
         font-family: inherit;
         font-size: 1rem;
+    }
+
+    select {
+        appearance: none;
+        padding-right: 2.4rem;
+        background-color: #fff;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%231b3350' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M3.5 6.2 8 10.2l4.5-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.85rem center;
+        background-size: 0.9rem;
     }
 
     select:focus, input:focus {
@@ -296,6 +481,16 @@
         margin-top: 0.75rem;
         color: var(--blue-color-main);
         font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .privacy-link {
+        margin: 0.45rem 0 0;
+        font-size: 0.8rem;
+    }
+
+    .privacy-link a {
+        color: var(--blue-color-main);
         font-weight: 600;
     }
 

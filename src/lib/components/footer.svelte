@@ -24,7 +24,7 @@
       margin-right: 10%; /* Add a gap between rows */
       margin-left: 7%;
     }
-  
+
     .footer-title {
       font-weight: 500;
       font-family: "Open Sans", sans-serif;
@@ -54,14 +54,14 @@
       flex-direction: column;
       gap: 15px; /* Add a gap between rows */
     }
-  
+
     .footer-divider {
       width: 100%;
       height: 1px;
       margin: 20px 0; /* Add a gap between rows */
       flex-basis: 100%; /* Ensure the divider spans the full width */
     }
-  
+
     .footer-bottom-text {
       font-size: 12px;
       text-align: center;
@@ -100,9 +100,9 @@
     }
 
   </style>
-  
 
-  
+
+
   <div class="footer">
     <!-- Left Side with Logo -->
     <div class="footer-logo">
@@ -119,9 +119,10 @@
       <a href={`${base}/archive`}>Archive</a>
       <a href={`${base}/team`}>Team</a>
       <a href={`${base}/faq`}>FAQ</a>
+      <a href={`${base}/privacy`}>Privacy</a>
       <a href={`${base}/joinus`}>Join Us</a>
     </div>
-  
+
     <!-- Column 2 -->
     <div class="footer-column">
       <div class="footer-title">Products</div>
@@ -130,7 +131,7 @@
       <a href={`${base}/products/hangul_api`}>Hangul API</a>
       <a href={`${base}/products/owl`}>Owl</a>
     </div>
-  
+
     <!-- Column 3 -->
     <div class="footer-column">
       <div class="footer-title">Location</div>
@@ -142,11 +143,10 @@
         info@data4good.center
       </p>
     </div>
-  
+
     <!-- Divider -->
     <div class="footer-divider"></div>
-  
+
     <!-- Bottom Text -->
     <div class="footer-bottom-text">&copy; 2025 Data4Good All rights reserved.</div>
   </div>
-  

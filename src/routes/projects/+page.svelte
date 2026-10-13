@@ -70,8 +70,8 @@
       if (status && $lighthouseStatus.sessionActive) {
         secretKey = "verified-session"; // Dummy value to trigger Svelte's reactivity and unlock the card
       }
-    } catch (err) {
-      console.error("Failed to check session status:", err);
+    } catch {
+      /* An unreachable session check leaves the experimental cards locked. */
     }
   }
 
