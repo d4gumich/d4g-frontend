@@ -1,5 +1,6 @@
 <script>
     import { onMount } from 'svelte';
+    import { base } from '$app/paths';
     import Button from './button.svelte';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import { csrfHeaders, rememberCsrf } from '$lib/byokSession.js';
@@ -261,6 +262,7 @@
             <div class="security-warning">
                 <strong>Key expires</strong> at {idleText} if left idle, and at {hardText} at the latest. Paste it again, or repeat the steps above if you need a new one.
             </div>
+            <p class="privacy-link"><a href={`${base}/privacy`}>How keys and resumes are handled</a></p>
         </div>
 
         {#if error}
@@ -463,6 +465,16 @@
         margin-top: 0.75rem;
         color: var(--blue-color-main);
         font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .privacy-link {
+        margin: 0.45rem 0 0;
+        font-size: 0.8rem;
+    }
+
+    .privacy-link a {
+        color: var(--blue-color-main);
         font-weight: 600;
     }
 
