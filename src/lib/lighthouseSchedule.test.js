@@ -15,10 +15,12 @@ import {
   canReturnSeat,
   scheduleLine,
   seatControls,
+  analysisSourceLabel,
   sourceTag,
   syncHeldSeats,
   sessionIcs,
   sessionInstants,
+  sessionIsJoined,
 } from "./lighthouseSchedule.js";
 
 const payload = {
@@ -95,7 +97,13 @@ test("a server restart drops a seat the browser still remembers", () => {
 });
 
 test("the in-house tag keeps how long analysis took", () => {
+  assert.equal(analysisSourceLabel("personal"), "Your API key");
+  assert.equal(analysisSourceLabel("byok"), "Your API key");
+  assert.equal(analysisSourceLabel("team"), "In house");
+  assert.equal(analysisSourceLabel("in_house"), "In house");
+  assert.equal(analysisSourceLabel(undefined), "Not analyzed");
   assert.equal(sourceTag({ provider: "in_house" }, 0), "In house");
+  assert.equal(sourceTag({}, 0), "Not analyzed");
   assert.equal(
     sourceTag({ provider: "byok", analysisMs: 8000 }, 0),
     "Your API key · 0:08",
@@ -296,6 +304,31 @@ test("calendar exports use Detroit local time and name the 30 seat cap", () => {
   assert.match(url, /ctz=America%2FDetroit/);
   assert.match(url, /20260929T180000%2F20260929T200000/);
   assert.match(url, /30\+seats|30%20seats/);
+});
+
+test("a held seat joins only while that Deep session is open or closing", () => {
+  const live = {
+    phase: "open",
+    current_window: {
+      start: "2026-09-29T22:00:00Z",
+      end: "2026-09-30T00:00:00Z",
+    },
+  };
+  assert.equal(sessionIsJoined(live, ["2026-09-29"]), true);
+  assert.equal(sessionIsJoined(live, ["2026-10-01"]), false);
+  assert.equal(sessionIsJoined(live, []), false);
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "drain" }, ["2026-09-29"]),
+    true,
+  );
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "pre_warm" }, ["2026-09-29"]),
+    false,
+  );
+  assert.equal(
+    sessionIsJoined({ ...live, phase: "closed" }, ["2026-09-29"]),
+    false,
+  );
 });
 
 test("detroitDate reads the Detroit calendar day", () => {

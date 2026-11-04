@@ -9,6 +9,8 @@
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
   import { formatElapsed } from "$lib/lighthouseSchedule.js";
 
+  let { personal = false } = $props();
+
   let showTesterKey = $state(false);
   let pendingAnalysis = $state(false);
   let now = $state(Date.now());
@@ -70,7 +72,8 @@
   async function triggerAnalysis() {
     if (!selectedText) return;
     try {
-      await lighthouseActions.analyzeText(selectedText);
+      if (personal) await lighthouseActions.analyzeWithKey(selectedText);
+      else await lighthouseActions.analyzeText(selectedText);
       activeTab = "analysis";
     } catch (error) {
       if (error?.name === "TesterKeyRequired") {
@@ -130,6 +133,10 @@
     </div>
   {/if}
 
+  {#if !$lighthouseResults.loading && $lighthouseResults.error}
+    <p class="analysis-error" role="alert">{$lighthouseResults.error}</p>
+  {/if}
+
   {#if currentDoc}
     <div class="doc-header">
       <div class="doc-info">
@@ -164,7 +171,7 @@
           </div>
 
           <div class="action-group">
-            {#if !isEngineRunning}
+            {#if !personal && !isEngineRunning}
               <span class="warning-tag"
                 >{engineStarting ? "Engine starting" : "Engine offline"}</span
               >
@@ -172,7 +179,7 @@
             <button
               class="btn-primary btn-sm"
               onclick={triggerAnalysis}
-              disabled={!isEngineRunning ||
+              disabled={(!personal && !isEngineRunning) ||
                 $lighthouseResults.loading ||
                 selectedText.length === 0}
             >
@@ -382,6 +389,16 @@
     font-variant-numeric: tabular-nums;
     font-weight: 700;
     color: #1b3350;
+  }
+
+  .analysis-error {
+    margin: 0 0 1rem;
+    max-width: 40rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e3b3b3;
+    border-radius: 6px;
+    background: #fff6f6;
+    color: #8a2a2a;
   }
 
   .btn-sm {

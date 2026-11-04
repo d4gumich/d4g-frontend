@@ -9,9 +9,10 @@
     import { browser } from '$app/environment';
     import { base } from '$app/paths';
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
+    import { csrfHeaders } from '$lib/byokSession.js';
 
     const currentPage = 'socrates-test';
-    
+
     let secretKey = $state(null);
     let showSetup = $state(true);
 
@@ -78,7 +79,7 @@
             retry_count = 0;
             events = [];
         }
-        
+
         loading = true;
         error = "";
         current_node = null;
@@ -104,12 +105,12 @@
         try {
             const endpoint = 'api/v1/products/socrates/run';
             const url = host_url + endpoint;
-            
+
             const response = await fetch(url, {
                 method: "POST",
-                headers: { 
+                headers: csrfHeaders({
                     "Content-Type": "application/json"
-                },
+                }),
                 body: JSON.stringify({
                     input: input,
                     channel: "web-test"
@@ -172,7 +173,7 @@
         if (events.length === 0 || events[events.length - 1] !== nodeName) {
             events = [...events, nodeName];
         }
-        
+
         const updates = event[nodeName];
         if (updates) {
             socratesState = { ...socratesState, ...updates };
