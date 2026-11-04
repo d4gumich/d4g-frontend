@@ -1,6 +1,17 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
+import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
 import { TesterKeyRequired } from "$lib/lighthouseSchedule.js";
+import {
+  messageForNetworkFailure,
+  messageForStatus,
+  referenceFromBody,
+  supportReference,
+  userFacingError,
+  withReference,
+} from "$lib/userError.js";
+
+export { analysisSourceLabel } from "$lib/lighthouseSchedule.js";
 
 const BASE_PATH = "api/v1/products/lighthouse";
 
@@ -65,8 +76,8 @@ if (typeof window !== "undefined") {
     try {
       const history = JSON.parse(saved);
       lighthouseResults.update((r) => ({ ...r, history }));
-    } catch (e) {
-      console.error("Failed to load history from cache");
+    } catch {
+      /* A broken history cache is ignored. The next analysis starts a new list. */
     }
   }
 }
@@ -88,48 +99,47 @@ function testerKeyError(status, detail) {
 }
 
 function formatError(err) {
-  const message = err.message || String(err);
-  const isHFError =
-    message.includes("MaxRetryError") ||
-    message.includes("502") ||
-    message.includes("Bad Gateway") ||
-    message.includes("HTTPSConnectionPool") ||
-    message.includes("ProxyError");
+  return userFacingError(err);
+}
 
-  if (isHFError) {
-    return `Hugging Face Service Error: The engine is currently unreachable (Bad Gateway/Max Retries). This usually happens during a cold start or high load. Please wait 1-2 minutes and try again. Original error: ${message}`;
-  }
-  return message;
+async function errorFromResponse(response) {
+  const errorData = await response.json().catch(() => ({}));
+  const detail =
+    (typeof errorData.detail === "string" && errorData.detail) ||
+    (typeof errorData.message === "string" && errorData.message) ||
+    "";
+  const keyError = testerKeyError(response.status, detail);
+  if (keyError) throw keyError;
+  const reference =
+    supportReference(response) || referenceFromBody(errorData.request_id);
+  throw new Error(
+    withReference(messageForStatus(response.status, detail), reference),
+  );
 }
 
 async function apiRequest(path, options = {}) {
+  const fullPath = path.startsWith("/auth")
+    ? `api/v1${path}`
+    : `${BASE_PATH}${path}`;
+  const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
+  const url = `${baseUrl}${fullPath}`;
+
+  let response;
   try {
-    // Resolve absolute vs relative paths
-    // Auth paths are top-level under api/v1
-    const fullPath = path.startsWith("/auth")
-      ? `api/v1${path}`
-      : `${BASE_PATH}${path}`;
-
-    // Ensure we use the correct backend URL (no double slashes)
-    const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
-    const url = `${baseUrl}${fullPath}`;
-
-    const response = await fetch(url, {
+    response = await fetch(url, {
       ...options,
+      headers: csrfHeaders(options.headers || {}),
       credentials: "include",
     });
-
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ detail: "Unknown error" }));
-      throw new Error(errorData.detail || `Server error: ${response.status}`);
-    }
-    return await response.json();
   } catch (err) {
-    console.error(`API Request failed: ${path}`, err);
-    throw err;
+    throw new Error(
+      messageForNetworkFailure(err) ||
+        "The server could not be reached. Check your connection and try again.",
+    );
   }
+
+  if (!response.ok) await errorFromResponse(response);
+  return await response.json();
 }
 
 let scheduledSeat = null;
@@ -157,6 +167,9 @@ export const lighthouseActions = {
     try {
       // 1. Check Auth status first (Unprotected endpoint)
       const sessionData = await apiRequest("/auth/lighthouse-status");
+      if (sessionData.status === "active" && sessionData.csrf_token) {
+        rememberCsrf("lighthouse", sessionData.csrf_token);
+      }
       const isAuth = sessionData.status === "active";
 
       let statusData = { stage: "OFFLINE", hardware: "None", message: "" };
@@ -171,11 +184,12 @@ export const lighthouseActions = {
           } else {
             this.clearSessionTimer();
           }
-        } catch (err) {
-          console.error(
-            "Failed to fetch engine status even though session is active",
-            err,
-          );
+        } catch {
+          statusData = {
+            stage: "OFFLINE",
+            hardware: "None",
+            message: "",
+          };
         }
       }
 
@@ -322,10 +336,12 @@ export const lighthouseActions = {
     try {
       await fetch(`${HOST_URL}api/v1/auth/logout`, {
         method: "POST",
+        headers: csrfHeaders(),
         credentials: "include",
       });
-    } catch (err) {
-      console.error("Logout failed:", err);
+      clearCsrf("lighthouse");
+    } catch {
+      /* The local session is cleared even when the server cannot be reached. */
     } finally {
       this.clearSessionTimer();
       lighthouseStatus.update((s) => ({
@@ -339,6 +355,26 @@ export const lighthouseActions = {
         });
       }
     }
+  },
+
+  recordStandardResult(name, resumeText, analysis) {
+    const docId = Date.now().toString();
+    const newDoc = {
+      id: docId,
+      name: name || "Resume",
+      timestamp: new Date().toISOString(),
+      extractedText: resumeText,
+      sections: this.splitIntoSections(resumeText),
+      isSanitized: false,
+      provider: "personal",
+      analysis,
+    };
+    lighthouseResults.update((r) => {
+      const history = [newDoc, ...r.history].slice(0, 10);
+      saveHistory(history);
+      return { ...r, currentId: docId, history, loading: false, error: null };
+    });
+    return newDoc;
   },
 
   async uploadPdf(file, sanitize = false) {
@@ -356,18 +392,14 @@ export const lighthouseActions = {
         const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
         const response = await fetch(
           `${baseUrl}api/v1/products/lighthouse/schedule/parse`,
-          { method: "POST", credentials: "include", body: formData },
+          {
+            method: "POST",
+            credentials: "include",
+            headers: csrfHeaders(),
+            body: formData,
+          },
         );
-        if (!response.ok) {
-          const errorData = await response
-            .json()
-            .catch(() => ({ detail: "Upload failed" }));
-          const keyError = testerKeyError(response.status, errorData.detail);
-          if (keyError) throw keyError;
-          throw new Error(
-            errorData.detail || `Server error: ${response.status}`,
-          );
-        }
+        if (!response.ok) await errorFromResponse(response);
         result = await response.json();
       } else {
         result = await apiRequest("/parse-pdf", {
@@ -387,7 +419,6 @@ export const lighthouseActions = {
         extractedText: rawText,
         sections: sections,
         isSanitized: sanitize,
-        provider: "in_house",
         analysis: null,
       };
 
@@ -463,14 +494,56 @@ export const lighthouseActions = {
     });
   },
 
-  async analyzeText(text, sanitize = false) {
+  async uploadStandardPdf(file, sanitize = false) {
+    lighthouseResults.update((r) => ({ ...r, loading: true, error: null }));
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("sanitize", sanitize ? "true" : "false");
+    try {
+      const result = await apiRequest("/standard/parse-pdf", {
+        method: "POST",
+        body: formData,
+      });
+      const rawText = result.extracted_text || "";
+      const docId = Date.now().toString();
+      const newDoc = {
+        id: docId,
+        name: file.name,
+        timestamp: new Date().toISOString(),
+        extractedText: rawText,
+        sections: this.splitIntoSections(rawText),
+        isSanitized: sanitize,
+        analysis: null,
+      };
+      lighthouseResults.update((r) => {
+        const history = [newDoc, ...r.history].slice(0, 10);
+        saveHistory(history);
+        return { ...r, currentId: docId, history, loading: false };
+      });
+      return result;
+    } catch (err) {
+      lighthouseResults.update((r) => ({
+        ...r,
+        loading: false,
+        error: formatError(err),
+      }));
+      throw err;
+    }
+  },
+
+  async analyzeText(text, sanitize = false, provider = "team") {
     const settings = get(lighthouseSettings);
     const startedAt = new Date().toISOString();
     const startedMs = Date.now();
     lighthouseResults.update((r) => {
       const history = r.history.map((doc) =>
         doc.id === r.currentId
-          ? { ...doc, analysisStartedAt: startedAt, analysisMs: null }
+          ? {
+              ...doc,
+              provider,
+              analysisStartedAt: startedAt,
+              analysisMs: null,
+            }
           : doc,
       );
       saveHistory(history);
@@ -484,14 +557,20 @@ export const lighthouseActions = {
         await new Promise((resolve) => setTimeout(resolve, 1500));
         result = JSON.parse(JSON.stringify(MOCK_ANALYSIS));
       } else {
-        if (scheduledSeat) {
+        if (provider === "personal") {
+          result = await apiRequest("/standard/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resume_text: text }),
+          });
+        } else if (scheduledSeat) {
           const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
           const response = await fetch(
             `${baseUrl}api/v1/products/lighthouse/schedule/analyze`,
             {
               method: "POST",
               credentials: "include",
-              headers: { "Content-Type": "application/json" },
+              headers: csrfHeaders({ "Content-Type": "application/json" }),
               body: JSON.stringify({
                 token: scheduledSeat.token,
                 session: scheduledSeat.session,
@@ -500,16 +579,7 @@ export const lighthouseActions = {
               }),
             },
           );
-          if (!response.ok) {
-            const errorData = await response
-              .json()
-              .catch(() => ({ detail: "Analysis failed" }));
-            const keyError = testerKeyError(response.status, errorData.detail);
-            if (keyError) throw keyError;
-            throw new Error(
-              errorData.detail || `Server error: ${response.status}`,
-            );
-          }
+          if (!response.ok) await errorFromResponse(response);
           result = await response.json();
         } else {
           result = await apiRequest("/analyze-text", {
@@ -596,6 +666,7 @@ export const lighthouseActions = {
           history[docIndex] = {
             ...history[docIndex],
             analysis: cleanedResult,
+            provider,
             analysisMs,
             analysisStartedAt: null,
           };
@@ -620,6 +691,10 @@ export const lighthouseActions = {
       });
       throw err;
     }
+  },
+
+  analyzeWithKey(text) {
+    return this.analyzeText(text, false, "personal");
   },
 
   selectDocument(id) {

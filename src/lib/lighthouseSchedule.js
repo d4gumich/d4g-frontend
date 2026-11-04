@@ -50,8 +50,14 @@ export function formatElapsed(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
+export function analysisSourceLabel(provider) {
+  if (provider === "personal" || provider === "byok") return "Your API key";
+  if (provider === "team" || provider === "in_house") return "In house";
+  return "Not analyzed";
+}
+
 export function sourceTag(doc, nowMs = Date.now()) {
-  const name = doc?.provider === "byok" ? "Your API key" : "In house";
+  const name = analysisSourceLabel(doc?.provider);
   if (Number.isFinite(doc?.analysisMs)) {
     return `${name} · ${formatElapsed(doc.analysisMs)}`;
   }
@@ -365,6 +371,21 @@ export function sessionDateKey(year, monthIndex, day) {
   return `${year}-${pad(monthIndex + 1)}-${pad(day)}`;
 }
 
+export function currentSessionDate(payload) {
+  const start = payload?.current_window?.start;
+  if (!start) return "";
+  const date = detroitDate(new Date(start));
+  return sessionDateKey(date.year, date.monthIndex, date.day);
+}
+
+export function sessionIsJoined(payload, heldDates) {
+  if (!payload || (payload.phase !== "open" && payload.phase !== "drain")) {
+    return false;
+  }
+  const date = currentSessionDate(payload);
+  return date !== "" && Array.isArray(heldDates) && heldDates.includes(date);
+}
+
 function localStamp(year, monthIndex, day, time) {
   const { hours, minutes } = parseClock(time);
   return `${year}${pad(monthIndex + 1)}${pad(day)}T${pad(hours)}${pad(
@@ -445,6 +466,11 @@ export class TesterKeyRequired extends Error {
   }
 }
 
+async function seatHeaders() {
+  const { csrfHeaders } = await import("$lib/byokSession.js");
+  return csrfHeaders({ "Content-Type": "application/json" });
+}
+
 async function scheduleBase(baseUrl) {
   if (baseUrl == null) {
     const { HOST_URL } = await import("$lib/config.js");
@@ -482,17 +508,19 @@ export async function claimSeat(token, sessionDate, baseUrl) {
     {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: await seatHeaders(),
       body: JSON.stringify({ token, session: sessionDate }),
     },
   );
-  if (response.status === 403) throw new TesterKeyRequired();
   if (!response.ok) {
     let detail = "";
     try {
       detail = (await response.json()).detail;
     } catch {
       detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
     }
     throw new Error(
       typeof detail === "string" && detail
@@ -510,17 +538,19 @@ export async function releaseSeat(token, sessionDate, baseUrl) {
     {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: await seatHeaders(),
       body: JSON.stringify({ token, session: sessionDate }),
     },
   );
-  if (response.status === 403) throw new TesterKeyRequired();
   if (!response.ok) {
     let detail = "";
     try {
       detail = (await response.json()).detail;
     } catch {
       detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
     }
     throw new Error(
       typeof detail === "string" && detail
@@ -551,13 +581,26 @@ export async function setDevSchedule(preset, sessionDate, baseUrl) {
     `${base}api/v1/products/lighthouse/schedule/dev`,
     {
       method: "POST",
-      credentials: "omit",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: await seatHeaders(),
       body: JSON.stringify(body),
     },
   );
   if (!response.ok) {
-    throw new Error(`Dev schedule request failed: ${response.status}`);
+    let detail = "";
+    try {
+      detail = (await response.json()).detail;
+    } catch {
+      detail = "";
+    }
+    if (response.status === 403 && String(detail).includes("security key")) {
+      throw new TesterKeyRequired();
+    }
+    throw new Error(
+      typeof detail === "string" && detail
+        ? detail
+        : `Dev schedule request failed: ${response.status}`,
+    );
   }
   return response.json();
 }

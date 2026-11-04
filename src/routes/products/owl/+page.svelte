@@ -7,6 +7,7 @@
     import ChevronDown from "$lib/assets/icons/chevron-down-solid.svelte";
     import ChevronUp from "$lib/assets/icons/angle-up-solid.svelte";
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
+    import { csrfHeaders } from '$lib/byokSession.js';
     import AISetup from "$lib/components/AISetup.svelte";
     import AIBanner from "$lib/components/AIBanner.svelte";
 
@@ -27,7 +28,7 @@
     let showAISetup = $state(false);
 
     let progressInterval;
-  
+
     // feedback modal
     let showModal = $state(false);
     let formUrl = 'https://forms.gle/n51U4g2K9cafpZUu5';
@@ -38,7 +39,7 @@
     onMount(() => {
         aiActions.fetchStatus();
     });
-  
+
     async function submitQuestion() {
       if (!query.trim()) {
         error = "Please enter a question.";
@@ -68,7 +69,7 @@
       const startTime = performance.now();
 
       try {
-        const headers = { "Content-Type": "application/json" };
+        const headers = csrfHeaders({ "Content-Type": "application/json" });
         if ($aiStatus.forceTeamKey) {
             headers['X-Force-Team-Key'] = 'true';
         }
@@ -186,7 +187,7 @@
               Current: <span class="temp-value">{temperature.toFixed(2)}</span>
             </small>
           </label>
-        
+
           <input
             id="temperature"
             type="range"
@@ -195,13 +196,13 @@
             step="0.05"
             bind:value={temperature}
           />
-        
+
           <div class="range-labels">
             <span>0.0</span>
             <span>1.0</span>
           </div>
         </div>
-      
+
         <!-- Top K -->
         <div class="param-block">
           <label for="topk" class="param-text">Number of Similar Documents (k between 1 and 10)</label>
@@ -254,7 +255,7 @@
               <p><strong>Source:</strong> {doc.source}</p>
               <p><strong>Page:</strong> {doc.page_label}</p>
               <p><strong>URL:</strong> <a href={doc.URL} target="_blank" rel="noopener noreferrer">{doc.URL}</a></p>
-               
+
               <div class="doc-toggle-line">
                 <button
                   class="arrow"
@@ -316,11 +317,11 @@
     </div>
 
     {#if showModal}
-      <div 
-        class="modal" 
-        onclick={() => (showModal = false)} 
+      <div
+        class="modal"
+        onclick={() => (showModal = false)}
         onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (showModal = false)}
-        role="button" 
+        role="button"
         aria-label="Close modal"
         tabindex="0"
       >
@@ -339,7 +340,7 @@
       </div>
     {/if}
   </div>
-  
+
   <style>
     .container {
       margin: auto;

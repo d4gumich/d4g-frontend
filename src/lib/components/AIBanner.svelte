@@ -2,9 +2,21 @@
     import { aiStatus, aiActions, HOST_URL } from '$lib/aiSetupStore.js';
     import AISetup from './AISetup.svelte';
     import Icon from '@iconify/svelte';
-    import { browser } from '$app/environment';
+    let { variant = "product", productName = "AI Product" } = $props();
+    const lighthouseTeamModel = "meta-llama/Meta-Llama-3.1-8B-Instruct";
 
     let showSetup = $state(false);
+
+    let personal = $derived(
+        $aiStatus.status === "active" &&
+            $aiStatus.key_source === "personal" &&
+            !$aiStatus.forceTeamKey,
+    );
+    let byokMode = $derived(
+        variant === "lighthouse"
+            ? personal
+            : $aiStatus.status === "active" && !$aiStatus.forceTeamKey,
+    );
 
     function toggleKeyType() {
         if ($aiStatus.status === 'active') {
@@ -13,38 +25,70 @@
             aiActions.setForceTeamKey(false);
         }
     }
+
+    let modeTip = $derived(
+        variant === "lighthouse"
+            ? byokMode
+                ? "Your Gemini key is on. Click to switch back to Scheduling. The icon changes back to a shield."
+                : "Scheduling uses the shared Deep session. Click to use your own API key. The shield changes to a key."
+            : byokMode
+                ? "Your API key is on. Click to switch back to the team key."
+                : "The team key is on. Click to use your own API key.",
+    );
+    let modelTip = $derived(
+        variant === "lighthouse" && !byokMode
+            ? "This Hugging Face model runs the Deep session. It stays fixed."
+            : "Choose the model for your API key. Free-tier names are marked.",
+    );
+    let connectTip = $derived(
+        $aiStatus.status === "active"
+            ? "Update or clear the key saved for this browser session."
+            : "Add a Gemini, OpenAI, or Anthropic key. The form lists the steps for each one.",
+    );
 </script>
 
-<div 
-    class="ai-status-banner" 
-    class:byok={$aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
+<div
+    class="ai-status-banner"
+    class:byok={byokMode}
     class:has-error={$aiStatus.hasError}
 >
     <div class="banner-container">
         <div class="status-left">
-            <button class="mode-toggle" onclick={toggleKeyType} title="Click to toggle between Team and Personal key">
-                {#if $aiStatus.status === 'active' && !$aiStatus.forceTeamKey}
-                    <div class="badge byok-badge">
-                        <Icon icon="mdi:account-key" width="16" height="16" />
-                        <span>Personal Key</span>
-                    </div>
-                {:else}
-                    <div class="badge team-badge">
-                        <Icon icon="mdi:shield-check" width="16" height="16" />
-                        <span>Team Key</span>
-                    </div>
-                {/if}
-            </button>
-            
-            {#if $aiStatus.model}
-                <div class="active-info">
-                    <select class="banner-model-select" value={$aiStatus.model} onchange={(e) => aiActions.setModel(e.target.value)}>
+            <div class="tip-host">
+                <button class="mode-toggle" onclick={toggleKeyType} aria-describedby="mode-tip">
+                    {#if byokMode}
+                        <div class="badge byok-badge">
+                            <Icon icon="mdi:account-key" width="16" height="16" />
+                            <span>{variant === "lighthouse" ? "BYOK" : "Personal Key"}</span>
+                        </div>
+                    {:else}
+                        <div class="badge team-badge">
+                            <Icon icon="mdi:shield-check" width="16" height="16" />
+                            <span>{variant === "lighthouse" ? "Scheduling" : "Team Key"}</span>
+                        </div>
+                    {/if}
+                </button>
+                <span class="banner-tail" aria-hidden="true"></span>
+                <span class="banner-tip" id="mode-tip">{modeTip}</span>
+            </div>
+
+            {#if variant === "lighthouse" && !byokMode}
+                <div class="active-info tip-host">
+                    <span class="banner-model-select banner-model-fixed">
+                        {lighthouseTeamModel}
+                    </span>
+                    <span class="banner-tail" aria-hidden="true"></span>
+                    <span class="banner-tip">{modelTip}</span>
+                </div>
+            {:else if $aiStatus.model}
+                <div class="active-info tip-host">
+                    <select class="banner-model-select" value={$aiStatus.model} onchange={(e) => aiActions.setModel(e.target.value)} aria-describedby="model-tip">
                         {#each $aiStatus.availableModels as m}
                             <option value={m.id}>
                                 {m.name} {(() => {
                                     // Robust check: use backend tier if available, otherwise check name
-                                    const isFree = m.tier === 'free' || 
-                                                  m.id.toLowerCase().includes('flash') || 
+                                    const isFree = m.tier === 'free' ||
+                                                  m.id.toLowerCase().includes('flash') ||
                                                   m.id.toLowerCase().includes('lite') ||
                                                   m.name.toLowerCase().includes('flash') ||
                                                   m.name.toLowerCase().includes('lite');
@@ -61,32 +105,39 @@
                             </option>
                         {/each}
                     </select>
+                    <span class="banner-tail" aria-hidden="true"></span>
+                    <span class="banner-tip" id="model-tip">{modelTip}</span>
                 </div>
             {/if}
         </div>
 
         <div class="controls-center">
-            {#if $aiStatus.hasError}
+            {#if $aiStatus.hasError && $aiStatus.errorMessage && $aiStatus.errorMessage !== "Backend offline"}
                 <button class="error-pill" onclick={() => aiActions.setError(false)} title="Click to clear error">
                     <Icon icon="mdi:alert" width="16" height="16" />
-                    <span>{$aiStatus.errorMessage || 'Engine Error'}</span>
+                    <span>{$aiStatus.errorMessage}</span>
                 </button>
             {/if}
         </div>
 
         <div class="actions-right">
-            <button class="setup-trigger" onclick={() => showSetup = true}>
-                <Icon icon="mdi:cog" width="18" height="18" />
-                <span>{$aiStatus.status === 'active' ? 'Manage Keys' : 'Connect Key'}</span>
-            </button>
+            <div class="tip-host">
+                <button class="setup-trigger" onclick={() => showSetup = true} aria-describedby="connect-tip">
+                    <Icon icon="mdi:cog" width="18" height="18" />
+                    <span>{$aiStatus.status === 'active' ? 'Manage Keys' : 'Connect Key'}</span>
+                </button>
+                <span class="banner-tail" aria-hidden="true"></span>
+                <span class="banner-tip" id="connect-tip">{connectTip}</span>
+            </div>
         </div>
     </div>
 </div>
 
 {#if showSetup}
-    <AISetup 
-        onComplete={() => { showSetup = false; }} 
-        onCancel={() => showSetup = false} 
+    <AISetup
+        {productName}
+        onComplete={() => { showSetup = false; }}
+        onCancel={() => showSetup = false}
     />
 {/if}
 
@@ -100,7 +151,12 @@
         font-size: 0.85rem;
         z-index: 800;
         position: relative;
-        transition: all 0.3s ease;
+        transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .ai-status-banner:hover,
+    .ai-status-banner:focus-within {
+        z-index: 1100;
     }
 
     .ai-status-banner.byok {
@@ -162,6 +218,83 @@
         border-color: var(--blue-color-main);
     }
 
+    .banner-model-fixed {
+        cursor: default;
+        display: inline-block;
+        max-width: 100%;
+    }
+
+    .banner-model-fixed:hover {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .tip-host {
+        position: relative;
+        display: inline-flex;
+        max-width: 100%;
+    }
+
+    .active-info.tip-host {
+        display: flex;
+    }
+
+    .banner-tail,
+    .banner-tip {
+        position: absolute;
+        z-index: 30;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .banner-tail {
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-bottom: 8px solid #fff6e8;
+    }
+
+    .banner-tip {
+        left: 50%;
+        top: calc(100% + 7px);
+        transform: translateX(-50%);
+        box-sizing: border-box;
+        width: max-content;
+        max-width: 240px;
+        padding: 0.45rem 0.55rem;
+        border-radius: 6px;
+        background: #fff6e8;
+        color: #1b3350;
+        font-size: 0.78rem;
+        font-weight: 500;
+        line-height: 1.35;
+        letter-spacing: normal;
+        text-align: left;
+        text-transform: none;
+        white-space: normal;
+        box-shadow: 0 6px 16px rgba(27, 51, 80, 0.2);
+    }
+
+    .status-left > .tip-host:first-child .banner-tip {
+        left: 0;
+        transform: none;
+    }
+
+    .actions-right .banner-tip {
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+
+    .tip-host:hover .banner-tail,
+    .tip-host:hover .banner-tip,
+    .tip-host:focus-within .banner-tail,
+    .tip-host:focus-within .banner-tip {
+        opacity: 1;
+    }
+
     .mode-toggle {
         background: none;
         border: none;
@@ -202,6 +335,7 @@
         align-items: center;
         justify-content: center;
         flex: 1;
+        gap: 0.75rem;
     }
 
     .error-pill {
@@ -254,8 +388,41 @@
     @media (max-width: 800px) {
         .banner-container {
             flex-direction: column;
-            gap: 1rem;
-            padding: 0.5rem;
+            align-items: stretch;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            box-sizing: border-box;
+        }
+
+        .status-left,
+        .controls-center,
+        .actions-right {
+            width: 100%;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+
+        .status-left {
+            gap: 0.5rem;
+        }
+
+        .active-info {
+            flex: 1 1 12rem;
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .banner-model-select {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .status-left > .tip-host .banner-tip,
+        .actions-right .banner-tip {
+            left: 0;
+            right: auto;
+            transform: none;
         }
     }
 </style>

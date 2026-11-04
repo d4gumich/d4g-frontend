@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { HOST_URL } from "$lib/aiSetupStore.js";
+  import { rememberCsrf } from "$lib/byokSession.js";
   import Button from "./button.svelte";
   import Icon from "@iconify/svelte";
 
@@ -35,10 +36,11 @@
         },
       );
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.detail || "Failed to initialize session.");
       }
+      rememberCsrf("lighthouse", data.csrf_token);
 
       onComplete();
     } catch (err) {

@@ -113,8 +113,8 @@
       if (status && $lighthouseStatus.sessionActive) {
         secretKey = "verified-session";
       }
-    } catch (err) {
-      console.error("Session check failed:", err);
+    } catch {
+      /* An unreachable session check leaves the experimental cards locked. */
     }
   }
 
