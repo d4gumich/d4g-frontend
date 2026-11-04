@@ -145,8 +145,8 @@ async function apiRequest(path, options = {}) {
 let scheduledSeat = null;
 
 export const lighthouseActions = {
-  useScheduledSeat(token, session) {
-    scheduledSeat = token && session ? { token, session } : null;
+  useScheduledSeat(token, session, practice = false) {
+    scheduledSeat = token && session ? { token, session, practice } : null;
   },
 
   rememberEngine(snapshot) {
@@ -389,6 +389,7 @@ export const lighthouseActions = {
       if (scheduledSeat) {
         formData.append("token", scheduledSeat.token);
         formData.append("session", scheduledSeat.session);
+        if (scheduledSeat.practice) formData.append("practice", "true");
         const baseUrl = HOST_URL.endsWith("/") ? HOST_URL : `${HOST_URL}/`;
         const response = await fetch(
           `${baseUrl}api/v1/products/lighthouse/schedule/parse`,
@@ -576,6 +577,7 @@ export const lighthouseActions = {
                 session: scheduledSeat.session,
                 resume_text: text,
                 sanitize,
+                practice: Boolean(scheduledSeat.practice),
               }),
             },
           );

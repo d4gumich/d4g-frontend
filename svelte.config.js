@@ -12,6 +12,9 @@ const config = {
     adapter: adapter({
       fallback: "404.html",
     }),
+    prerender: {
+      entries: ["*", "/products/lighthouse-dev"],
+    },
     csp: {
       mode: "auto",
       directives: {

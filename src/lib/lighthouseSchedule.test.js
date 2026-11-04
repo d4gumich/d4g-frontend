@@ -13,6 +13,7 @@ import {
   googleCalendarUrl,
   highlightedDayNumbers,
   canReturnSeat,
+  showPracticeControls,
   scheduleLine,
   seatControls,
   analysisSourceLabel,
@@ -67,6 +68,14 @@ test("a warmup countdown shows seconds and opens when it runs out", () => {
   const opened = scheduleLine(warming, start + 1000, 0);
   assert.match(opened, /Deep session is live/);
   assert.match(opened, /29m 59s/);
+});
+
+test("the practice bar stays off the public page", () => {
+  const practicePayload = { dev: true, dev_preset: "open" };
+  assert.equal(showPracticeControls(false, practicePayload), false);
+  assert.equal(showPracticeControls(undefined, practicePayload), false);
+  assert.equal(showPracticeControls(true, { phase: "closed" }), false);
+  assert.equal(showPracticeControls(true, practicePayload), true);
 });
 
 test("open now does not call the session live until a seat starts the clock", () => {

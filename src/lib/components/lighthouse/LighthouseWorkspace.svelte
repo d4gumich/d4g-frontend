@@ -9,6 +9,8 @@
   import {
     clockSkewMs,
     fetchEngineStatus,
+    fetchPracticeEngine,
+    fetchPracticeSchedule,
     canReturnSeat,
     fetchSchedule,
     seatWindowOpen,
@@ -26,7 +28,7 @@
   } from "$lib/lighthouseSchedule.js";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
-  let { personal = false } = $props();
+  let { personal = false, practice = false } = $props();
 
   let schedule = $state(null);
   let engine = $state(null);
@@ -41,6 +43,7 @@
   let leaving = $state(false);
   let showTesterKey = $state(false);
   let keyForLeave = $state(false);
+  let practiceOff = $state(false);
 
   const focusDate = $derived(schedule?.seat_session || "");
   const phase = $derived(schedule ? livePhase(schedule, now, skew) : "closed");
@@ -101,7 +104,7 @@
         forgetSeat(focusDate);
         return;
       }
-      const result = await releaseSeat(token, focusDate);
+      const result = await releaseSeat(token, focusDate, undefined, practice);
       if (schedule) {
         schedule = {
           ...schedule,
@@ -129,12 +132,18 @@
 
   async function refresh() {
     try {
-      schedule = await fetchSchedule();
+      schedule = practice
+        ? await fetchPracticeSchedule()
+        : await fetchSchedule();
       skew = clockSkewMs(schedule.server_time, Date.now());
-      engine = await fetchEngineStatus();
+      engine = practice
+        ? await fetchPracticeEngine()
+        : await fetchEngineStatus();
       lighthouseActions.rememberEngine(engine);
       held = readHeld();
-    } catch {
+      practiceOff = false;
+    } catch (error) {
+      if (practice && error?.status === 404) practiceOff = true;
       /* Keep the last schedule if a refresh fails. */
     }
   }
@@ -179,7 +188,7 @@
         ? ""
         : sessionStorage.getItem(SEAT_TOKEN_KEY);
     if (canUpload && token) {
-      lighthouseActions.useScheduledSeat(token, focusDate);
+      lighthouseActions.useScheduledSeat(token, focusDate, practice);
     } else {
       lighthouseActions.useScheduledSeat(null, null);
     }
@@ -222,109 +231,113 @@
 </script>
 
 <section class="workspace" aria-label="Lighthouse seat workspace">
-  {#if !personal}
-    {#if line}
-      <p class="session-line">{line}</p>
-    {/if}
-    {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
-      <p class="session-warning">
-        {SESSION_ENDED_WARNING} Resume upload is closed.
-      </p>
-    {/if}
-    <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
-    {#if leaveError}
-      <p class="upload-error" role="alert">{leaveError}</p>
-    {/if}
-  {/if}
-  <div class="dashboard-grid">
-    <aside class="sidebar">
-      <div class="card upload-card">
-        <h3>Upload Document</h3>
-        <p>Analyze your PDF resume</p>
-        {#if !canUpload}
-          <p class="gate">
-            {#if phase === "drain"}
-              {SESSION_DRAIN_WARNING}
-            {:else if seated && phase === "closed"}
-              {SESSION_ENDED_WARNING} Resume upload is closed.
-            {:else}
-              Take a seat while a session is starting or live. Reading the PDF
-              does not wait for the engine.
-            {/if}
-          </p>
-        {/if}
-        <div class="file-options">
-          <label class="checkbox-container">
-            <input type="checkbox" bind:checked={shouldSanitize} />
-            Sanitize PDF (Remove PII)
-          </label>
-        </div>
-        <div class="file-input-group">
-          <input
-            bind:this={fileInput}
-            id="pdf-upload"
-            class="file-input"
-            type="file"
-            accept="application/pdf"
-            onchange={handleFileChange}
-          />
-          <label for="pdf-upload" class="file-label">
-            {file ? file.name : "Choose PDF..."}
-          </label>
-        </div>
-        <button
-          class="btn-primary w-full"
-          class:btn-loading={$lighthouseResults.loading}
-          type="button"
-          onclick={handleUpload}
-          disabled={!canUpload || !file || $lighthouseResults.loading}
-        >
-          {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
-        </button>
-        {#if uploadError}
-          <p class="upload-error" role="alert">{uploadError}</p>
-        {/if}
-      </div>
-
-      {#if $lighthouseResults.history.length > 0}
-        <div class="card history-card">
-          <h3>Recent Documents</h3>
-          <div class="history-list">
-            {#each $lighthouseResults.history as doc (doc.id)}
-              <div
-                class="history-item"
-                class:active={doc.id === $lighthouseResults.currentId}
-              >
-                <button
-                  class="select-doc"
-                  type="button"
-                  onclick={() => lighthouseActions.selectDocument(doc.id)}
-                >
-                  <span class="doc-name">{doc.name}</span>
-                  <span class="doc-meta">
-                    {new Date(doc.timestamp).toLocaleDateString()}
-                    · {sourceLabel(doc)}
-                  </span>
-                </button>
-                <button
-                  class="delete-doc"
-                  type="button"
-                  aria-label="Remove {doc.name}"
-                  onclick={() => lighthouseActions.deleteDocument(doc.id)}
-                >
-                  ✕
-                </button>
-              </div>
-            {/each}
-          </div>
-        </div>
+  {#if practiceOff}
+    <p role="status">Practice mode is off on this server.</p>
+  {:else}
+    {#if !personal}
+      {#if line}
+        <p class="session-line">{line}</p>
       {/if}
-    </aside>
+      {#if schedule?.dev_preset === "ended" || (seated && phase === "closed")}
+        <p class="session-warning">
+          {SESSION_ENDED_WARNING} Resume upload is closed.
+        </p>
+      {/if}
+      <EngineStatus {engine} {canLeave} {leaving} onLeave={leaveSeat} />
+      {#if leaveError}
+        <p class="upload-error" role="alert">{leaveError}</p>
+      {/if}
+    {/if}
+    <div class="dashboard-grid">
+      <aside class="sidebar">
+        <div class="card upload-card">
+          <h3>Upload Document</h3>
+          <p>Analyze your PDF resume</p>
+          {#if !canUpload}
+            <p class="gate">
+              {#if phase === "drain"}
+                {SESSION_DRAIN_WARNING}
+              {:else if seated && phase === "closed"}
+                {SESSION_ENDED_WARNING} Resume upload is closed.
+              {:else}
+                Take a seat while a session is starting or live. Reading the PDF
+                does not wait for the engine.
+              {/if}
+            </p>
+          {/if}
+          <div class="file-options">
+            <label class="checkbox-container">
+              <input type="checkbox" bind:checked={shouldSanitize} />
+              Sanitize PDF (Remove PII)
+            </label>
+          </div>
+          <div class="file-input-group">
+            <input
+              bind:this={fileInput}
+              id="pdf-upload"
+              class="file-input"
+              type="file"
+              accept="application/pdf"
+              onchange={handleFileChange}
+            />
+            <label for="pdf-upload" class="file-label">
+              {file ? file.name : "Choose PDF..."}
+            </label>
+          </div>
+          <button
+            class="btn-primary w-full"
+            class:btn-loading={$lighthouseResults.loading}
+            type="button"
+            onclick={handleUpload}
+            disabled={!canUpload || !file || $lighthouseResults.loading}
+          >
+            {$lighthouseResults.loading ? "UPLOADING..." : "UPLOAD & PARTITION"}
+          </button>
+          {#if uploadError}
+            <p class="upload-error" role="alert">{uploadError}</p>
+          {/if}
+        </div>
 
-    <section class="main-content">
-      <LighthouseResults {personal} />
-    </section>
-  </div>
+        {#if $lighthouseResults.history.length > 0}
+          <div class="card history-card">
+            <h3>Recent Documents</h3>
+            <div class="history-list">
+              {#each $lighthouseResults.history as doc (doc.id)}
+                <div
+                  class="history-item"
+                  class:active={doc.id === $lighthouseResults.currentId}
+                >
+                  <button
+                    class="select-doc"
+                    type="button"
+                    onclick={() => lighthouseActions.selectDocument(doc.id)}
+                  >
+                    <span class="doc-name">{doc.name}</span>
+                    <span class="doc-meta">
+                      {new Date(doc.timestamp).toLocaleDateString()}
+                      · {sourceLabel(doc)}
+                    </span>
+                  </button>
+                  <button
+                    class="delete-doc"
+                    type="button"
+                    aria-label="Remove {doc.name}"
+                    onclick={() => lighthouseActions.deleteDocument(doc.id)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </aside>
+
+      <section class="main-content">
+        <LighthouseResults {personal} />
+      </section>
+    </div>
+  {/if}
 </section>
 
 {#if showTesterKey}

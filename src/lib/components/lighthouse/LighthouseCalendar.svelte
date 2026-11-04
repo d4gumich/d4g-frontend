@@ -10,6 +10,8 @@
     clockSkewMs,
     detroitDate,
     fetchEngineStatus,
+    fetchPracticeEngine,
+    fetchPracticeSchedule,
     fetchSchedule,
     formatSessionRange,
     googleCalendarUrl,
@@ -29,13 +31,14 @@
     sessionIcs,
     sessionInstants,
     setDevSchedule,
+    showPracticeControls,
     TesterKeyRequired,
   } from "$lib/lighthouseSchedule.js";
   import { lighthouseActions } from "$lib/lighthouseStore.js";
   import EngineStatus from "$lib/components/lighthouse/EngineStatus.svelte";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
-  let { onUpload = () => {} } = $props();
+  let { onUpload = () => {}, practice = false } = $props();
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const PRACTICE_PRESETS = ["soon", "open", "drain", "ended"];
@@ -57,6 +60,7 @@
   let pendingSeatDate = $state(null);
   let devNotice = $state("");
   let engine = $state(null);
+  let practiceOff = $state(false);
 
   const today = $derived(detroitDate(new Date(now - skew)));
   const line = $derived(payload ? scheduleLine(payload, now, skew) : "");
@@ -360,6 +364,15 @@
       }
       await refreshEngine();
     } catch (error) {
+      if (error instanceof TesterKeyRequired) {
+        pendingAction = "refresh";
+        showTesterKey = true;
+        return;
+      }
+      if (error?.status === 404) {
+        practiceOff = true;
+        return;
+      }
       failed = true;
       claimError = error?.message || "Could not change the dev schedule.";
     }
@@ -370,24 +383,45 @@
     onUpload();
   }
 
+  function notePracticeFailure(error) {
+    if (error instanceof TesterKeyRequired) {
+      pendingAction = "refresh";
+      showTesterKey = true;
+      return;
+    }
+    if (error?.status === 404) {
+      practiceOff = true;
+      failed = false;
+      return;
+    }
+    failed = true;
+  }
+
   async function refreshEngine() {
     try {
-      engine = await fetchEngineStatus();
+      engine = practice
+        ? await fetchPracticeEngine()
+        : await fetchEngineStatus();
       lighthouseActions.rememberEngine(engine);
-    } catch {
+    } catch (error) {
+      if (practice) notePracticeFailure(error);
       engine = null;
     }
   }
 
   async function refresh() {
     try {
-      const next = await fetchSchedule();
+      const next = practice
+        ? await fetchPracticeSchedule()
+        : await fetchSchedule();
       payload = next;
       skew = clockSkewMs(next.server_time, Date.now());
       failed = false;
+      practiceOff = false;
       await refreshEngine();
-    } catch {
-      failed = true;
+    } catch (error) {
+      if (practice) notePracticeFailure(error);
+      else failed = true;
     }
   }
 
@@ -421,7 +455,7 @@
     claiming = true;
     claimError = "";
     try {
-      const result = await claimSeat(seatToken(), date);
+      const result = await claimSeat(seatToken(), date, undefined, practice);
       payload = {
         ...payload,
         seat_cap: result.seat_cap,
@@ -453,7 +487,7 @@
     leaving = true;
     claimError = "";
     try {
-      const result = await releaseSeat(seatToken(), date);
+      const result = await releaseSeat(seatToken(), date, undefined, practice);
       payload = {
         ...payload,
         seat_cap: result.seat_cap,
@@ -487,7 +521,10 @@
     const action = pendingAction;
     pendingSeatDate = null;
     pendingAction = "claim";
-    if (!date) return;
+    if (action === "refresh" || !date) {
+      refresh();
+      return;
+    }
     if (action === "leave") leaveSeat(date);
     else saveSeat(date);
   }
@@ -577,7 +614,11 @@
 <svelte:window onkeydown={onKeydown} />
 
 <section class="schedule-card" aria-label="Lighthouse Deep session schedule">
-  {#if payload?.dev}
+  {#if practiceOff}
+    <p class="practice-off" role="status">
+      Practice mode is off on this server.
+    </p>
+  {:else if showPracticeControls(practice, payload)}
     <div class="dev-bar" role="region" aria-label="Schedule practice controls">
       <p>
         Practice schedule. Only Open now starts the GPU, and only after someone
@@ -661,66 +702,73 @@
       {/if}
     </div>
   {/if}
-  <div class="schedule-header">
-    <h2>Deep sessions</h2>
-    <p>{failed ? "Schedule unavailable." : line}</p>
-    {#if payload}
-      <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
-    {/if}
-    {#if payload?.dev_preset === "ended"}
-      <p class="session-warning">{SESSION_ENDED_WARNING} Take a seat is off.</p>
-    {/if}
-    <EngineStatus
-      {engine}
-      canLeave={canLeaveFocus}
-      {leaving}
-      onLeave={() => leaveSeat(focusDate)}
-    />
-    {#if (canUseFocusSeat || canLeaveFocus) && !selected}
-      <p class="next-step">
-        You have a seat.
-        {#if canUseFocusSeat}
-          <button type="button" onclick={continueToUpload}>Use your seat</button
+  {#if !practiceOff}
+    <div class="schedule-header">
+      <h2>Deep sessions</h2>
+      <p>{failed ? "Schedule unavailable." : line}</p>
+      {#if payload}
+        <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
+      {/if}
+      {#if payload?.dev_preset === "ended"}
+        <p class="session-warning">
+          {SESSION_ENDED_WARNING} Take a seat is off.
+        </p>
+      {/if}
+      <EngineStatus
+        {engine}
+        canLeave={canLeaveFocus}
+        {leaving}
+        onLeave={() => leaveSeat(focusDate)}
+      />
+      {#if (canUseFocusSeat || canLeaveFocus) && !selected}
+        <p class="next-step">
+          You have a seat.
+          {#if canUseFocusSeat}
+            <button type="button" onclick={continueToUpload}
+              >Use your seat</button
+            >
+          {/if}
+        </p>
+      {/if}
+    </div>
+
+    <div class="month-nav">
+      <button
+        type="button"
+        onclick={() => shiftMonth(-1)}
+        aria-label="Previous month"
+        disabled={!previousEnabled}
+      >
+        ‹
+      </button>
+      <strong>{monthLabel}</strong>
+      <button
+        type="button"
+        onclick={() => shiftMonth(1)}
+        aria-label="Next month">›</button
+      >
+    </div>
+    <div class="month-grid">
+      {#each WEEKDAYS as name}
+        <span class="dow">{name}</span>
+      {/each}
+      {#each { length: leadingBlanks } as _}
+        <span aria-hidden="true"></span>
+      {/each}
+      {#each { length: daysInMonth } as _, index}
+        {@const day = index + 1}
+        {#if clickable.includes(day)}
+          <button type="button" class="day session" onclick={() => openDay(day)}
+            >{day}</button
+          >
+        {:else}
+          <span class="day" class:was-session={sessionDays.includes(day)}
+            >{day}</span
           >
         {/if}
-      </p>
-    {/if}
-  </div>
-
-  <div class="month-nav">
-    <button
-      type="button"
-      onclick={() => shiftMonth(-1)}
-      aria-label="Previous month"
-      disabled={!previousEnabled}
-    >
-      ‹
-    </button>
-    <strong>{monthLabel}</strong>
-    <button type="button" onclick={() => shiftMonth(1)} aria-label="Next month"
-      >›</button
-    >
-  </div>
-  <div class="month-grid">
-    {#each WEEKDAYS as name}
-      <span class="dow">{name}</span>
-    {/each}
-    {#each { length: leadingBlanks } as _}
-      <span aria-hidden="true"></span>
-    {/each}
-    {#each { length: daysInMonth } as _, index}
-      {@const day = index + 1}
-      {#if clickable.includes(day)}
-        <button type="button" class="day session" onclick={() => openDay(day)}
-          >{day}</button
-        >
-      {:else}
-        <span class="day" class:was-session={sessionDays.includes(day)}
-          >{day}</span
-        >
-      {/if}
-    {/each}
-  </div>
+      {/each}
+    </div>
+  {/if}
 </section>
 
 {#if selectedSession}
@@ -815,6 +863,10 @@
 {/if}
 
 <style>
+  .practice-off {
+    margin: 0 0 1rem;
+  }
+
   .dev-bar {
     margin-bottom: 1rem;
     padding: 0.8rem 0.9rem;
@@ -995,7 +1047,9 @@
     border-radius: 999px;
     line-height: 1;
     padding: 0.15rem 0.45rem;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
   }
   .month-nav button:hover:not(:disabled),
   .month-nav button:focus-visible:not(:disabled),
@@ -1038,7 +1092,11 @@
     font: inherit;
     font-size: 0.95rem;
     border-radius: 999px;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
   }
   .day:hover {
     background: #e3ebf5;
