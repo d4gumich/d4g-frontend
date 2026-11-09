@@ -1,6 +1,6 @@
 <script>
   import { onDestroy, onMount } from "svelte";
-  import { formatElapsed } from "$lib/lighthouseSchedule.js";
+  import { formatElapsed, huggingFaceNotice } from "$lib/lighthouseSchedule.js";
 
   let {
     engine = null,
@@ -36,6 +36,7 @@
   });
   const stepIndex = $derived(STEPS.findIndex(([id]) => id === displayStep));
   const showSteps = $derived(stepIndex >= 0);
+  const notice = $derived(huggingFaceNotice(engine));
   const startupLabel = $derived.by(() => {
     const startup = engine?.startup;
     if (!startup?.started_at) return "";
@@ -57,7 +58,7 @@
 </script>
 
 {#if engine?.summary}
-  <div class="engine-status" class:problem={engine.step === "error"}>
+  <div class="engine-status" class:problem={engine.step === "error" || Boolean(notice)}>
     {#if showSteps || canLeave}
       <ol>
         {#if showSteps}
@@ -84,6 +85,9 @@
     {/if}
     {#if startupLabel}
       <p class="startup">{startupLabel}</p>
+    {/if}
+    {#if notice && notice !== engine.summary}
+      <p class="hf-notice" role="status">{notice}</p>
     {/if}
     <p>{engine.summary}</p>
   </div>
@@ -234,6 +238,10 @@
   }
   p {
     margin: 0;
+  }
+  .hf-notice {
+    margin-bottom: 0.35rem;
+    font-weight: 700;
   }
   .startup {
     margin-bottom: 0.35rem;
