@@ -13,7 +13,7 @@ const config = {
       fallback: "404.html",
     }),
     prerender: {
-      entries: ["*", "/products/lighthouse-dev"],
+      entries: ["*"],
     },
     csp: {
       mode: "auto",

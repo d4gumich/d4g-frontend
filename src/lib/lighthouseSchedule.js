@@ -463,6 +463,32 @@ export function googleCalendarUrl(session) {
 export const SEAT_TOKEN_KEY = "lighthouse_seat_token";
 export const HELD_SEATS_KEY = "lighthouse_seats_held";
 
+export const HUGGING_FACE_DOWN =
+  "The schedule is connected. Hugging Face is not responding.";
+export const HUGGING_FACE_ERROR =
+  "The schedule is connected. Hugging Face reported a problem with the engine.";
+
+export function huggingFaceNotice(engine) {
+  if (!engine || engine.huggingface === "unchecked") return "";
+  if (engine.huggingface === "error" || engine.step === "error") {
+    return HUGGING_FACE_ERROR;
+  }
+  if (engine.huggingface === "down" || engine.step === "unknown") {
+    return HUGGING_FACE_DOWN;
+  }
+  return "";
+}
+
+export function unreadEngine() {
+  return {
+    stage: "UNKNOWN",
+    hardware: null,
+    step: "unknown",
+    huggingface: "down",
+    summary: HUGGING_FACE_DOWN,
+  };
+}
+
 export class TesterKeyRequired extends Error {
   constructor() {
     super("A team security key is required for this user test.");
@@ -515,7 +541,7 @@ async function readDetail(response) {
 
 function practiceError(response, detail, fallback) {
   if (response.status === 404) {
-    const error = new Error("Practice mode is off on this server.");
+    const error = new Error(fallback);
     error.status = 404;
     return error;
   }
@@ -523,26 +549,6 @@ function practiceError(response, detail, fallback) {
     return new TesterKeyRequired();
   }
   return new Error(typeof detail === "string" && detail ? detail : fallback);
-}
-
-export async function fetchPracticeSchedule(baseUrl) {
-  const base = await scheduleBase(baseUrl);
-  const response = await fetch(
-    `${base}api/v1/products/lighthouse/schedule/dev`,
-    {
-      credentials: "include",
-      cache: "no-store",
-      headers: await seatHeaders(),
-    },
-  );
-  if (!response.ok) {
-    throw practiceError(
-      response,
-      await readDetail(response),
-      `Practice schedule request failed: ${response.status}`,
-    );
-  }
-  return response.json();
 }
 
 export async function claimSeat(token, sessionDate, baseUrl, practice = false) {
@@ -604,49 +610,6 @@ export async function fetchEngineStatus(baseUrl) {
   );
   if (!response.ok) {
     throw new Error(`Engine status request failed: ${response.status}`);
-  }
-  return response.json();
-}
-
-export async function fetchPracticeEngine(baseUrl) {
-  const base = await scheduleBase(baseUrl);
-  const response = await fetch(
-    `${base}api/v1/products/lighthouse/schedule/dev/engine`,
-    {
-      credentials: "include",
-      cache: "no-store",
-      headers: await seatHeaders(),
-    },
-  );
-  if (!response.ok) {
-    throw practiceError(
-      response,
-      await readDetail(response),
-      `Practice engine request failed: ${response.status}`,
-    );
-  }
-  return response.json();
-}
-
-export async function setDevSchedule(preset, sessionDate, baseUrl) {
-  const base = await scheduleBase(baseUrl);
-  const body = { preset };
-  if (sessionDate) body.session = sessionDate;
-  const response = await fetch(
-    `${base}api/v1/products/lighthouse/schedule/dev`,
-    {
-      method: "POST",
-      credentials: "include",
-      headers: await seatHeaders(),
-      body: JSON.stringify(body),
-    },
-  );
-  if (!response.ok) {
-    throw practiceError(
-      response,
-      await readDetail(response),
-      `Dev schedule request failed: ${response.status}`,
-    );
   }
   return response.json();
 }

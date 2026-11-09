@@ -13,7 +13,9 @@ import {
   googleCalendarUrl,
   highlightedDayNumbers,
   canReturnSeat,
+  huggingFaceNotice,
   showPracticeControls,
+  unreadEngine,
   scheduleLine,
   seatControls,
   analysisSourceLabel,
@@ -68,6 +70,30 @@ test("a warmup countdown shows seconds and opens when it runs out", () => {
   const opened = scheduleLine(warming, start + 1000, 0);
   assert.match(opened, /Deep session is live/);
   assert.match(opened, /29m 59s/);
+});
+
+test("a connected schedule names a Hugging Face failure", () => {
+  assert.equal(huggingFaceNotice(null), "");
+  assert.equal(
+    huggingFaceNotice({ huggingface: "unchecked", step: "practice" }),
+    "",
+  );
+  assert.equal(huggingFaceNotice({ huggingface: "ok", step: "asleep" }), "");
+  assert.equal(
+    huggingFaceNotice({ huggingface: "down", step: "asleep" }),
+    "The schedule is connected. Hugging Face is not responding.",
+  );
+  assert.equal(
+    huggingFaceNotice({ step: "unknown" }),
+    "The schedule is connected. Hugging Face is not responding.",
+  );
+  assert.match(
+    huggingFaceNotice({ huggingface: "error", step: "error" }),
+    /problem with the engine/,
+  );
+  const missed = unreadEngine();
+  assert.equal(missed.huggingface, "down");
+  assert.equal(huggingFaceNotice(missed), missed.summary);
 });
 
 test("the practice bar stays off the public page", () => {

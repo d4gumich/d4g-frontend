@@ -9,8 +9,6 @@
   import {
     clockSkewMs,
     fetchEngineStatus,
-    fetchPracticeEngine,
-    fetchPracticeSchedule,
     canReturnSeat,
     fetchSchedule,
     seatWindowOpen,
@@ -25,10 +23,12 @@
     SESSION_ENDED_WARNING,
     SEAT_TOKEN_KEY,
     TesterKeyRequired,
+    unreadEngine,
   } from "$lib/lighthouseSchedule.js";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
-  let { personal = false, practice = false } = $props();
+  let { personal = false, practice = false, practiceClient = null } = $props();
+  const practicePage = $derived(practice === true && practiceClient != null);
 
   let schedule = $state(null);
   let engine = $state(null);
@@ -44,6 +44,8 @@
   let showTesterKey = $state(false);
   let keyForLeave = $state(false);
   let practiceOff = $state(false);
+  let practiceKeyTried = $state(false);
+  let keyForPractice = $state(false);
 
   const focusDate = $derived(schedule?.seat_session || "");
   const phase = $derived(schedule ? livePhase(schedule, now, skew) : "closed");
@@ -104,7 +106,7 @@
         forgetSeat(focusDate);
         return;
       }
-      const result = await releaseSeat(token, focusDate, undefined, practice);
+      const result = await releaseSeat(token, focusDate, undefined, practicePage);
       if (schedule) {
         schedule = {
           ...schedule,
@@ -130,22 +132,46 @@
     return sourceTag(doc, now);
   }
 
+  function notePracticeLoadFailure(error) {
+    if (
+      error instanceof TesterKeyRequired ||
+      (error?.status === 404 && !practiceKeyTried)
+    ) {
+      keyForPractice = true;
+      showTesterKey = true;
+      return;
+    }
+    if (error?.status === 404) {
+      practiceOff = true;
+      lighthouseActions.rememberEngine(null);
+    }
+  }
+
   async function refresh() {
     try {
-      schedule = practice
-        ? await fetchPracticeSchedule()
+      schedule = practicePage
+        ? await practiceClient.fetchSchedule()
         : await fetchSchedule();
       skew = clockSkewMs(schedule.server_time, Date.now());
-      engine = practice
-        ? await fetchPracticeEngine()
-        : await fetchEngineStatus();
-      lighthouseActions.rememberEngine(engine);
-      held = readHeld();
       practiceOff = false;
     } catch (error) {
-      if (practice && error?.status === 404) practiceOff = true;
-      /* Keep the last schedule if a refresh fails. */
+      if (practicePage) notePracticeLoadFailure(error);
+      else lighthouseActions.rememberEngine(null);
+      return;
     }
+    try {
+      engine = practicePage
+        ? await practiceClient.fetchEngine()
+        : await fetchEngineStatus();
+      lighthouseActions.rememberEngine(engine);
+    } catch (error) {
+      if (practicePage) notePracticeLoadFailure(error);
+      else {
+        engine = unreadEngine();
+        lighthouseActions.rememberEngine(engine);
+      }
+    }
+    held = readHeld();
   }
 
   function handleFileChange(event) {
@@ -231,8 +257,21 @@
 </script>
 
 <section class="workspace" aria-label="Lighthouse seat workspace">
-  {#if practiceOff}
-    <p role="status">Practice mode is off on this server.</p>
+  {#if practicePage && practiceOff}
+    <p role="status">
+      {practiceClient.unavailable}
+      <button
+        class="retry"
+        type="button"
+        onclick={() => {
+          practiceKeyTried = false;
+          keyForPractice = true;
+          showTesterKey = true;
+        }}
+      >
+        Enter team key
+      </button>
+    </p>
   {:else}
     {#if !personal}
       {#if line}
@@ -344,14 +383,23 @@
   <LighthouseSetup
     onComplete={() => {
       const leavingAfterKey = keyForLeave;
+      const practiceAfterKey = keyForPractice;
       showTesterKey = false;
       keyForLeave = false;
+      keyForPractice = false;
+      if (practiceAfterKey) practiceKeyTried = true;
       if (leavingAfterKey) leaveSeat();
+      else if (practiceAfterKey) refresh();
       else handleUpload();
     }}
     onCancel={() => {
+      if (keyForPractice && !schedule) {
+        practiceKeyTried = true;
+        practiceOff = true;
+      }
       showTesterKey = false;
       keyForLeave = false;
+      keyForPractice = false;
     }}
   />
 {/if}
@@ -361,6 +409,18 @@
     max-width: 1400px;
     margin: 0 auto 2rem;
     padding: 0 2rem;
+  }
+  .retry {
+    display: block;
+    margin-top: 0.6rem;
+    border: 0;
+    background: transparent;
+    color: #1b3350;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
   }
   .session-line {
     margin: 0 0 0.85rem;

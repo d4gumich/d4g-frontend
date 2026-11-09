@@ -5,6 +5,7 @@
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
   import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
+  import { lighthouseStatus } from "$lib/lighthouseStore.js";
   import { browser } from "$app/environment";
   import { onMount } from "svelte";
   import { base } from "$app/paths";
@@ -33,6 +34,9 @@
 
 <div class="demo-warning">
   ⚠️ DEMO VERSION: This is an experimental prototype still in development.
+  {#if $lighthouseStatus.huggingFaceNotice}
+    <span class="hf-line" role="status">{$lighthouseStatus.huggingFaceNotice}</span>
+  {/if}
 </div>
 
 <div class="navbar">

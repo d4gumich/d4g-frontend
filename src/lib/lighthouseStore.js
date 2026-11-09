@@ -1,7 +1,10 @@
 import { writable, get } from "svelte/store";
 import { HOST_URL } from "$lib/config.js";
 import { clearCsrf, csrfHeaders, rememberCsrf } from "$lib/byokSession.js";
-import { TesterKeyRequired } from "$lib/lighthouseSchedule.js";
+import {
+  TesterKeyRequired,
+  huggingFaceNotice,
+} from "$lib/lighthouseSchedule.js";
 import {
   messageForNetworkFailure,
   messageForStatus,
@@ -51,6 +54,7 @@ export const lighthouseStatus = writable({
   isRefreshing: false,
   requestedHardware: null,
   error: null,
+  huggingFaceNotice: "",
   sessionActive: false,
   sessionRemaining: null, // Seconds remaining in the 59-min window
 });
@@ -154,6 +158,7 @@ export const lighthouseActions = {
       ...s,
       stage: snapshot?.stage || "OFFLINE",
       hardware: snapshot?.hardware || "None",
+      huggingFaceNotice: huggingFaceNotice(snapshot),
     }));
   },
 

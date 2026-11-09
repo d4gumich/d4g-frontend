@@ -10,8 +10,6 @@
     clockSkewMs,
     detroitDate,
     fetchEngineStatus,
-    fetchPracticeEngine,
-    fetchPracticeSchedule,
     fetchSchedule,
     formatSessionRange,
     googleCalendarUrl,
@@ -25,23 +23,28 @@
     scheduledTesterActive,
     seatControls,
     SEAT_TOKEN_KEY,
-    SESSION_DRAIN_WARNING,
     SESSION_ENDED_WARNING,
     sessionDateKey,
     sessionIcs,
     sessionInstants,
-    setDevSchedule,
     showPracticeControls,
     TesterKeyRequired,
+    unreadEngine,
   } from "$lib/lighthouseSchedule.js";
   import { lighthouseActions } from "$lib/lighthouseStore.js";
   import EngineStatus from "$lib/components/lighthouse/EngineStatus.svelte";
   import LighthouseSetup from "$lib/components/LighthouseSetup.svelte";
 
-  let { onUpload = () => {}, practice = false } = $props();
+  let {
+    onUpload = () => {},
+    practice = false,
+    practiceClient = null,
+    practiceBar = null,
+    practiceExtra = null,
+  } = $props();
+  const practicePage = $derived(practice === true && practiceClient != null);
 
   const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const PRACTICE_PRESETS = ["soon", "open", "drain", "ended"];
 
   let payload = $state(null);
   let skew = $state(0);
@@ -61,6 +64,7 @@
   let devNotice = $state("");
   let engine = $state(null);
   let practiceOff = $state(false);
+  let practiceKeyTried = $state(false);
 
   const today = $derived(detroitDate(new Date(now - skew)));
   const line = $derived(payload ? scheduleLine(payload, now, skew) : "");
@@ -312,69 +316,30 @@
       selectedDate ||
       focusDate ||
       sessionDateKey(today.year, today.monthIndex, today.day);
+    if (!practiceClient?.apply) return;
     try {
-      const next = await setDevSchedule(
-        preset,
-        preset === "fill_seats" ? session : undefined,
-      );
-      payload = next;
-      skew = clockSkewMs(next.server_time, Date.now());
+      const result = await practiceClient.apply(preset, session);
+      payload = result.payload;
+      skew = clockSkewMs(result.payload.server_time, Date.now());
       failed = false;
-      if (preset === "reset_seats") releaseLocalSeats();
-      const shown = showDevDate(
-        preset === "fill_seats" ? session : next.dev_date,
-      );
-      const openPopup =
-        shown &&
-        (PRACTICE_PRESETS.includes(preset) ||
-          preset === "fill_seats" ||
-          preset === "fast_forward");
-      if (openPopup) {
+      if (result.releaseSeats) releaseLocalSeats();
+      const shown = showDevDate(result.showDate);
+      if (result.openPopup && shown) {
         selected = shown;
         zoneIndex = 0;
         claimError = "";
-      }
-      if (preset === "open") {
-        const taken = Number(
-          next.seats?.[next.dev_date] ?? next.seats_taken ?? 0,
-        );
-        devNotice =
-          taken >= 1
-            ? "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it."
-            : "Open now is armed. The session clock and the GPU stay off until someone takes a seat.";
-      } else if (preset === "soon") {
-        devNotice =
-          "Session starts in 10 minutes. Fast forward skips that wait. The GPU stays off.";
-      } else if (preset === "fast_forward") {
-        devNotice = "Skipped the wait. The session is open. The GPU stays off.";
-      } else if (preset === "drain") {
-        devNotice = SESSION_DRAIN_WARNING;
-      } else if (preset === "ended") {
-        devNotice = `${SESSION_ENDED_WARNING} Take a seat is off.`;
-      } else if (preset === "clear") {
+      } else if (result.clearSelection) {
         selected = null;
-        devNotice = "Real Tuesday and Thursday calendar is on.";
-      } else if (preset === "reset_seats") {
-        devNotice = "Seats reset. Open a session, then take a seat.";
-      } else if (preset === "fill_seats") {
-        devNotice =
-          next.dev_preset === "open"
-            ? "All 30 seats are filled. The GPU starts because someone has a seat."
-            : "All 30 seats are filled. Take a seat stays off until you reset seats.";
       }
+      devNotice = result.notice;
       await refreshEngine();
     } catch (error) {
-      if (error instanceof TesterKeyRequired) {
-        pendingAction = "refresh";
-        showTesterKey = true;
-        return;
-      }
-      if (error?.status === 404) {
-        practiceOff = true;
+      if (error instanceof TesterKeyRequired || error?.status === 404) {
+        notePracticeFailure(error);
         return;
       }
       failed = true;
-      claimError = error?.message || "Could not change the dev schedule.";
+      claimError = error?.message || "Could not update the schedule.";
     }
   }
 
@@ -384,7 +349,10 @@
   }
 
   function notePracticeFailure(error) {
-    if (error instanceof TesterKeyRequired) {
+    if (
+      error instanceof TesterKeyRequired ||
+      (error?.status === 404 && !practiceKeyTried)
+    ) {
       pendingAction = "refresh";
       showTesterKey = true;
       return;
@@ -392,6 +360,7 @@
     if (error?.status === 404) {
       practiceOff = true;
       failed = false;
+      lighthouseActions.rememberEngine(null);
       return;
     }
     failed = true;
@@ -399,20 +368,30 @@
 
   async function refreshEngine() {
     try {
-      engine = practice
-        ? await fetchPracticeEngine()
+      engine = practicePage
+        ? await practiceClient.fetchEngine()
         : await fetchEngineStatus();
       lighthouseActions.rememberEngine(engine);
     } catch (error) {
-      if (practice) notePracticeFailure(error);
+      if (practicePage) {
+        notePracticeFailure(error);
+        engine = null;
+        return;
+      }
+      if (payload) {
+        engine = unreadEngine();
+        lighthouseActions.rememberEngine(engine);
+        return;
+      }
       engine = null;
+      lighthouseActions.rememberEngine(null);
     }
   }
 
   async function refresh() {
     try {
-      const next = practice
-        ? await fetchPracticeSchedule()
+      const next = practicePage
+        ? await practiceClient.fetchSchedule()
         : await fetchSchedule();
       payload = next;
       skew = clockSkewMs(next.server_time, Date.now());
@@ -420,8 +399,11 @@
       practiceOff = false;
       await refreshEngine();
     } catch (error) {
-      if (practice) notePracticeFailure(error);
-      else failed = true;
+      if (practicePage) notePracticeFailure(error);
+      else {
+        failed = true;
+        lighthouseActions.rememberEngine(null);
+      }
     }
   }
 
@@ -455,7 +437,7 @@
     claiming = true;
     claimError = "";
     try {
-      const result = await claimSeat(seatToken(), date, undefined, practice);
+      const result = await claimSeat(seatToken(), date, undefined, practicePage);
       payload = {
         ...payload,
         seat_cap: result.seat_cap,
@@ -463,17 +445,22 @@
       };
       if (result.accepted) {
         rememberSeat(date);
-        if (payload?.dev_preset === "open") {
-          devNotice =
-            "Open now requested the GPU. The startup timer runs until Hugging Face says it is ready. Another practice button stops it.";
+        if (practiceClient && payload?.dev_preset === "open") {
+          devNotice = practiceClient.notice("seat_taken", payload);
           await refresh();
         }
       }
     } catch (error) {
-      if (error instanceof TesterKeyRequired) {
-        pendingSeatDate = date;
-        pendingAction = "claim";
-        showTesterKey = true;
+      if (
+        error instanceof TesterKeyRequired ||
+        (practicePage && error?.status === 404)
+      ) {
+        if (practicePage && error?.status === 404) notePracticeFailure(error);
+        else {
+          pendingSeatDate = date;
+          pendingAction = "claim";
+          showTesterKey = true;
+        }
         return;
       }
       claimError = error?.message || "Could not save a seat.";
@@ -487,7 +474,12 @@
     leaving = true;
     claimError = "";
     try {
-      const result = await releaseSeat(seatToken(), date, undefined, practice);
+      const result = await releaseSeat(
+        seatToken(),
+        date,
+        undefined,
+        practicePage,
+      );
       payload = {
         ...payload,
         seat_cap: result.seat_cap,
@@ -498,15 +490,24 @@
             : payload?.seats_taken,
       };
       forgetSeat(date);
-      if (payload?.dev_preset === "open" && result.seats_taken < 1) {
-        devNotice =
-          "Open now is armed. The session clock and the GPU stay off until someone takes a seat.";
+      if (
+        practiceClient &&
+        payload?.dev_preset === "open" &&
+        result.seats_taken < 1
+      ) {
+        devNotice = practiceClient.notice("seat_left", payload);
       }
     } catch (error) {
-      if (error instanceof TesterKeyRequired) {
-        pendingSeatDate = date;
-        pendingAction = "leave";
-        showTesterKey = true;
+      if (
+        error instanceof TesterKeyRequired ||
+        (practicePage && error?.status === 404)
+      ) {
+        if (practicePage && error?.status === 404) notePracticeFailure(error);
+        else {
+          pendingSeatDate = date;
+          pendingAction = "leave";
+          showTesterKey = true;
+        }
         return;
       }
       claimError = error?.message || "Could not leave the session.";
@@ -517,6 +518,7 @@
 
   function finishTesterKey() {
     showTesterKey = false;
+    practiceKeyTried = true;
     const date = pendingSeatDate;
     const action = pendingAction;
     pendingSeatDate = null;
@@ -531,6 +533,10 @@
 
   function cancelTesterKey() {
     showTesterKey = false;
+    if (practicePage && !payload) {
+      practiceKeyTried = true;
+      practiceOff = true;
+    }
     pendingSeatDate = null;
     pendingAction = "claim";
   }
@@ -614,93 +620,18 @@
 <svelte:window onkeydown={onKeydown} />
 
 <section class="schedule-card" aria-label="Lighthouse Deep session schedule">
-  {#if practiceOff}
-    <p class="practice-off" role="status">
-      Practice mode is off on this server.
-    </p>
-  {:else if showPracticeControls(practice, payload)}
-    <div class="dev-bar" role="region" aria-label="Schedule practice controls">
-      <p>
-        Practice schedule. Only Open now starts the GPU, and only after someone
-        takes a seat. The session popup can skip the 10 minute wait, and that
-        stays off the GPU. Leaving Open now stops it.
-      </p>
-      <div class="dev-actions">
-        <button
-          type="button"
-          class:forwarded={payload.dev_preset === "soon" &&
-            payload.dev_forwarded}
-          aria-pressed={payload.dev_preset === "soon" && !payload.dev_forwarded}
-          onclick={() => chooseDev("soon")}
-        >
-          Starts in 10 min
-          <span class="dev-tail"></span>
-          <span class="dev-tip"
-            >Practice session starts in 10 minutes. The GPU stays off.</span
-          >
-        </button>
-        <button
-          type="button"
-          aria-pressed={payload.dev_preset === "open"}
-          onclick={() => chooseDev("open")}
-        >
-          Open now
-          <span class="dev-tail"></span>
-          <span class="dev-tip"
-            >Session is open now. The GPU starts only after someone takes a
-            seat. Another practice button stops it.</span
-          >
-        </button>
-        <button
-          type="button"
-          aria-pressed={payload.dev_preset === "drain"}
-          onclick={() => chooseDev("drain")}
-        >
-          Draining
-          <span class="dev-tail"></span>
-          <span class="dev-tip"
-            >Last minutes of the session. No new seats. People who already have
-            a seat can finish.</span
-          >
-        </button>
-        <button
-          type="button"
-          aria-pressed={payload.dev_preset === "ended"}
-          onclick={() => chooseDev("ended")}
-        >
-          Ended
-          <span class="dev-tail"></span>
-          <span class="dev-tip">The session is over. Take a seat is off.</span>
-        </button>
-        <button
-          type="button"
-          aria-pressed={!payload.dev_preset}
-          onclick={() => chooseDev("clear")}
-        >
-          Real calendar
-          <span class="dev-tail"></span>
-          <span class="dev-tip"
-            >Leave practice mode and show the real Tuesday and Thursday
-            schedule.</span
-          >
-        </button>
-        <button type="button" onclick={() => chooseDev("reset_seats")}>
-          Reset seats
-          <span class="dev-tail"></span>
-          <span class="dev-tip">Clear every held seat.</span>
-        </button>
-        <button type="button" onclick={() => chooseDev("fill_seats")}>
-          Fill seats
-          <span class="dev-tail"></span>
-          <span class="dev-tip"
-            >Fill all 30 seats. If Open now is on, that starts the GPU.</span
-          >
-        </button>
-      </div>
-      {#if devNotice}
-        <p class="dev-notice">{devNotice}</p>
-      {/if}
-    </div>
+  {#if practiceBar && practicePage && practiceOff}
+    {@render practiceBar({
+      kind: "unavailable",
+      message: practiceClient.unavailable,
+      retry: () => {
+        practiceKeyTried = false;
+        pendingAction = "refresh";
+        showTesterKey = true;
+      },
+    })}
+  {:else if practiceBar && showPracticeControls(practicePage, payload)}
+    {@render practiceBar({ kind: "controls", payload, devNotice, choose: chooseDev })}
   {/if}
   {#if !practiceOff}
     <div class="schedule-header">
@@ -815,12 +746,8 @@
         >
           {seat.label}
         </button>
-        {#if payload?.dev_preset === "soon" && (selectedStage === "pre_warm" || selectedStage === "upcoming")}
-          <button
-            type="button"
-            class="secondary"
-            onclick={() => chooseDev("fast_forward")}>Fast forward</button
-          >
+        {#if practiceExtra && practiceClient.showSkip(payload, selectedStage)}
+          {@render practiceExtra({ choose: chooseDev })}
         {/if}
         <button type="button" class="secondary" onclick={downloadCalendar}
           >Add to calendar</button
@@ -863,117 +790,12 @@
 {/if}
 
 <style>
-  .practice-off {
-    margin: 0 0 1rem;
-  }
-
-  .dev-bar {
-    margin-bottom: 1rem;
-    padding: 0.8rem 0.9rem;
-    border: 1px solid #e3b878;
-    border-radius: 8px;
-    background: #fff8ee;
-  }
-  .dev-bar p {
-    margin: 0;
-    color: #5c3b16;
-  }
-  .dev-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    margin-top: 0.7rem;
-  }
-  .dev-actions button {
-    position: relative;
-    font: inherit;
-    cursor: pointer;
-    border: 1px solid #5c3b16;
-    background: #fff;
-    color: #5c3b16;
-    border-radius: 4px;
-    padding: 0.4rem 0.65rem;
-  }
-  .dev-tail,
-  .dev-tip {
-    position: absolute;
-    z-index: 6;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .dev-tail {
-    left: 50%;
-    top: 100%;
-    transform: translateX(-50%);
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 8px solid #3d2914;
-  }
-  .dev-tip {
-    left: 50%;
-    top: calc(100% + 7px);
-    transform: translateX(-50%);
-    box-sizing: border-box;
-    width: max-content;
-    max-width: 220px;
-    padding: 0.45rem 0.55rem;
-    border-radius: 6px;
-    background: #3d2914;
-    color: #fff8ee;
-    font-size: 0.78rem;
-    font-weight: 500;
-    line-height: 1.35;
-    text-align: left;
-    white-space: normal;
-    box-shadow: 0 6px 16px rgba(60, 36, 12, 0.18);
-  }
-  .dev-actions button:hover .dev-tail,
-  .dev-actions button:hover .dev-tip,
-  .dev-actions button:focus-visible .dev-tail,
-  .dev-actions button:focus-visible .dev-tip {
-    opacity: 1;
-  }
-  @media (max-width: 800px) {
-    .dev-actions button:nth-child(1) .dev-tip,
-    .dev-actions button:nth-child(3) .dev-tip {
-      left: 0;
-      transform: none;
-    }
-  }
-  .dev-actions button[aria-pressed="true"] {
-    background: #5c3b16;
-    color: #fff;
-  }
-  .dev-actions button.forwarded,
-  .dev-actions button.forwarded:active {
-    background: #c4a574;
-    color: #3d2914;
-    border-color: #8a6239;
-  }
-  .dev-actions button:active {
-    transform: translateY(1px);
-    background: #5c3b16;
-    color: #fff;
-  }
-  .dev-actions button:disabled {
-    opacity: 0.45;
-    cursor: default;
-  }
-  .dev-actions button:disabled:active {
-    transform: none;
-    background: #fff;
-    color: #5c3b16;
-  }
   .session-warning {
     margin: 0.7rem 0 0;
     padding: 0.7rem 0.8rem;
     border-radius: 8px;
     background: #fff4e5;
     color: #6a3d09;
-    font-weight: 600;
-  }
-  .dev-notice {
-    margin: 0.7rem 0 0;
     font-weight: 600;
   }
   .next-step {
