@@ -230,7 +230,11 @@
   });
 </script>
 
-<section class="workspace" aria-label="Lighthouse seat workspace">
+<section
+  class="workspace"
+  aria-label="Lighthouse seat workspace"
+  data-coach="workspace"
+>
   {#if practiceOff}
     <p role="status">Practice mode is off on this server.</p>
   {:else}
@@ -250,7 +254,7 @@
     {/if}
     <div class="dashboard-grid">
       <aside class="sidebar">
-        <div class="card upload-card">
+        <div class="card upload-card" data-coach="upload">
           <h3>Upload Document</h3>
           <p>Analyze your PDF resume</p>
           {#if !canUpload}
@@ -266,7 +270,7 @@
             </p>
           {/if}
           <div class="file-options">
-            <label class="checkbox-container">
+            <label class="checkbox-container" data-coach="sanitize">
               <input type="checkbox" bind:checked={shouldSanitize} />
               Sanitize PDF (Remove PII)
             </label>

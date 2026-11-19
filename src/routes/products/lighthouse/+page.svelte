@@ -4,6 +4,7 @@
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
+  import LighthouseGuide from "$lib/components/lighthouse/LighthouseGuide.svelte";
   import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
   import { browser } from "$app/environment";
   import { onMount } from "svelte";
@@ -45,33 +46,34 @@
       </div>
     </div>
     {#if !byokMode}
-    <div
-      class="session-tabs"
-      role="tablist"
-      aria-label="Current and past sessions"
-    >
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === "upcoming"}
-        onclick={() => (view = "upcoming")}
+      <div
+        class="session-tabs"
+        role="tablist"
+        aria-label="Current and past sessions"
       >
-        Current
-      </button>
-      <button
-        type="button"
-        role="tab"
-        aria-selected={view === "past"}
-        onclick={() => (view = "past")}
-      >
-        Past sessions
-      </button>
-    </div>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "upcoming"}
+          onclick={() => (view = "upcoming")}
+        >
+          Current
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "past"}
+          onclick={() => (view = "past")}
+        >
+          Past sessions
+        </button>
+      </div>
     {/if}
   </div>
 </div>
 
 {#if browser}
+  <LighthouseGuide {byokMode} {view} onView={(next) => (view = next)} />
   {#if byokMode}
     <LighthouseWorkspace personal />
   {:else if view === "upcoming"}

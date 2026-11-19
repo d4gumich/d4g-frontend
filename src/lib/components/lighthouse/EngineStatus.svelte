@@ -57,7 +57,11 @@
 </script>
 
 {#if engine?.summary}
-  <div class="engine-status" class:problem={engine.step === "error"}>
+  <div
+    class="engine-status"
+    class:problem={engine.step === "error"}
+    data-coach="engine"
+  >
     {#if showSteps || canLeave}
       <ol>
         {#if showSteps}

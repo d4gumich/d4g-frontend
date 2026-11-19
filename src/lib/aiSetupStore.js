@@ -9,6 +9,12 @@ import {
 
 export { HOST_URL };
 
+export const aiSetupRequests = writable(0);
+
+export function requestAiSetup() {
+  aiSetupRequests.update((count) => count + 1);
+}
+
 export const aiStatus = writable({
   status: "inactive",
   provider: "google",
