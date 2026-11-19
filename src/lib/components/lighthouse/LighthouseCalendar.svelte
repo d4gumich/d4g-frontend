@@ -613,7 +613,11 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<section class="schedule-card" aria-label="Lighthouse Deep session schedule">
+<section
+  class="schedule-card"
+  aria-label="Lighthouse Deep session schedule"
+  data-coach="calendar"
+>
   {#if practiceOff}
     <p class="practice-off" role="status">
       Practice mode is off on this server.
@@ -704,11 +708,13 @@
   {/if}
   {#if !practiceOff}
     <div class="schedule-header">
-      <h2>Deep sessions</h2>
-      <p>{failed ? "Schedule unavailable." : line}</p>
-      {#if payload}
-        <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
-      {/if}
+      <div data-coach="schedule-when">
+        <h2>Deep sessions</h2>
+        <p>{failed ? "Schedule unavailable." : line}</p>
+        {#if payload}
+          <p class="seat-count">{focusTaken} of {seatCap} seats filled</p>
+        {/if}
+      </div>
       {#if payload?.dev_preset === "ended"}
         <p class="session-warning">
           {SESSION_ENDED_WARNING} Take a seat is off.
@@ -724,49 +730,55 @@
         <p class="next-step">
           You have a seat.
           {#if canUseFocusSeat}
-            <button type="button" onclick={continueToUpload}
-              >Use your seat</button
+            <button
+              type="button"
+              data-coach="use-seat"
+              onclick={continueToUpload}>Use your seat</button
             >
           {/if}
         </p>
       {/if}
     </div>
 
-    <div class="month-nav">
-      <button
-        type="button"
-        onclick={() => shiftMonth(-1)}
-        aria-label="Previous month"
-        disabled={!previousEnabled}
-      >
-        ‹
-      </button>
-      <strong>{monthLabel}</strong>
-      <button
-        type="button"
-        onclick={() => shiftMonth(1)}
-        aria-label="Next month">›</button
-      >
-    </div>
-    <div class="month-grid">
-      {#each WEEKDAYS as name}
-        <span class="dow">{name}</span>
-      {/each}
-      {#each { length: leadingBlanks } as _}
-        <span aria-hidden="true"></span>
-      {/each}
-      {#each { length: daysInMonth } as _, index}
-        {@const day = index + 1}
-        {#if clickable.includes(day)}
-          <button type="button" class="day session" onclick={() => openDay(day)}
-            >{day}</button
-          >
-        {:else}
-          <span class="day" class:was-session={sessionDays.includes(day)}
-            >{day}</span
-          >
-        {/if}
-      {/each}
+    <div data-coach="schedule-days">
+      <div class="month-nav">
+        <button
+          type="button"
+          onclick={() => shiftMonth(-1)}
+          aria-label="Previous month"
+          disabled={!previousEnabled}
+        >
+          ‹
+        </button>
+        <strong>{monthLabel}</strong>
+        <button
+          type="button"
+          onclick={() => shiftMonth(1)}
+          aria-label="Next month">›</button
+        >
+      </div>
+      <div class="month-grid">
+        {#each WEEKDAYS as name}
+          <span class="dow">{name}</span>
+        {/each}
+        {#each { length: leadingBlanks } as _}
+          <span aria-hidden="true"></span>
+        {/each}
+        {#each { length: daysInMonth } as _, index}
+          {@const day = index + 1}
+          {#if clickable.includes(day)}
+            <button
+              type="button"
+              class="day session"
+              onclick={() => openDay(day)}>{day}</button
+            >
+          {:else}
+            <span class="day" class:was-session={sessionDays.includes(day)}
+              >{day}</span
+            >
+          {/if}
+        {/each}
+      </div>
     </div>
   {/if}
 </section>
@@ -839,8 +851,11 @@
         <div class="next-step">
           <p>{seatNextStep}</p>
           {#if canUseSeat}
-            <button type="button" class="primary" onclick={continueToUpload}
-              >Use your seat</button
+            <button
+              type="button"
+              class="primary"
+              data-coach="use-seat"
+              onclick={continueToUpload}>Use your seat</button
             >
           {/if}
           {#if canLeaveSelected}

@@ -4,7 +4,7 @@
   import LighthouseCalendar from "$lib/components/lighthouse/LighthouseCalendar.svelte";
   import LighthouseLogo from "$lib/assets/LighthouseLogo.png";
   import LighthouseWorkspace from "$lib/components/lighthouse/LighthouseWorkspace.svelte";
-  import LighthouseTutorial from "$lib/components/lighthouse/LighthouseTutorial.svelte";
+  import LighthouseGuide from "$lib/components/lighthouse/LighthouseGuide.svelte";
   import { aiActions, aiStatus } from "$lib/aiSetupStore.js";
   import { browser } from "$app/environment";
   import { onMount } from "svelte";
@@ -13,7 +13,6 @@
   const currentPage = "products";
 
   let view = $state("upcoming");
-  let tutorialOpen = $state(false);
   let byokMode = $derived(
     $aiStatus.status === "active" &&
       $aiStatus.key_source === "personal" &&
@@ -46,47 +45,35 @@
         <p>High-Fidelity AI Profile Analysis</p>
       </div>
     </div>
-    <div class="nav-actions">
-      <button
-        type="button"
-        class="tutorial-open"
-        onclick={() => (tutorialOpen = true)}
+    {#if !byokMode}
+      <div
+        class="session-tabs"
+        role="tablist"
+        aria-label="Current and past sessions"
       >
-        Tutorial
-      </button>
-      {#if !byokMode}
-        <div
-          class="session-tabs"
-          role="tablist"
-          aria-label="Current and past sessions"
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "upcoming"}
+          onclick={() => (view = "upcoming")}
         >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === "upcoming"}
-            onclick={() => (view = "upcoming")}
-          >
-            Current
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={view === "past"}
-            onclick={() => (view = "past")}
-          >
-            Past sessions
-          </button>
-        </div>
-      {/if}
-    </div>
+          Current
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "past"}
+          onclick={() => (view = "past")}
+        >
+          Past sessions
+        </button>
+      </div>
+    {/if}
   </div>
 </div>
 
-{#if tutorialOpen}
-  <LighthouseTutorial onClose={() => (tutorialOpen = false)} />
-{/if}
-
 {#if browser}
+  <LighthouseGuide {byokMode} {view} onView={(next) => (view = next)} />
   {#if byokMode}
     <LighthouseWorkspace personal />
   {:else if view === "upcoming"}
@@ -116,30 +103,6 @@
     align-items: center;
     gap: 1rem 2rem;
     flex-wrap: wrap;
-  }
-
-  .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  .tutorial-open {
-    border: 1px solid #1b3350;
-    background: #fff;
-    color: #1b3350;
-    font: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 0.35rem 0.85rem;
-    cursor: pointer;
-  }
-
-  .tutorial-open:hover,
-  .tutorial-open:focus-visible {
-    background: #e8eef6;
   }
 
   .session-tabs {

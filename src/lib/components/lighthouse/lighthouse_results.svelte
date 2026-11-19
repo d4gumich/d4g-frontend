@@ -155,6 +155,7 @@
         <button
           class:active={activeTab === "analysis"}
           disabled={!results}
+          data-coach="analysis-tab"
           onclick={() => (activeTab = "analysis")}
         >
           AI Analysis
@@ -178,6 +179,7 @@
             {/if}
             <button
               class="btn-primary btn-sm"
+              data-coach="analyze"
               onclick={triggerAnalysis}
               disabled={(!personal && !isEngineRunning) ||
                 $lighthouseResults.loading ||
@@ -191,7 +193,7 @@
           </div>
         </div>
 
-        <div class="sections-container">
+        <div class="sections-container" data-coach="sections">
           {#each sections as section, i}
             <div
               class="section-block"
@@ -217,7 +219,7 @@
       </div>
     {:else if activeTab === "analysis" && results}
       <div class="tab-content analysis-tab" in:fade>
-        <div class="analysis-grid">
+        <div class="analysis-grid" data-coach="results">
           <!-- Top Row: Skills (Favor width) and Jobs -->
           <div class="card compact-card fixed-height skills-card">
             <h3>
