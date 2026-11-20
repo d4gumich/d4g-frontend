@@ -14,18 +14,18 @@
   const execTeam = [
     {
       name: "Edward G. Happ",
-      position: "Director",
+      position: "President and Chair",
       description:
-        "Edward G. Happ is the founder and volunteer director of the Data4Good Center. He is a former Executive Fellow at the University of Michigan School of Information, where he taught and advised student research. He is the former Global CIO at The IFRC and Save the Children. He is Co-founder, former Chairman, and a Leadership Fellow of NetHope, a US based consortium of leading international relief, development and conservation nonprofits focused on ICT and collaboration. He has over 20 years of board experience at NetHope, NTEN and ecclesiastical organizations.",
+        "Edward G. Happ is the founder and volunteer President and Chair of the Data4Good Center. He is a former Executive Fellow at the University of Michigan School of Information, where he taught and advised student research. He is the former Global CIO at the International Federation of Red Cross and Red Crescent Societies (IFRC) and Save the Children. He is Co-founder, former Chairman, and a Leadership Fellow of NetHope, a US-based consortium of leading international relief, development, and conservation nonprofits focused on technology and collaboration. He has over 20 years of board experience at NetHope, NTEN, and ecclesiastical organizations.",
       image:
         "https://pbs.twimg.com/profile_images/1653043667211370496/tsXMk4do_400x400.jpg",
       linkedin: "https://www.linkedin.com/in/edward-g-happ/",
     },
     {
       name: "Romanus Berg",
-      position: "Advisor",
+      position: "Vice Chair and Secretary",
       description:
-        "Founder at <a href='https://1o1.org/about'>1o1.org</a> and Systems Architect with 20+ years scaling global NGOs, COO/CIO leadership across 90+ countries at a $65M operating scale. Former COO/CIO at Ashoka and VP Operations at Oceana, he has led large-scale global organizational transformation across highly decentralized, international environments.",
+        "Romanus Berg is the volunteer Vice Chair and Secretary of the Data4Good Center and an advisor to its founder and team. He led the center's incorporation and its 501(c)(3) application. He founded <a href='https://1o1.org/about'>1o1.org</a>, which partners with the center on Socrates, a structured inquiry system. He is the former Chief Operating Officer and CIO at Ashoka and the former Vice President of Operations and CIO at Oceana. He served on the board of NetHope from 2009 to 2018.",
       image: RomanusProfile,
       linkedin: "https://www.linkedin.com/in/romanusberg/",
     },
